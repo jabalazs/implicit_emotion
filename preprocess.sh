@@ -26,7 +26,7 @@ cat $TRAIN_DATA_PATH | awk '{$1=""; gsub("\\[#TRIGGERWORD#\\]", " __TRIGGERWORD_
                                   gsub("@USERNAME", " __USERNAME__ ", $0); 
                                   gsub("\\[NEWLINE\\]", " __NEWLINE__ ", $0); 
                                   gsub("http://url.removed", " __URL__ ", $0); print $0}' \
-                   | ./twokenize.py > $CLEAN_TRAIN_DATA_PATH
+                   | ./utils/twokenize.py > $CLEAN_TRAIN_DATA_PATH
 
 cat $TRAIN_DATA_PATH | awk '{print $1}' > $TRAIN_LABELS_PATH
 
@@ -39,17 +39,17 @@ cat $DEV_DATA_PATH | awk '{$1=""; gsub("\\[#TRIGGERWORD#\\]", " __TRIGGERWORD__ 
                                   gsub("@USERNAME", " __USERNAME__ ", $0); 
                                   gsub("\\[NEWLINE\\]", " __NEWLINE__ ", $0); 
                                   gsub("http://url.removed", " __URL__ ", $0); print $0}' \
-                   | ./twokenize.py > $CLEAN_DEV_DATA_PATH
+                   | ./utils/twokenize.py > $CLEAN_DEV_DATA_PATH
 echo "Created $CLEAN_DEV_DATA_PATH"
 
 echo
 
 echo "Removing emojis from train"
-cat $CLEAN_TRAIN_DATA_PATH | ./remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
+cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
 echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
 
 echo
 
 echo "Removing emojis from dev"
-cat $CLEAN_DEV_DATA_PATH | ./remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
+cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
 echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
