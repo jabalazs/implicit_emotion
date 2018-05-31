@@ -55,7 +55,7 @@ URL_TOKEN = '__URL__'
 
 # These should be just like the ones appearing in the input dataset (these are
 # different to the originals because of preprocessing)
-USR_TOKEN = '__USER__'
+USR_TOKEN = '__USERNAME__'
 TRIGGERWORD_TOKEN = '__TRIGGERWORD__'
 
 SPECIAL_TOKENS = {
@@ -74,8 +74,10 @@ SPECIAL_CHARS = {
                  UNK_CHAR_TOKEN: UNK_CHAR_ID
                 }
 
-LABEL_DICT = {'neutral': 0, 'contradiction': 1, 'entailment': 2}
-LABELS = ['neutral', 'contradiction', 'entailment']
+LABEL_DICT = {'anger': 0, 'disgust': 1, 'fear': 2, 'joy': 3, 'sad': 4,
+              'surprise': 5}
+
+LABELS = ['anger', 'disgust', 'fear', 'joy', 'sad', 'surprise']
 
 # DATABASE PARAMETERS
 _DB_NAME = 'runs.db'

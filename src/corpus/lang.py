@@ -60,10 +60,10 @@ class Lang(object):
         return char_dict, char_freqs
 
     def sent2ids(self, sent, ignore_period=True, append_EOS=False):
-        if not isinstance(sent, str):
-            raise TypeError(f'Input shout be a str but got {type(sent)} instead.')
+        if not isinstance(sent, list):
+            raise TypeError(f'Input shout be a list but got {type(sent)} instead.')
         ids = []
-        for token in sent.split(' '):
+        for token in sent:
             if token == '.' and ignore_period:
                 continue
             try:
@@ -102,11 +102,11 @@ class Lang(object):
         return char_ids
 
     def sent2char_ids(self, sent, ignore_period=True):
-        if not isinstance(sent, str):
-            raise TypeError(f'Input shout be a str but got {type(sent)} instead.')
+        if not isinstance(sent, list):
+            raise TypeError(f'Input shout be a list but got {type(sent)} instead.')
         char_ids = []
 
-        for token in sent.split(' '):
+        for token in sent:
             if token == '.' and ignore_period:
                 continue
             char_ids.append(self.token2char_ids(token))

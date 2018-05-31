@@ -36,9 +36,9 @@ class BaseNLPBatch(dict):
         return padded_sequences2d, sent_lengths, word_lengths, char_masks
 
 
-class MultiNLIBatch(BaseNLPBatch):
+class IESTBatch(BaseNLPBatch):
     def __init__(self, examples, *args, **kwargs):
-        super(MultiNLIBatch, self).__init__(*args, **kwargs)
+        super(IESTBatch, self).__init__(*args, **kwargs)
         self.examples = examples
         self.use_chars = kwargs.pop('use_chars')
         self._build_batch_from_examples()
@@ -48,52 +48,32 @@ class MultiNLIBatch(BaseNLPBatch):
         # This class expects examples to be a list containing dicts
         # with at least a 'sequence', a 'labels' key and a 'char_sequence'
         # if use_chars is true
-        ids = [example['pairID'] for example in self.examples]
+        ids = [example['id'] for example in self.examples]
 
-        prem_sequences = [example['prem_token_ids'] for example in self.examples]
-        prem_padded_sequences, prem_lengths, prem_masks = self._pad1d(prem_sequences)
+        sequences = [example['sequence'] for example in self.examples]
+        padded_sequences, lengths, masks = self._pad1d(sequences)
 
-        hypo_sequences = [example['hypo_token_ids'] for example in self.examples]
-        hypo_padded_sequences, hypo_lengths, hypo_masks = self._pad1d(hypo_sequences)
+        self['sequences'] = padded_sequences
+        self['lengths'] = lengths
+        self['masks'] = masks
 
-        self['prems'] = prem_padded_sequences
-        self['prem_sent_lengths'] = prem_lengths
-        self['prem_masks'] = prem_masks
-
-        self['hypos'] = hypo_padded_sequences
-        self['hypo_sent_lengths'] = hypo_lengths
-        self['hypo_masks'] = hypo_masks
+        labels = [example['label'] for example in self.examples]
+        self['labels'] = labels
 
         self['ids'] = ids
 
-        try:
-            # We try this because test examples have no labels
-            labels = [example['label_id'] for example in self.examples]
-            self['labels'] = labels
-        except KeyError:
-            pass
-
         if self.use_chars:
-            prem_char_sequences = [example['prem_char_ids'] for example in self.examples]
-            hypo_char_sequences = [example['hypo_char_ids'] for example in self.examples]
+            char_sequences = [example['char_sequence']
+                              for example in self.examples]
 
-            (prem_padded_sequences2d,
-             prem_sent_lengths,
-             prem_word_lengths,
-             prem_char_masks) = self._pad2d(prem_char_sequences)
+            (padded_sequences2d,
+             sent_lengths,
+             word_lengths,
+             char_masks) = self._pad2d(char_sequences)
 
-            (hypo_padded_sequences2d,
-             hypo_sent_lengths,
-             hypo_word_lengths,
-             hypo_char_masks) = self._pad2d(hypo_char_sequences)
-
-            self['prem_char_sequences'] = prem_padded_sequences2d
-            self['prem_word_lengths'] = prem_word_lengths
-            self['prem_char_masks'] = prem_char_masks
-
-            self['hypo_char_sequences'] = hypo_padded_sequences2d
-            self['hypo_word_lengths'] = hypo_word_lengths
-            self['hypo_char_masks'] = hypo_char_masks
+            self['char_sequences'] = padded_sequences2d
+            self['word_lengths'] = word_lengths
+            self['char_masks'] = char_masks
 
     def inspect(self):
         for key, value in self.items():
@@ -113,6 +93,7 @@ class MultiNLIBatch(BaseNLPBatch):
 
 class BatchIterator(object):
 
+    # TODO: Add method for reshuffling examples
     def __init__(self, examples, batch_size, data_proportion=1.0,
                  shuffle=False, batch_first=False, use_chars=False):
 
@@ -161,10 +142,10 @@ class BatchIterator(object):
         examples_slice = self.examples_subset[index * self.batch_size:
                                               (index + 1) * self.batch_size]
 
-        return MultiNLIBatch(examples_slice,
-                             batch_size=self.batch_size,
-                             batch_first=self.batch_first,
-                             use_chars=self.use_chars)
+        return IESTBatch(examples_slice,
+                         batch_size=self.batch_size,
+                         batch_first=self.batch_first,
+                         use_chars=self.use_chars)
 
     def __len__(self):
         return self.num_batches
