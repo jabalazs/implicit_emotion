@@ -1,6 +1,7 @@
 import os
 
 DATA_PATH = 'data/'
+CACHE_PATH = '.cache'
 PREPROCESSED_DATA_PATH = os.path.join(DATA_PATH, 'preprocessed')
 RESULTS_PATH = os.path.join(DATA_PATH, 'results')
 LOG_PATH = 'log/'

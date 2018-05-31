@@ -27,6 +27,10 @@ def load_pickle(path):
 
 
 def save_pickle(path, obj):
+    dirname = os.path.dirname(path)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+        print(f"Created {dirname}")
     with open(path, 'wb') as f:
         pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
         print(f'Pickle {path} saved.')

@@ -1,6 +1,8 @@
 import os
 
-from ..utils.io import load_or_create, read_jsonl, load_pickle
+# from profilehooks import profile
+
+from ..utils.io import load_or_create
 from .batch_iterator import BatchIterator
 from .lang import Lang
 
@@ -29,6 +31,8 @@ class BaseCorpus(object):
 
 
 class IESTCorpus(BaseCorpus):
+
+    # @profile(immediate=True)
     def __init__(self, *args, **kwargs):
         super(IESTCorpus, self).__init__(config.corpora_dict['iest'],
                                          *args, **kwargs)
@@ -37,18 +41,44 @@ class IESTCorpus(BaseCorpus):
 
         # This assumes the data comes nicely separated by spaces. That's the
         # task of the tokenizer who should be called elsewhere
-        self.train_sents = [s.rstrip().split(' ') for s in train_sents]
+        split_train_pickle_path = os.path.join(config.CACHE_PATH, 'split_train.pkl')
+        self.train_sents = load_or_create(split_train_pickle_path,
+                                          self.split_sents,
+                                          train_sents,
+                                          force_reload=self.force_reload)
 
         dev_sents = open(self.paths['dev']).readlines()
         self.dev_sents = [s.rstrip().split(' ') for s in dev_sents]
 
-        self.lang = Lang(self.train_sents)
+        lang_pickle_path = os.path.join(config.CACHE_PATH, 'lang.pkl')
+        self.lang = load_or_create(lang_pickle_path,
+                                   Lang,
+                                   self.train_sents,
+                                   force_reload=self.force_reload)
 
-        self.train_id_sents = self.lang.sents2ids(self.train_sents)
+        train_pickle_path = os.path.join(config.CACHE_PATH, 'train.pkl')
+        self.train_id_sents = load_or_create(train_pickle_path,
+                                             self.lang.sents2ids,
+                                             self.train_sents,
+                                             force_reload=self.force_reload)
+
         self.dev_id_sents = self.lang.sents2ids(self.dev_sents)
 
-        self.train_char_id_sents = self.lang.sents2char_ids(self.train_sents)
-        self.dev_char_id_sents = self.lang.sents2char_ids(self.dev_sents)
+        train_chars_pickle_path = os.path.join(config.CACHE_PATH,
+                                               'train_chars.pkl')
+        self.train_char_id_sents = load_or_create(
+                               train_chars_pickle_path,
+                               self.lang.sents2char_ids,
+                               self.train_sents,
+                               force_reload=self.force_reload)
+
+        dev_chars_pickle_path = os.path.join(config.CACHE_PATH,
+                                             'dev_chars.pkl')
+        self.dev_char_id_sents = load_or_create(
+                               dev_chars_pickle_path,
+                               self.lang.sents2char_ids,
+                               self.dev_sents,
+                               force_reload=self.force_reload)
 
         train_labels = open(config.TRAIN_LABELS).readlines()
         self.train_labels = [l.rstrip() for l in train_labels]
@@ -96,3 +126,8 @@ class IESTCorpus(BaseCorpus):
                                          shuffle=False,
                                          batch_first=self.batch_first,
                                          use_chars=self.use_chars)
+
+    # For enabling caching of the split sentences
+    @staticmethod
+    def split_sents(sents):
+        return [s.split(' ') for s in sents]

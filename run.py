@@ -9,7 +9,7 @@ import numpy as np
 
 from tqdm import tqdm
 
-from src.corpus.corpus import MultiNLICorpus, SNLICorpus
+from src.corpus.iestcorpus import IESTCorpus
 from src.corpus.embeddings import Embeddings
 from src.utils.logger import Logger
 # from src.utils.io import load_or_create
@@ -113,7 +113,7 @@ def main():
 
     # these must match the ones found in config.corpora_dict
     if hp.corpus == 'iest':
-        CorpusClass = SNLICorpus
+        CorpusClass = IESTCorpus
     else:
         raise NotImplementedError('Corpus not implemented')
 

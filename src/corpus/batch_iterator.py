@@ -16,7 +16,9 @@ class BaseNLPBatch(dict):
 
     def _pad1d(self, sequences, *args, **kwargs):
         """sequences: a list of lists"""
-        padded_sequences, lengths, masks = self.padder.pad1d(sequences, *args, **kwargs)
+        padded_sequences, lengths, masks = self.padder.pad1d(sequences,
+                                                             *args,
+                                                             **kwargs)
         if not self.batch_first:
             padded_sequences = padded_sequences.transpose(1, 0)
             masks = masks.transpose(1, 0)
@@ -46,7 +48,7 @@ class IESTBatch(BaseNLPBatch):
     def _build_batch_from_examples(self):
 
         # This class expects examples to be a list containing dicts
-        # with at least a 'sequence', a 'labels' key and a 'char_sequence'
+        # with at least a 'sequence', a 'label' key and a 'char_sequence'
         # if use_chars is true
         ids = [example['id'] for example in self.examples]
 
