@@ -112,10 +112,10 @@ def main():
         CUDA = True
 
     # these must match the ones found in config.corpora_dict
-    if hp.corpus == 'snli':
+    if hp.corpus == 'iest':
         CorpusClass = SNLICorpus
-    elif hp.corpus == 'multinli':
-        CorpusClass = MultiNLICorpus
+    else:
+        raise NotImplementedError('Corpus not implemented')
 
     corpus = CorpusClass(force_reload=hp.force_reload,
                          train_data_proportion=hp.train_data_proportion,

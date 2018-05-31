@@ -1,127 +1,69 @@
 # import os
-import re
-from collections import Counter
+from collections import defaultdict, OrderedDict
 
-from sklearn.feature_extraction.text import CountVectorizer
-from nltk.tokenize.treebank import TreebankWordTokenizer
-
-from ..preprocessing import preprocess
 from .. import config
 from ..utils.io import load_or_create
 
 
-def postprocess_vocab(vocab: dict) -> dict:
-    # WARNING: make sure these 4 ids are contiguous! eg 0,1,2,3
-    new_vocab = {config.PAD_TOKEN: config.PAD_ID,
-                 config.UNK_TOKEN: config.UNK_ID,
-                 config.NUM_TOKEN: config.NUM_ID,
-                 config.URL_TOKEN: config.URL_ID}
-
-    curr_id = len(new_vocab)
-    # matches any single quotes (once or more times) in front of a token
-    # will not match if token is 'nt or 't
-    # This should be run after tokenization
-    exp = re.compile(r"^('+)(?!(nt)|t)+")
-    for key, value in vocab.items():
-        postprocessed = exp.sub(r'', key)
-        if postprocessed not in new_vocab.keys():
-            new_vocab[postprocessed] = curr_id
-            curr_id += 1
-
-    return new_vocab
-
-
-def build_word_lang(sents, min_freq_threshold=0):
-
-    treebank_tokenizer = TreebankWordTokenizer()
-
-    word_vectorizer = CountVectorizer(preprocessor=preprocess,
-                                      tokenizer=treebank_tokenizer.tokenize,
-                                      lowercase=True)
-
-    term_doc_matrix = word_vectorizer.fit_transform(sents)
-
-    word_freqs = term_doc_matrix.sum(axis=0).A1
-    words = word_vectorizer.get_feature_names()
-
-    word_counts = Counter(dict(zip(words, word_freqs)))
-
-    vocab = {}
-    curr_id = 0
-    for word in words:
-        if word_counts[word] < min_freq_threshold:
-            # If too few ocurrences of token, we don't add it to the vocabulary
-            # this will make it an unk when transforming tokens to ids
-            continue
-        if word not in vocab.keys():
-            vocab[word] = curr_id
-            curr_id += 1
-
-    token2id = postprocess_vocab(vocab)
-    # token2id = vocab
-    id2token = {value: key for key, value in token2id.items()}
-
-    return {'counts': word_counts, 'token2id': token2id,
-            'vectorizer': word_vectorizer}
-
-
-def build_char_lang(sents):
-
-    char_vectorizer = CountVectorizer(analyzer='char',
-                                      lowercase=False)
-    char_term_doc_matrix = char_vectorizer.fit_transform(sents)
-    char_freqs = char_term_doc_matrix.sum(axis=0).A1
-    chars = char_vectorizer.get_feature_names()
-
-    char_counts = Counter(dict(zip(chars, char_freqs)))
-    char_vocab = {config.UNK_CHAR_TOKEN: config.UNK_CHAR_ID}
-    curr_id = len(char_vocab)
-    for char in chars:
-        if char not in char_vocab.keys():
-            char_vocab[char] = curr_id
-            curr_id += 1
-    return {'counts': char_counts, 'char2id': char_vocab}
-
-
 class Lang(object):
 
-    MODES = ['multinli', 'snli']
+    def __init__(self, sents,  min_freq_threshold=0, force_reload=False):
+        """sents is a list of tokenized sentences"""
 
-    def __init__(self, sents, mode='multinli', min_freq_threshold=0,
-                 force_reload=False):
+        # token_dict = load_or_create(token_dict_pickle_path,
+        #                             build_word_lang,
+        #                             sents,
+        #                             min_freq_threshold=min_freq_threshold,
+        #                             force_reload=force_reload)
+        self.token2id, self.token_freqs = self._build_token_dict(sents)
 
-        if mode == 'multinli':
-            token_dict_pickle_path = config.MULTINLI_TOKEN_DICT_PICKLE_PATH
-            char_dict_pickle_path = config.MULTINLI_CHAR_DICT_PICKLE_PATH
-        elif mode == 'snli':
-            token_dict_pickle_path = config.SNLI_TOKEN_DICT_PICKLE_PATH
-            char_dict_pickle_path = config.SNLI_CHAR_DICT_PICKLE_PATH
-        else:
-            raise RuntimeError(f'Mode not recognized, try with one of {self.MODES}')
+        # char_dict = load_or_create(char_dict_pickle_path,
+        #                            build_char_lang,
+        #                            sents,
+        #                            force_reload=force_reload)
 
-        token_dict = load_or_create(token_dict_pickle_path,
-                                    build_word_lang,
-                                    sents,
-                                    min_freq_threshold=min_freq_threshold,
-                                    force_reload=force_reload)
-        self.token_counts = token_dict['counts']
-        self.token2id = token_dict['token2id']
-        self.vectorizer = token_dict['vectorizer']
-        self.analyzer = self.vectorizer.build_analyzer()
+        self.char2id, self.char_freqs = self._build_char_dict()
 
-        char_dict = load_or_create(char_dict_pickle_path,
-                                   build_char_lang,
-                                   sents,
-                                   force_reload=force_reload)
+    def _build_token_dict(self, sents):
+        token_dict = {key: value for key, value in config.SPECIAL_TOKENS.items()}
+        curr_token_id = len(token_dict)
+        token_freqs = defaultdict(int)
+        for sent in sents:
+            for token in sent:
+                token_freqs[token] += 1
+                if token not in token_dict.keys():
+                    token_dict[token] = curr_token_id
+                    curr_token_id += 1
 
-        self.char_counts = char_dict['counts']
-        self.char2id = char_dict['char2id']
+        token_freqs = OrderedDict(sorted(token_freqs.items(),
+                                         key=lambda t: t[1],
+                                         reverse=True))
+        return token_dict, token_freqs
+
+    def _build_char_dict(self):
+        char_dict = {key: value for key, value in config.SPECIAL_CHARS.items()}
+        curr_char_id = len(char_dict)
+        char_freqs = defaultdict(int)
+
+        for token in self.token2id.keys():
+            if token not in config.SPECIAL_TOKENS.keys():
+                for char in token:
+                    char_freqs[char] += 1
+                    if char not in char_dict.keys():
+                        char_dict[char] = curr_char_id
+                        curr_char_id += 1
+
+        char_freqs = OrderedDict(sorted(char_freqs.items(),
+                                        key=lambda t: t[1],
+                                        reverse=True))
+
+        return char_dict, char_freqs
 
     def sent2ids(self, sent, ignore_period=True, append_EOS=False):
         if not isinstance(sent, str):
             raise TypeError(f'Input shout be a str but got {type(sent)} instead.')
         ids = []
-        for token in self.analyzer(sent):
+        for token in sent.split(' '):
             if token == '.' and ignore_period:
                 continue
             try:
@@ -163,10 +105,8 @@ class Lang(object):
         if not isinstance(sent, str):
             raise TypeError(f'Input shout be a str but got {type(sent)} instead.')
         char_ids = []
-        # This analyzer has the preprocessing routine built-in, which means that
-        # the character pipeline will never see tokens that were replaced by
-        # __NUM__ or __URL__.
-        for token in self.analyzer(sent):
+
+        for token in sent.split(' '):
             if token == '.' and ignore_period:
                 continue
             char_ids.append(self.token2char_ids(token))

@@ -17,7 +17,7 @@ import csv
 
 import dataset as dt
 
-from substring_nli import config
+from .. import config
 
 
 def load_pickle(path):
