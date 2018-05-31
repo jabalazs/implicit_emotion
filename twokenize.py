@@ -26,11 +26,6 @@ import re
 import sys
 
 try:
-    from html.parser import HTMLParser
-except ImportError:
-    from HTMLParser import HTMLParser
-
-try:
     import html
 except ImportError:
     pass
