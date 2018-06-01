@@ -216,9 +216,10 @@ def main():
                                            model,
                                            progress_bar=tqdm)
 
-        logger.insert_in_googlesheets()
+        # logger.insert_in_googlesheets()
     except KeyboardInterrupt:
-        logger.insert_in_googlesheets()
+        # logger.insert_in_googlesheets()
+        pass
 
 
 if __name__ == '__main__':

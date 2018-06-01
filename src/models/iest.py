@@ -291,16 +291,6 @@ class IESTClassifier(nn.Module):
 
         self.pooling_layer = PoolingLayer(self.pooling_method)
 
-        # we multiply by 4 because the LinearAggregationLayer concatenates
-        # 4 vectors
-
-        # self.dense_layer = nn.Sequential(nn.Linear(self.sent_encoding_layer.out_dim * 4,
-        #                                            1600),
-        #                                  nn.ReLU(), nn.Dropout(self.dropout),
-        #                                  nn.Linear(1600, 1600),
-        #                                  nn.ReLU(), nn.Dropout(self.dropout),
-        #                                  nn.Linear(1600, self.num_classes))
-
         self.dense_layer = nn.Sequential(
             nn.Linear(self.sent_encoding_layer.out_dim, 512),
             nn.ReLU(),
