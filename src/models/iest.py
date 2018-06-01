@@ -160,8 +160,6 @@ class StackedShortcutLSTM(nn.Module):
                               batch_first=self.batch_first)
 
     def forward(self, emb_batch, lengths):
-        # import ipdb; ipdb.set_trace()
-        # dim(zero_state[0])= (num_dirs, batch, hidden_size)
 
         self.lstm_0.flatten_parameters()
         lstm_out_0 = pack_forward(self.lstm_0, emb_batch, lengths)
@@ -346,7 +344,7 @@ class IESTClassifier(nn.Module):
             word_lengths = batch['word_lengths']
             char_masks = batch['char_masks']
 
-            word_lengths = to_var(torch.FloatTensor(word_lengths),
+            word_lengths = to_var(torch.LongTensor(word_lengths),
                                   self.use_cuda,
                                   requires_grad=False)
 

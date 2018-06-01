@@ -39,11 +39,13 @@ def test():
     string2 = "sad	I be so [#TRIGGERWORD#] when the game come on and I get ignored 😂"
     string3 = "joy	Im at the lowest point in my life.... But I can't help but be [#TRIGGERWORD#] because I still have you! 💕💍😊💑"
     string4 = "joy	I'm so [#TRIGGERWORD#] that Katie and Tom finally pulled the trigger. It was about damn time! 👫👰🏻🎊 #love #wedding #PumpRules"
+    string5 = "I'm __TRIGGERWORD__ that my kid will be born with that red birthmark on her face 🙁 since I had one but on the side of my tummy"
 
     print(remove_emoji(string1))
     print(remove_emoji(string2))
     print(remove_emoji(string3))
     print(remove_emoji(string4))
+    print(remove_emoji(string5))
 
 
 if __name__ == "__main__":

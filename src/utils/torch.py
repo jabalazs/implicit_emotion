@@ -39,7 +39,7 @@ def pack_forward(module, emb_batch, lengths, use_cuda=True, batch_first=True):
 
     idx_sort = torch.from_numpy(idx_sort).cuda() if use_cuda \
         else torch.from_numpy(idx_sort)
-    idx_sort = Variable(idx_sort)
+    # idx_sort = Variable(idx_sort)
     sent = sent.index_select(0, idx_sort)
 
     sent_len_list = sent_len.tolist()
@@ -58,7 +58,7 @@ def pack_forward(module, emb_batch, lengths, use_cuda=True, batch_first=True):
     # Un-sort by length
     idx_unsort = torch.from_numpy(idx_unsort).cuda() if use_cuda \
         else torch.from_numpy(idx_unsort)
-    idx_unsort = Variable(idx_unsort)
+    # idx_unsort = Variable(idx_unsort)
 
     select_dim = 0 if batch_first else 1
     sent_output = sent_output.index_select(select_dim, idx_unsort)

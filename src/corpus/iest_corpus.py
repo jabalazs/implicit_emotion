@@ -41,14 +41,10 @@ class IESTCorpus(BaseCorpus):
 
         # This assumes the data comes nicely separated by spaces. That's the
         # task of the tokenizer who should be called elsewhere
-        split_train_pickle_path = os.path.join(config.CACHE_PATH, 'split_train.pkl')
-        self.train_sents = load_or_create(split_train_pickle_path,
-                                          self.split_sents,
-                                          train_sents,
-                                          force_reload=self.force_reload)
+        self.train_sents = [s.rstrip().split() for s in train_sents]
 
         dev_sents = open(self.paths['dev']).readlines()
-        self.dev_sents = [s.rstrip().split(' ') for s in dev_sents]
+        self.dev_sents = [s.rstrip().split() for s in dev_sents]
 
         lang_pickle_path = os.path.join(config.CACHE_PATH, 'lang.pkl')
         self.lang = load_or_create(lang_pickle_path,
@@ -128,8 +124,3 @@ class IESTCorpus(BaseCorpus):
                                          shuffle=False,
                                          batch_first=self.batch_first,
                                          use_chars=self.use_chars)
-
-    # For enabling caching of the split sentences
-    @staticmethod
-    def split_sents(sents):
-        return [s.split(' ') for s in sents]
