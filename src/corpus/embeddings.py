@@ -16,7 +16,7 @@ class Embeddings(object):
         embeddings"""
         self.filepath = filepath
         embeddings_name = get_name_from_path(filepath)
-        embeddings_pickle_filepath = os.path.join(config.EMBEDDINGS_DIR,
+        embeddings_pickle_filepath = os.path.join(config.CACHE_PATH,
                                                   embeddings_name + '.pkl')
 
         self.dict_repr = load_or_create(embeddings_pickle_filepath,

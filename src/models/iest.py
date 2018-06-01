@@ -241,7 +241,7 @@ class SentenceEncodingLayer(nn.Module):
         return self.sent_encoding_layer(*args, **kwargs)
 
 
-class NLIClassifier(nn.Module):
+class IESTClassifier(nn.Module):
     """Args:
         embeddings: torch word embeddings
         """
@@ -257,7 +257,7 @@ class NLIClassifier(nn.Module):
                  dropout=0.0,
                  use_cuda=True):
 
-        super(NLIClassifier, self).__init__()
+        super(IESTClassifier, self).__init__()
         self.num_classes = num_classes
         self.batch_size = batch_size
         self.batch_first = batch_first
@@ -290,13 +290,9 @@ class NLIClassifier(nn.Module):
                                                          use_cuda=self.use_cuda)
 
         self.pooling_layer = PoolingLayer(self.pooling_method)
-        self.sent_aggregation_layer = LinearAggregationLayer()
 
         # we multiply by 4 because the LinearAggregationLayer concatenates
         # 4 vectors
-
-        # self.dense_layer = nn.Linear(self.sent_encoding_layer.out_dim * 4,
-        #                              self.num_classes)
 
         # self.dense_layer = nn.Sequential(nn.Linear(self.sent_encoding_layer.out_dim * 4,
         #                                            1600),
@@ -305,10 +301,12 @@ class NLIClassifier(nn.Module):
         #                                  nn.ReLU(), nn.Dropout(self.dropout),
         #                                  nn.Linear(1600, self.num_classes))
 
-        self.dense_layer = nn.Sequential(nn.Linear(self.sent_encoding_layer.out_dim * 4,
-                                                   512),
-                                         nn.ReLU(), nn.Dropout(self.dropout),
-                                         nn.Linear(512, self.num_classes))
+        self.dense_layer = nn.Sequential(
+            nn.Linear(self.sent_encoding_layer.out_dim, 512),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(512, self.num_classes)
+        )
 
     def encode(self, batch, char_batch,
                sent_lengths, word_lengths,
@@ -318,8 +316,13 @@ class NLIClassifier(nn.Module):
             This method exists for compatibility with facebook's senteval
 
             batch: padded batch of word indices if embed_words, else padded
-                  batch of torch tensors corresponding to embedded word
-                  vectors"""
+                   batch of torch tensors corresponding to embedded word
+                   vectors
+
+            embed_words: whether to pass the input through an embedding layer
+                         or not
+        """
+
         if embed_words:
             embedded = self.word_encoding_layer(batch, char_batch, word_lengths)
         else:
@@ -332,68 +335,38 @@ class NLIClassifier(nn.Module):
 
     def forward(self, batch):
         # batch is created in Batch Iterator
-        prems = batch['prems']
-        hypos = batch['hypos']
-
-        prem_sent_lengths = batch['prem_sent_lengths']
-        prem_masks = batch['prem_masks']
-        hypo_sent_lengths = batch['hypo_sent_lengths']
-        hypo_masks = batch['hypo_masks']
+        sequences = batch['sequences']
+        sent_lengths = batch['sent_lengths']
+        masks = batch['masks']
 
         # TODO: to_var is going to happen for every batch every epoch which
         # makes this op O(num_batches * num_epochs). We could make it
         # O(num_batches) if we ran it once for every batch before training, but
         # this would limit our ability to shuffle the examples and re-create
         # the batches each epoch
-        prem_sent_lengths = to_var(torch.FloatTensor(prem_sent_lengths),
-                                   self.use_cuda,
-                                   requires_grad=False)
-        prem_masks = to_var(torch.FloatTensor(prem_masks),
-                            self.use_cuda,
-                            requires_grad=False)
-
-        hypo_sent_lengths = to_var(torch.FloatTensor(hypo_sent_lengths),
-                                   self.use_cuda,
-                                   requires_grad=False)
-        hypo_masks = to_var(torch.FloatTensor(hypo_masks),
-                            self.use_cuda,
-                            requires_grad=False)
+        sent_lengths = to_var(torch.FloatTensor(sent_lengths),
+                              self.use_cuda,
+                              requires_grad=False)
+        masks = to_var(torch.FloatTensor(masks),
+                       self.use_cuda,
+                       requires_grad=False)
 
         if self.char_embeddings:
-            prem_char_sequences = batch['prem_char_sequences']
-            hypo_char_sequences = batch['hypo_char_sequences']
+            char_sequences = batch['char_sequences']
+            word_lengths = batch['word_lengths']
+            char_masks = batch['char_masks']
 
-            prem_word_lengths = batch['prem_word_lengths']
-            hypo_word_lengths = batch['hypo_word_lengths']
+            word_lengths = to_var(torch.FloatTensor(word_lengths),
+                                  self.use_cuda,
+                                  requires_grad=False)
 
-            prem_char_masks = batch['prem_char_masks']
-            hypo_char_masks = batch['hypo_char_masks']
+        sent_vec = self.encode(sequences,
+                               char_batch=char_sequences,
+                               sent_lengths=sent_lengths,
+                               word_lengths=word_lengths,
+                               masks=masks)
 
-            prem_word_lengths = to_var(torch.FloatTensor(prem_word_lengths),
-                                       self.use_cuda,
-                                       requires_grad=False)
-
-            hypo_word_lengths = to_var(torch.FloatTensor(hypo_word_lengths),
-                                       self.use_cuda,
-                                       requires_grad=False)
-
-            # prem_char_reprs = self.char_encoding_layer(prem_char_sequences)
-            # prem_char_lvl_word_repr = self.char_level_word_encoder(prem_char_reprs,
-            #                                                        prem_word_lengths)
-
-        pooled_prem = self.encode(prems,
-                                  char_batch=prem_char_sequences,
-                                  sent_lengths=prem_sent_lengths,
-                                  word_lengths=prem_word_lengths,
-                                  masks=prem_masks)
-        pooled_hypo = self.encode(hypos,
-                                  char_batch=hypo_char_sequences,
-                                  sent_lengths=hypo_sent_lengths,
-                                  word_lengths=hypo_word_lengths,
-                                  masks=hypo_masks)
-
-        pair_repr = self.sent_aggregation_layer(pooled_prem, pooled_hypo)
-        logits = self.dense_layer(pair_repr)
+        logits = self.dense_layer(sent_vec)
 
         ret_dict = {'logits': logits}
 

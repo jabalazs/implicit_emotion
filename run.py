@@ -9,7 +9,7 @@ import numpy as np
 
 from tqdm import tqdm
 
-from src.corpus.iestcorpus import IESTCorpus
+from src.corpus.iest_corpus import IESTCorpus
 from src.corpus.embeddings import Embeddings
 from src.utils.logger import Logger
 # from src.utils.io import load_or_create
@@ -17,8 +17,8 @@ from src.train import Trainer
 from src.optim import OptimWithDecay
 from src import config
 
-from src.models.base import (
-                             NLIClassifier,
+from src.models.iest import (
+                             IESTClassifier,
                              WordEncodingLayer,
                              WordCharEncodingLayer,
                              SentenceEncodingLayer,
@@ -33,24 +33,19 @@ base_parser.description = 'PyTorch MultiNLI Inner Attention Classifier'
 arg_parser = CustomArgumentParser(parents=[base_parser],
                                   description='PyTorch MultiNLI')
 
-arg_parser.add_argument('--model', type=str, default="infersent",
+arg_parser.add_argument('--model', type=str, default="bilstm",
                         choices=SentenceEncodingLayer.SENTENCE_ENCODING_METHODS,
                         help='Model to use')
 
-arg_parser.add_argument('--corpus', type=str, default="multinli",
+arg_parser.add_argument('--corpus', type=str, default="iest",
                         choices=list(config.corpora_dict.keys()),
                         help='Name of the corpus to use.')
-
-arg_parser.add_argument('--mismatched_dev', action='store_true',
-                        help='Whether to use the mismatched dev dataset for '
-                             'MultiNLI')
 
 arg_parser.add_argument('--embeddings', type=str, default="glove",
                         choices=list(config.embedding_dict.keys()),
                         help='Name of the embeddings to use.')
 
 arg_parser.add_argument('--lstm_hidden_size', type=int, default=2048,
-                        choices=list(config.embedding_dict.keys()),
                         help='Hidden dimension size for the word-level LSTM')
 
 arg_parser.add_argument('--force_reload', action='store_true',
@@ -90,11 +85,6 @@ def validate_args(hp):
                          f'using char_lstm word_encoding_method. '
                          f'Choose one from {WordCharEncodingLayer.AGGREGATION_METHODS}')
 
-    if hp.mismatched_dev and hp.corpus != 'multinli':
-        raise ValueError('mismatched_dev flag passed but a corpus other than '
-                         'multinli is being used. Either disable '
-                         'mismatched_dev or choose multinli as corpus')
-
 
 def main():
     hp = arg_parser.parse_args()
@@ -119,7 +109,7 @@ def main():
 
     corpus = CorpusClass(force_reload=hp.force_reload,
                          train_data_proportion=hp.train_data_proportion,
-                         valid_data_proportion=hp.dev_data_proportion,
+                         dev_data_proportion=hp.dev_data_proportion,
                          batch_size=hp.batch_size)
 
     if hp.model_hash:
@@ -127,7 +117,6 @@ def main():
         ext_experiment_path = glob(experiment_path)
         assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
         model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
-        import ipdb; ipdb.set_trace(context=10)
         model = torch.load(model_path)
 
     # Load pre-trained embeddings
@@ -136,7 +125,7 @@ def main():
                             force_reload=hp.force_reload)
 
     # Get subset of embeddings corresponding to our vocabulary
-    embedding_matrix = embeddings.generate_embedding_matrix(corpus.word2index)
+    embedding_matrix = embeddings.generate_embedding_matrix(corpus.lang.token2id)
     print(f'{len(embeddings.unknown_tokens)} words from vocabulary not found '
           f'in {hp.embeddings} embeddings. ')
 
@@ -148,7 +137,7 @@ def main():
     # not pretrained
 
     # Initialize character embedding matrix randomly
-    char_vocab_size = len(corpus.char2index)
+    char_vocab_size = len(corpus.lang.char2id)
     char_embedding_matrix = np.random.uniform(-0.05, 0.05,
                                               size=(char_vocab_size,
                                                     hp.char_emb_dim))
@@ -157,29 +146,21 @@ def main():
                                             torch.Tensor(char_embedding_matrix))
 
     # Define some specific parameters for the model
-    num_classes = len(corpus.label_ids)
+    num_classes = len(corpus.label2id)
     batch_size = corpus.train_batches.batch_size
 
-    if hp.model == 'stacked':
-        # Nie's model: Stacked LSTM
-        hidden_sizes = [512, 1024, 2048]
-        # hidden_sizes = [128, 256, 512]
-
-    elif hp.model == 'infersent':
-        # Conneau's InferSent
-        hidden_sizes = hp.lstm_hidden_size
-
-    model = NLIClassifier(num_classes, batch_size,
-                          torch_embeddings=torch_embeddings,
-                          char_embeddings=char_torch_embeddings,
-                          word_encoding_method=hp.word_encoding_method,
-                          word_char_aggregation_method=hp.word_char_aggregation_method,
-                          sent_encoding_method=hp.model,
-                          hidden_sizes=hidden_sizes,
-                          use_cuda=CUDA,
-                          pooling_method=hp.pooling_method,
-                          batch_first=True,
-                          dropout=hp.dropout)
+    hidden_sizes = hp.lstm_hidden_size
+    model = IESTClassifier(num_classes, batch_size,
+                           torch_embeddings=torch_embeddings,
+                           char_embeddings=char_torch_embeddings,
+                           word_encoding_method=hp.word_encoding_method,
+                           word_char_aggregation_method=hp.word_char_aggregation_method,
+                           sent_encoding_method=hp.model,
+                           hidden_sizes=hidden_sizes,
+                           use_cuda=CUDA,
+                           pooling_method=hp.pooling_method,
+                           batch_first=True,
+                           dropout=hp.dropout)
 
     if CUDA:
         model.cuda()
@@ -195,10 +176,7 @@ def main():
 
     loss_function = torch.nn.CrossEntropyLoss()
 
-    # Whether to use matched or mismatched MultiNLI data
     dev_batches = corpus.dev_batches
-    if hp.mismatched_dev:
-        dev_batches = corpus.dev_mismatched_batches
 
     trainer = Trainer(model, corpus.train_batches,
                       dev_batches,

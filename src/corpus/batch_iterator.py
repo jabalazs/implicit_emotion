@@ -53,10 +53,10 @@ class IESTBatch(BaseNLPBatch):
         ids = [example['id'] for example in self.examples]
 
         sequences = [example['sequence'] for example in self.examples]
-        padded_sequences, lengths, masks = self._pad1d(sequences)
+        padded_sequences, sent_lengths, masks = self._pad1d(sequences)
 
         self['sequences'] = padded_sequences
-        self['lengths'] = lengths
+        self['sent_lengths'] = sent_lengths
         self['masks'] = masks
 
         labels = [example['label'] for example in self.examples]

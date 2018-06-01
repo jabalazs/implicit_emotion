@@ -8,9 +8,9 @@ LOG_PATH = 'log/'
 
 # EMBEDDINGS
 EMBEDDINGS_DIR = os.path.join(DATA_PATH, 'word_embeddings')
-SENNA_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'senna.txt')
-GLOVE_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.840B.300d.txt')
 FASTTEXT_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'wiki.en.vec')
+GLOVE_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.840B.300d.txt')
+GLOVE_TWITTER_100_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.100d.txt')
 
 # CORPORA
 TRAIN = os.path.join(PREPROCESSED_DATA_PATH, 'train_no_emojis.csv')
@@ -21,9 +21,11 @@ DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
 
 # MAPPINGS
-embedding_dict = {'senna': SENNA_EMB_PATH,
-                  'glove': GLOVE_EMB_PATH,
-                  'fasttext': FASTTEXT_EMB_PATH}
+embedding_dict = {
+     'fasttext': FASTTEXT_EMB_PATH,
+     'glove': GLOVE_EMB_PATH,
+     'glove_twitter_100': GLOVE_TWITTER_100_EMB_PATH,
+}
 
 corpora_dict = {'iest': {'train': TRAIN,
                          'dev': DEV,

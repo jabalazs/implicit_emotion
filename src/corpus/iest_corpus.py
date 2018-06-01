@@ -80,14 +80,16 @@ class IESTCorpus(BaseCorpus):
                                self.dev_sents,
                                force_reload=self.force_reload)
 
+        self.label2id = {key: value for key, value in config.LABEL_DICT.items()}
+
         train_labels = open(config.TRAIN_LABELS).readlines()
         self.train_labels = [l.rstrip() for l in train_labels]
-        self.train_id_labels = [config.LABEL_DICT[label]
+        self.train_id_labels = [self.label2id[label]
                                 for label in self.train_labels]
 
         dev_labels = open(config.DEV_LABELS).readlines()
         self.dev_labels = [l.rstrip() for l in dev_labels]
-        self.dev_id_labels = [config.LABEL_DICT[label]
+        self.dev_id_labels = [self.label2id[label]
                               for label in self.dev_labels]
 
         self.train_ids = range(len(self.train_id_sents))
