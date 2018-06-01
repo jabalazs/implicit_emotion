@@ -182,6 +182,8 @@ class GatherLastLayer(nn.Module):
 
         lengths = kwargs['lengths']
 
+        # FIXME: pytorch 0.4.0 doesn't have variables anymore, so this call
+        # to data shouldn't happen
         # Hacky way of checking the type of the input tensor
         if 'Float' in str(type(lengths.data)):
             lengths = lengths.long()

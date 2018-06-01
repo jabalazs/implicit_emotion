@@ -38,7 +38,7 @@ class Trainer(object):
             batch = self.train_batches[batch_index]
             ret_dict = self.model(batch)
 
-            # FIXME: This part depends both on the way the batch is bult and
+            # FIXME: This part depends both on the way the batch is built and
             # on using pytorch. Think of how to avoid this. Maybe by creating
             # a specific MultNLI Trainer Subclass?
             labels = batch['labels']
@@ -51,7 +51,7 @@ class Trainer(object):
 
             # We ignore batch 0's output for prettier logging
             if batch_index != 0:
-                total_loss += batch_loss.data[0]
+                total_loss += batch_loss.item()
 
             if (batch_index % self.log_interval == 0 and batch_index != 0):
 
@@ -68,6 +68,7 @@ class Trainer(object):
         for batch_index in range(num_batches):
             batch = self.dev_batches[batch_index]
             out = self.model(batch)
+            # FIXME: Shouldn't call data()
             outputs.append(out['logits'].cpu().data.numpy())
             true_labels.extend(batch['labels'])
 

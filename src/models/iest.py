@@ -199,6 +199,7 @@ class BLSTMEncoder(nn.Module):
                                 dropout=self.dropout)
 
     def is_cuda(self):
+        # FIXME: Avoid calls to data()
         # either all weights are on cpu or they are on gpu
         return 'cuda' in str(type(self.enc_lstm.bias_hh_l0.data))
 

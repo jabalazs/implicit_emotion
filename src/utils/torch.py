@@ -2,7 +2,6 @@ import logging
 
 import torch
 from torch import nn
-from torch.autograd import Variable
 
 import numpy as np
 
@@ -13,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 def to_var(tensor, use_cuda, requires_grad=True):
     """Transform tensor into variable and transfer to GPU depending on flag"""
-    tensor = Variable(tensor, requires_grad=requires_grad)
+    if requires_grad:
+        tensor.requires_grad_()
+
     if use_cuda:
         tensor = tensor.cuda()
     return tensor
@@ -31,6 +32,7 @@ def pack_forward(module, emb_batch, lengths, use_cuda=True, batch_first=True):
             lengths: a pytorch tensor of dimension (batch_size)"""
 
     sent = emb_batch
+    # FIXME: should avoid calls do data() since pytorch 0.4.0
     sent_len = lengths.data.cpu().numpy()
 
     # Sort by length (keep idx)

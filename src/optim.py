@@ -4,7 +4,7 @@ https://github.com/pytorch/examples/blob/master/OpenNMT/onmt/Optim.py
 """
 
 import torch.optim as optim
-from torch.nn.utils import clip_grad_norm
+from torch.nn.utils import clip_grad_norm_
 
 
 class OptimWithDecay(object):
@@ -43,7 +43,7 @@ class OptimWithDecay(object):
     def step(self):
         # Compute gradients norm.
         if self.max_grad_norm:
-            clip_grad_norm(self.params, self.max_grad_norm)
+            clip_grad_norm_(self.params, self.max_grad_norm)
         self.optimizer.step()
 
     def update_learning_rate_nie(self, epoch):
