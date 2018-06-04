@@ -329,6 +329,5 @@ TSWLatexianTemp*
 .DS_STORE
 tags
 
-data/train*
-data/trial*
-data/sample*
+data/*.csv
+scripts/*
