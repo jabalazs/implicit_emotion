@@ -5,12 +5,8 @@
 *.git
 *.zip
 *.csv
-data/MultiNLI
-data/SNLI
-data/corpora
-data/word_embeddings
-data/results/runs.db
 *__pycache__*
 runs
 paper
 server_name
+data/*

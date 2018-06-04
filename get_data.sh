@@ -3,12 +3,12 @@
 USER=$1
 
 cd data
-wget --user=$USER --ask-password http://implicitemotions.wassa2018.com/data/protected/train.csv.gz
-wget http://implicitemotions.wassa2018.com/data/unprotected/trial.csv.gz
-wget http://implicitemotions.wassa2018.com/data/unprotected/trial.labels.gz
+wget --user=$USER --ask-password http://implicitemotions.wassa2018.com/data/protected/train-v2.csv.gz
+wget http://implicitemotions.wassa2018.com/data/unprotected/trial-v2.csv.gz
+wget http://implicitemotions.wassa2018.com/data/unprotected/trial-v2.labels.gz
 
-gunzip train.csv.gz
-gunzip trial.csv.gz
-gunzip trial.labels.gz
+gunzip train-v2.csv.gz
+gunzip trial-v2.csv.gz
+gunzip trial-v2.labels.gz
 
 cd ..
