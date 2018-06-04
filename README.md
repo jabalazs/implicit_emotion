@@ -38,3 +38,32 @@ conda install matplotlib scikit-learn
 ```
 
 To test if you installed everything correctly run `python run.py --help`.
+
+# Best Performance
+Currently the best validation accuracy (0.6153) is obtained at the end of the second epoch by running:
+```bash
+python run.py -lr=0.001 --lstm_hidden_size=1024 -wem=char_lstm -wcam=vector_gate
+```
+
+# TODO
+
+## Model tuning
+* Try augmenting the training dataset, if that's allowed
+* Try using other pre-trained word embeddings
+* Shuffle training examples at each epoch
+* Try using attention for aggregating character-level representations into word representations
+* Try using learning rate decay
+* Try different regularization methods
+  - l2-norm (see `weight_decay` [here](https://pytorch.org/docs/stable/optim.html))
+  - dropout
+  - [batch norm](https://pytorch.org/docs/stable/nn.html?highlight=crossentropy#batchnorm1d) 
+ 
+## Engineering
+### Implement proper way of doing early stopping
+Now it's only being applied when passing the `--update_learning_rate` and `--learning_rate_decay=<number>` flags, and the learning rate goes below 10e-5 (as in [InferSent](http://www.aclweb.org/anthology/D17-1070))
+
+The idea would be to control the stopping policies from a centralized place, so we could for example tell the training procedure to stop if any of the following conditions are met:
+
+* Epoch greater than 10
+* Learning rate lower than 10e-5
+* Validation accuracy has not improved in the last 2 epochs
