@@ -39,7 +39,20 @@ conda install matplotlib scikit-learn
 
 To test if you installed everything correctly run `python run.py --help`.
 
-# Best Performance
+# Preliminary results
+
+```
+date                 hash        seed        emb                corpus      model       char_emb_dim  wem         wcam         batch       optim       lr_0        acc         best_epoch
+-------------------  ----------  ----------  -----------------  ----------  ----------  ------------  ----------  -----------  ----------  ----------  ----------  ----------  ----------
+2018-06-04 16:24:23  19d806f     42          glove_twitter_100  iest        bilstm      50            char_lstm   scalar_gate  64          adam        0.001       0.6043      1
+2018-06-04 15:42:41  9293c63     42          glove_twitter_100  iest        bilstm      50            embed                    64          adam        0.001       0.6069      1
+2018-06-04 16:46:03  82e1569     42          glove_twitter_100  iest        bilstm      50            char_lstm   vector_gate  64          adam        0.001       0.6126      1
+2018-06-04 14:25:14  d419db4     42          glove              iest        bilstm      50            embed                    64          adam        0.001       0.6135      0
+2018-06-04 13:48:40  0700c24     42          glove              iest        bilstm      50            char_lstm   scalar_gate  64          adam        0.001       0.6147      0
+2018-06-04 15:10:11  cb452fc     42          glove              iest        bilstm      50            char_lstm   vector_gate  64          adam        0.001       0.6153      1
+```
+
+## Best Performance
 Currently the best validation accuracy (0.6153) is obtained at the end of the second epoch by running:
 ```bash
 python run.py -lr=0.001 --lstm_hidden_size=1024 -wem=char_lstm -wcam=vector_gate
