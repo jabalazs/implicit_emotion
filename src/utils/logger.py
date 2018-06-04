@@ -145,6 +145,11 @@ class Logger(object):
             raise ValueError('{} mode not recognized. Try with FILE, DATABASE '
                              'or BOTH'.format(write_mode))
 
+    def write_architecture(self, model):
+        architecture_filename = os.path.join(self.run_savepath, 'architecture.txt')
+        with open(architecture_filename, 'w', encoding='utf8') as f:
+            f.write(model)
+
     def _update_in_db(self, datadict):
         """expect a dictionary with the data to insert to the current run"""
         db = dt.connect(config.DATABASE_CONNECTION_STRING)

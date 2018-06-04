@@ -10,7 +10,11 @@ LOG_PATH = 'log/'
 EMBEDDINGS_DIR = os.path.join(DATA_PATH, 'word_embeddings')
 FASTTEXT_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'wiki.en.vec')
 GLOVE_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.840B.300d.txt')
+
+GLOVE_TWITTER_200_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.200d.txt')
 GLOVE_TWITTER_100_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.100d.txt')
+GLOVE_TWITTER_50_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.50d.txt')
+GLOVE_TWITTER_25_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.25d.txt')
 
 # CORPORA
 TRAIN = os.path.join(PREPROCESSED_DATA_PATH, 'train_no_emojis.csv')
@@ -24,7 +28,10 @@ DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 embedding_dict = {
      'fasttext': FASTTEXT_EMB_PATH,
      'glove': GLOVE_EMB_PATH,
+     'glove_twitter_200': GLOVE_TWITTER_200_EMB_PATH,
      'glove_twitter_100': GLOVE_TWITTER_100_EMB_PATH,
+     'glove_twitter_50': GLOVE_TWITTER_50_EMB_PATH,
+     'glove_twitter_25': GLOVE_TWITTER_25_EMB_PATH,
 }
 
 corpora_dict = {'iest': {'train': TRAIN,

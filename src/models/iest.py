@@ -274,13 +274,15 @@ class IESTClassifier(nn.Module):
         if char_embeddings:
             self.char_embeddings = char_embeddings
 
-        self.word_encoding_layer = WordEncodingLayer(self.word_encoding_method,
-                                                     torch_embeddings,
-                                                     char_embeddings=self.char_embeddings,
-                                                     char_hidden_size=300,  # same dim as Glove Embeddings
-                                                     word_char_aggregation_method=word_char_aggregation_method,
-                                                     train_char_embeddings=True,
-                                                     use_cuda=self.use_cuda)
+        self.word_encoding_layer = WordEncodingLayer(
+            self.word_encoding_method,
+            torch_embeddings,
+            char_embeddings=self.char_embeddings,
+            char_hidden_size=torch_embeddings.embedding_dim,  # same dim as the word embeddings
+            word_char_aggregation_method=word_char_aggregation_method,
+            train_char_embeddings=True,
+            use_cuda=self.use_cuda
+        )
 
         self.sent_encoding_layer = SentenceEncodingLayer(self.sent_encoding_method,
                                                          self.word_encoding_layer.embedding_dim,
