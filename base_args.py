@@ -101,19 +101,3 @@ misc_args.add_argument('--log_interval', type=int, default=200, metavar='',
 
 misc_args.add_argument('--seed', type=int, default=42, metavar='',
                        help='Random seed to be used by torch initializations')
-
-# misc_args.add_argument('-nlrt', '--no_load_raw_train',  action='store_true',
-#                        help='Avoid loading raw text in training set to make  '
-#                             "spooling faster. This flag shouldn't be passed "
-#                             "on the first run")
-
-# misc_args.add_argument('-nlrd', '--no_load_raw_dev',  action='store_true',
-#                        help='Avoid loading raw text in development set to  '
-#                             "make spooling faster. This flag shouldn't be "
-#                             "passed on the first run")
-
-# This shouldn't be a base arg since not all models will have attention.
-# TODO: Remove this arg from base_args when we find a way to efficiently deal
-# with models with different outputs
-misc_args.add_argument('-sa', '--save_attention', action='store_true',
-                       help='Save a sample of attentions as images')
