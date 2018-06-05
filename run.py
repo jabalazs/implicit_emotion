@@ -197,7 +197,10 @@ def main():
             eval_dict = trainer.evaluate()
             if hp.update_learning_rate:
                 optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
-                if new_lr < 10e-5:
+                lr_threshold = 10e-5
+                if new_lr < lr_threshold:
+                    tqdm.write(f'Learning rate smaller than {lr_threshold}, '
+                               f'stopping.')
                     break
                 if optim_updated:
                     tqdm.write(f'Learning rate decayed to {new_lr}')
