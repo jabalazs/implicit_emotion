@@ -69,8 +69,13 @@ python run.py -lr=0.001 --lstm_hidden_size=1024 -wem=char_lstm -wcam=vector_gate
 
 # TODO
 
-## Model tuning
+## Data
 * Try augmenting the training dataset, if that's allowed
+* Try removing examples which have the `un[#TRIGGERWORD#]` variant, or conditioning on it. See [this](https://groups.google.com/forum/#!topic/implicit-emotions-shared-task-wassa-2018/2wIdY_lmCoY) thread.
+* Related to the previous point, in some examples the trigger word is a hashtag: `#[#TRIGGERWORD#]`. Maybe we could use this as a feature.
+
+## Model tuning
+
 * Try using other pre-trained word embeddings
 * Shuffle training examples at each epoch
 * Try using attention for aggregating character-level representations into word representations
