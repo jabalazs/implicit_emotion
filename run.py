@@ -164,7 +164,10 @@ def main():
 
     if CUDA:
         model.cuda()
-    logger.write_architecture(str(model))
+
+    if hp.write_mode != 'NONE':
+        logger.write_architecture(str(model))
+
     logger.write_current_run_details(str(model))
 
     optimizer = OptimWithDecay(model.parameters(),
