@@ -330,4 +330,6 @@ TSWLatexianTemp*
 tags
 
 data/*.csv
+data/results/
+data/
 scripts/*
