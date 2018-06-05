@@ -5,7 +5,7 @@
 * Pytorch 0.4.0
 
 # Installation
-
+## Code
 
 * Clone this repo.
 ```
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ```
 conda install matplotlib scikit-learn
 ```
-
+## Data
 * Get the data by running the following command and typing your password when prompted
 ```
 ./get_data.sh <USERNAME>
@@ -37,6 +37,15 @@ conda install matplotlib scikit-learn
 ./preprocess.sh
 ```
 
+## Pre-trained Embeddings
+The code expects a directory named `word_embeddings` in `data`
+containing embeddings in `.txt` format with their default name,
+e.g., `glove.840B.300d.txt`. See [`config.py`](src/config.py) for more details
+on naming conventions and directory structure.
+
+TODO: create script to automate this process.
+
+---
 To test if you installed everything correctly run `python run.py --help`.
 
 # Preliminary results
