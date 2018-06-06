@@ -20,6 +20,9 @@ GLOVE_TWITTER_25_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.25d.
 TRAIN = os.path.join(PREPROCESSED_DATA_PATH, 'train_no_emojis.csv')
 DEV = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
 
+# FIXME: CHANGE THIS WHEN WE HAVE THE REAL TEST DATA
+TEST = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
+
 TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
 DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
@@ -36,8 +39,11 @@ embedding_dict = {
 
 corpora_dict = {'iest': {'train': TRAIN,
                          'dev': DEV,
-                         'test': None},
+                         'test': TEST},
                 }
+
+LABEL_PATHS = {'train': TRAIN_LABELS,
+               'dev': DEV_LABELS}
 
 WRITE_MODES = {'none': None,
                'file': 'FILE',
@@ -84,8 +90,10 @@ SPECIAL_CHARS = {
                  UNK_CHAR_TOKEN: UNK_CHAR_ID
                 }
 
-LABEL_DICT = {'anger': 0, 'disgust': 1, 'fear': 2, 'joy': 3, 'sad': 4,
-              'surprise': 5}
+LABEL2ID = {'anger': 0, 'disgust': 1, 'fear': 2, 'joy': 3, 'sad': 4,
+            'surprise': 5}
+
+ID2LABEL = {value: key for key, value in LABEL2ID.items()}
 
 LABELS = ['anger', 'disgust', 'fear', 'joy', 'sad', 'surprise']
 

@@ -76,14 +76,14 @@ class IESTCorpus(BaseCorpus):
                                self.dev_sents,
                                force_reload=self.force_reload)
 
-        self.label2id = {key: value for key, value in config.LABEL_DICT.items()}
+        self.label2id = {key: value for key, value in config.LABEL2ID.items()}
 
-        train_labels = open(config.TRAIN_LABELS).readlines()
+        train_labels = open(config.LABEL_PATHS['train']).readlines()
         self.train_labels = [l.rstrip() for l in train_labels]
         self.train_id_labels = [self.label2id[label]
                                 for label in self.train_labels]
 
-        dev_labels = open(config.DEV_LABELS).readlines()
+        dev_labels = open(config.LABEL_PATHS['dev']).readlines()
         self.dev_labels = [l.rstrip() for l in dev_labels]
         self.dev_id_labels = [self.label2id[label]
                               for label in self.dev_labels]
@@ -106,6 +106,8 @@ class IESTCorpus(BaseCorpus):
                                 'char_sequence': ex[2],
                                 'label': ex[3]} for ex in train_examples]
 
+        import ipdb; ipdb.set_trace(context=10)
+
         self.dev_examples = [{'id': ex[0],
                               'sequence': ex[1],
                               'char_sequence': ex[2],
@@ -124,3 +126,43 @@ class IESTCorpus(BaseCorpus):
                                          shuffle=False,
                                          batch_first=self.batch_first,
                                          use_chars=self.use_chars)
+
+    def create_examples(self, sents, mode):
+        """
+        sents: list of strings
+        mode: (string) train, dev or test
+        """
+        allowed_modes = ['train', 'dev', 'test']
+        if mode not in allowed_modes:
+            raise ValueError(f'Mode not recognized, try one of {allowed_modes}')
+
+        id_sents_pickle_path = os.path.join(config.CACHE_PATH, mode + '.pkl')
+        id_sents = load_or_create(id_sents_pickle_path,
+                                  self.lang.sents2ids,
+                                  sents,
+                                  force_reload=self.force_reload)
+
+        chars_pickle_path = os.path.join(config.CACHE_PATH,
+                                         mode + '_chars.pkl')
+        char_id_sents = load_or_create(chars_pickle_path,
+                                       self.lang.sents2char_ids,
+                                       sents,
+                                       force_reload=self.force_reload)
+
+        labels = open(config.LABEL_PATHS[mode]).readlines()
+        labels = [l.rstrip() for l in labels]
+        id_labels = [self.label2id[label] for label in labels]
+
+        ids = range(len(id_sents))
+
+        examples = zip(ids,
+                       id_sents,
+                       char_id_sents,
+                       id_labels)
+
+        examples = [{'id': ex[0],
+                     'sequence': ex[1],
+                     'char_sequence': ex[2],
+                     'label': ex[3]} for ex in examples]
+
+        return examples

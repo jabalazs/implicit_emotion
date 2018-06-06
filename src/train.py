@@ -84,5 +84,9 @@ class Trainer(object):
         accuracy = num_correct / num_total
         tqdm.write(f'\nAccuracy: {accuracy:.3f}\n')
 
-        ret_dict = {'accuracy': accuracy}
+        # Generate prediction list
+        pred_labels = pred_labels.tolist()
+        pred_labels = [config.ID2LABEL[label] for label in pred_labels]
+        ret_dict = {'accuracy': accuracy,
+                    'labels': pred_labels}
         return ret_dict
