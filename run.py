@@ -51,7 +51,7 @@ arg_parser.add_argument('--lstm_hidden_size', type=int, default=2048,
 arg_parser.add_argument('--force_reload', action='store_true',
                         help='Whether to reload pickles or not (makes the '
                         'process slower, but ensures data coherence)')
-arg_parser.add_argument('--char_emb_dim', type=int, default=50,
+arg_parser.add_argument('--char_emb_dim', '-ced', type=int, default=50,
                         help='Char embedding dimension')
 arg_parser.add_argument('--pooling_method', type=str, default='max',
                         choices=['mean', 'sum', 'last', 'max'],

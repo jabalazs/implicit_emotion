@@ -151,3 +151,6 @@ class BatchIterator(object):
 
     def __len__(self):
         return self.num_batches
+
+    def shuffle_examples(self):
+        random.shuffle(self.examples_subset)

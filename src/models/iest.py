@@ -183,7 +183,8 @@ class BLSTMEncoder(nn.Module):
         embedding_dim: """
 
     def __init__(self, embedding_dim, hidden_sizes=2048, num_layers=1,
-                 bidirectional=True, dropout=0.0, batch_first=True, use_cuda=True):
+                 bidirectional=True, dropout=0.0, batch_first=True,
+                 use_cuda=True):
         super(BLSTMEncoder, self).__init__()
         self.embedding_dim = embedding_dim
         self.hidden_size = hidden_sizes  # sizes in plural for compatibility
@@ -284,11 +285,13 @@ class IESTClassifier(nn.Module):
             use_cuda=self.use_cuda
         )
 
-        self.sent_encoding_layer = SentenceEncodingLayer(self.sent_encoding_method,
-                                                         self.word_encoding_layer.embedding_dim,
-                                                         hidden_sizes=self.hidden_sizes,
-                                                         batch_first=self.batch_first,
-                                                         use_cuda=self.use_cuda)
+        self.sent_encoding_layer = SentenceEncodingLayer(
+            self.sent_encoding_method,
+            self.word_encoding_layer.embedding_dim,
+            hidden_sizes=self.hidden_sizes,
+            batch_first=self.batch_first,
+            use_cuda=self.use_cuda
+        )
 
         self.pooling_layer = PoolingLayer(self.pooling_method)
 

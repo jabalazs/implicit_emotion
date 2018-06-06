@@ -59,6 +59,8 @@ class Trainer(object):
                 tqdm.write(f'Epoch: {epoch}, batch: {batch_index}, loss: {avg_loss}')
                 total_loss = 0
 
+        self.train_batches.shuffle_examples()
+
     def evaluate(self):
         self.model.eval()
         num_batches = self.dev_batches.num_batches

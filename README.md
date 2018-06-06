@@ -81,7 +81,7 @@ python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm
 ## Model tuning
 
 * Try using other pre-trained word embeddings
-* Shuffle training examples at each epoch
+* ~Shuffle training examples at each epoch~
 * Try using attention for aggregating character-level representations into word representations
 * Try using learning rate decay
 * Try different regularization methods
@@ -91,10 +91,10 @@ python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm
  
 ## Engineering
 ### Implement proper way of doing early stopping
-Now it's only being applied when passing the `--update_learning_rate` and `--learning_rate_decay=<number>` flags, and the learning rate goes below 10e-5 (as in [InferSent](http://www.aclweb.org/anthology/D17-1070))
+Now it's only being applied when passing the `--update_learning_rate` and `--learning_rate_decay=<number>` flags, and the learning rate goes below 1e-5 (as in [InferSent](http://www.aclweb.org/anthology/D17-1070))
 
 The idea would be to control the stopping policies from a centralized place, so we could for example tell the training procedure to stop if any of the following conditions are met:
 
 * Epoch greater than 10
-* Learning rate lower than 10e-5
+* Learning rate lower than 1e-5
 * Validation accuracy has not improved in the last 2 epochs
