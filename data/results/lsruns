@@ -5,7 +5,7 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        SUBSTR("commit", 0, 8) as "commit",
                                        server_name,
                                        seed,
-                                       embeddings || " " as emb,
+                                       embeddings || "            " as emb,
                                        corpus,
                                        model,
                                        char_emb_dim,
@@ -24,5 +24,5 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        best_epoch
                                    FROM runs
                                    --ORDER BY datetime DESC
-                                   ORDER BY best_valid_acc ASC
+                                   ORDER BY best_valid_acc DESC
                                    LIMIT 200'
