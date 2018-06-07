@@ -51,23 +51,20 @@ To test if you installed everything correctly run `python run.py --help`.
 # Preliminary results
 
 ```
-date                 hash        commit      server_name  seed        emb                corpus      model       char_emb_dim  wem         wcam         batch       optim       lr_0        ulr         acc         best_epoch
--------------------  ----------  ----------  -----------  ----------  -----------------  ----------  ----------  ------------  ----------  -----------  ----------  ----------  ----------  ----------  ----------  ----------
-2018-06-06 08:07:34  9dec60f     5a4a315     yatima       42          glove              iest        bilstm      100           char_lstm   vector_gate  64          adam        0.001       1           0.6186      1
-2018-06-05 17:09:18  c4e9af8     5a4a315     yatima       42          glove              iest        bilstm      50            char_lstm   vector_gate  64          adam        0.001       1           0.6171      1
-2018-06-05 16:07:42  cf062e2     3a4a35b     yatima       42          glove              iest        bilstm      50            char_lstm   scalar_gate  64          adam        0.001       1           0.6158      1
-2018-06-04 15:10:11  cb452fc                 yatima       42          glove              iest        bilstm      50            char_lstm   vector_gate  64          adam        0.001       0           0.6153      1
-2018-06-04 13:48:40  0700c24                 yatima       42          glove              iest        bilstm      50            char_lstm   scalar_gate  64          adam        0.001       0           0.6147      0
-2018-06-05 10:53:00  a115762                 yatima       42          glove_twitter_50   iest        bilstm      50            char_lstm   scalar_gate  64          adam        0.001       0           0.6138      1
-2018-06-04 14:25:14  d419db4                 yatima       42          glove              iest        bilstm      50            embed                    64          adam        0.001       0           0.6135      0
-2018-06-05 10:38:02  762b923                 yatima       42          glove_twitter_200  iest        bilstm      50            embed                    64          adam        0.001       0           0.6128      0
-2018-06-04 16:46:03  82e1569                 yatima       42          glove_twitter_100  iest        bilstm      50            char_lstm   vector_gate  64          adam        0.001       0           0.6126      1
+date                 hash        commit      server_name  seed        emb                corpus      model       char_emb_dim  wem         wcam        batch       optim       lr_0        ulr         acc         best_epoch
+-------------------  ----------  ----------  -----------  ----------  -----------------  ----------  ----------  ------------  ----------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
+2018-06-07 10:07:12  a3d35de     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   cat         64          adam        0.001       1           0.6235      1
+2018-06-07 08:28:48  d51d588     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6231      1
+2018-06-07 08:45:36  a13a0ba     9953057     yatima       44          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6224      1
+2018-06-06 14:15:12  7f6cdc0     9953057     yatima       42          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6203      1
+2018-06-06 11:55:54  bc44c5a     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   vector_gat  64          adam        0.001       1           0.6187      1
+2018-06-06 08:07:34  9dec60f     5a4a315     yatima       42          glove              iest        bilstm      100           char_lstm   vector_gat  64          adam        0.001       1           0.6186      1
 ```
 
 ## Best Performance
-Currently the best validation accuracy (0.6186) is obtained at the end of the second epoch by running:
+Currently the best validation accuracy (0.6235) is obtained at the end of the second epoch by running:
 ```bash
-python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm --word_char_aggregation_method=vector_gate --char_emb_dim=100
+python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm --word_char_aggregation_method=cat --char_emb_dim=100 --update_learning_rate --seed=43
 ```
 
 # TODO
