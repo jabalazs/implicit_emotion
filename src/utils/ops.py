@@ -1,7 +1,21 @@
-from __future__ import division
+
+import numpy as np
 import torch
 
 from .. import config
+
+
+def np_softmax(arr):
+    """arr: numpy array of shape (N, D), the softmax will be applied on D"""
+    # For numerical stability; softmax(x) = softmax(x - c) for any constant c
+    # See https://stackoverflow.com/questions/42599498/numercially-stable-softmax
+    colwise_max = np.amax(arr, axis=1, keepdims=True)
+    new_arr = arr - colwise_max
+
+    exp = np.exp(new_arr)
+    probs = exp / np.sum(exp, axis=1, keepdims=True)
+
+    return probs
 
 
 def embed_context_window(embeddings, batch):

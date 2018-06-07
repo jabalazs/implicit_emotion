@@ -11,8 +11,10 @@ from tqdm import tqdm
 
 from src.corpus.iest_corpus import IESTCorpus
 from src.corpus.embeddings import Embeddings
+
 from src.utils.logger import Logger
-# from src.utils.io import load_or_create
+from src.utils.ops import np_softmax
+
 from src.train import Trainer
 from src.optim import OptimWithDecay
 from src import config
@@ -180,12 +182,8 @@ def main():
 
     loss_function = torch.nn.CrossEntropyLoss()
 
-    dev_batches = corpus.dev_batches
-
-    trainer = Trainer(model, corpus.train_batches,
-                      dev_batches,
+    trainer = Trainer(model, corpus.train_batches, corpus.dev_batches,
                       optimizer, loss_function, num_epochs=hp.epochs,
-                      update_learning_rate=hp.update_learning_rate,
                       use_cuda=CUDA, log_interval=hp.log_interval)
 
     try:
@@ -215,6 +213,20 @@ def main():
                 best_accuracy = accuracy
                 logger.update_results({'best_valid_acc': best_accuracy,
                                        'best_epoch': epoch})
+
+                if hp.write_mode != 'NONE':
+                    probs = np_softmax(eval_dict['output'])
+                    probs_filepath = os.path.join(logger.run_savepath,
+                                                  'best_eval_probs.csv')
+                    np.savetxt(probs_filepath, probs,
+                               delimiter=',', fmt='%.8f')
+
+                    labels_filepath = os.path.join(logger.run_savepath,
+                                                   'predictions.txt')
+                    labels = [label + '\n' for label in eval_dict['labels']]
+                    with open(labels_filepath, 'w', encoding='utf-8') as f:
+                        f.writelines(labels)
+
                 if hp.save_model:
                     logger.torch_save_file('best_model_state_dict.pth',
                                            model.state_dict(),

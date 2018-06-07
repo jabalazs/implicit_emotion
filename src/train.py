@@ -5,13 +5,13 @@ from tqdm import tqdm
 from sklearn.metrics import classification_report
 
 from .utils.torch import to_var
+
 from . import config
 
 
 class Trainer(object):
     def __init__(self, model, train_batches, dev_batches, optimizer,
                  loss_function, num_epochs=10,
-                 update_learning_rate=False,
                  use_cuda=True,
                  log_interval=20):
         self.model = model
@@ -23,7 +23,6 @@ class Trainer(object):
         self.loss_function = loss_function
 
         self.num_epochs = num_epochs
-        self.update_learning_rate = update_learning_rate
 
         self.use_cuda = use_cuda
         self.log_interval = log_interval
@@ -45,7 +44,11 @@ class Trainer(object):
             labels = to_var(torch.LongTensor(labels), self.use_cuda,
                             requires_grad=False)
 
+            # FIXME: this line assumes that the loss_function expects logits
+            # and that ret_dict will contain that key, but what if our problem
+            # is not classification?
             batch_loss = self.loss_function(ret_dict['logits'], labels)
+
             batch_loss.backward()
             self.optimizer.step()
 
@@ -88,5 +91,6 @@ class Trainer(object):
         pred_labels = pred_labels.tolist()
         pred_labels = [config.ID2LABEL[label] for label in pred_labels]
         ret_dict = {'accuracy': accuracy,
-                    'labels': pred_labels}
+                    'labels': pred_labels,
+                    'output': output}
         return ret_dict
