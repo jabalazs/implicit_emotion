@@ -31,6 +31,9 @@ except ImportError:
     pass
 
 
+from unicode_codes_py3 import EMOJI_UNICODE
+
+
 def regex_or(*items):
     return '(?:' + '|'.join(items) + ')'
 
@@ -168,6 +171,8 @@ Bound = r"(?:\W|^|$)"
 Email = regex_or("(?<=(?:\W))", "(?<=(?:^))") + \
     r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}(?=" + Bound+")"
 
+emoji_pattern = '[' + ''.join(EMOJI_UNICODE.values()) + ']'
+
 # We will be tokenizing using these regexps as delimiters
 # Additionally, these things are "protected", meaning they shouldn't be further split themselves.
 Protected = re.compile(
@@ -180,6 +185,7 @@ Protected = re.compile(
         numberWithCommas,
         numComb,
         emoticon,
+        emoji_pattern,
         Arrows,
         entity,
         punctSeq,
