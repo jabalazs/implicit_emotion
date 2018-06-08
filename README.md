@@ -51,20 +51,20 @@ To test if you installed everything correctly run `python run.py --help`.
 # Preliminary results
 
 ```
-date                 hash        commit      server_name  seed        emb                corpus      model       char_emb_dim  wem         wcam        batch       optim       lr_0        ulr         acc         best_epoch
--------------------  ----------  ----------  -----------  ----------  -----------------  ----------  ----------  ------------  ----------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
-2018-06-07 10:07:12  a3d35de     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   cat         64          adam        0.001       1           0.6235      1
-2018-06-07 08:28:48  d51d588     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6231      1
-2018-06-07 08:45:36  a13a0ba     9953057     yatima       44          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6224      1
-2018-06-06 14:15:12  7f6cdc0     9953057     yatima       42          glove              iest        bilstm      100           char_lstm   scalar_gat  64          adam        0.001       1           0.6203      1
-2018-06-06 11:55:54  bc44c5a     9953057     yatima       43          glove              iest        bilstm      100           char_lstm   vector_gat  64          adam        0.001       1           0.6187      1
-2018-06-06 08:07:34  9dec60f     5a4a315     yatima       42          glove              iest        bilstm      100           char_lstm   vector_gat  64          adam        0.001       1           0.6186      1
+date                 hash        commit      seed        corpus      char_emb_dim  sent_l      wcam        ulr         acc         best_epoch
+-------------------  ----------  ----------  ----------  ----------  ------------  ----------  ----------  ----------  ----------  ----------
+2018-06-08 11:23:26  49736fd     36ee296     42          iest_emoji  150           1           cat         1           0.6287      1
+2018-06-08 08:38:15  aed323b     ccc3e4d     44          iest        150           1           vector_gat  1           0.6259      1
+2018-06-08 10:24:28  40a35e4     36ee296     44          iest_emoji  150           1           vector_gat  1           0.625       1
+2018-06-07 16:35:42  69fd297     ccc3e4d     42          iest        150           1           cat         1           0.6239      1
+2018-06-07 15:47:05  8a44651     ccc3e4d     42          iest        150           1           scalar_gat  1           0.6236      1
+2018-06-07 10:07:12  a3d35de     9953057     43          iest        100           1           cat         1           0.6235      1
 ```
 
 ## Best Performance
-Currently the best validation accuracy (0.6235) is obtained at the end of the second epoch by running:
+Currently the best validation accuracy (0.6287) is obtained at the end of the second epoch by running:
 ```bash
-python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm --word_char_aggregation_method=cat --char_emb_dim=100 --update_learning_rate --seed=43
+python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm --word_char_aggregation_method=cat --char_emb_dim=150 --update_learning_rate --seed=42
 ```
 
 # TODO
@@ -73,14 +73,14 @@ python run.py -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm
 * Try augmenting the training dataset, if that's allowed
 * Try removing examples which have the `un[#TRIGGERWORD#]` variant, or conditioning on it. See [this](https://groups.google.com/forum/#!topic/implicit-emotions-shared-task-wassa-2018/2wIdY_lmCoY) thread.
 * Related to the previous point, in some examples the trigger word is a hashtag: `#[#TRIGGERWORD#]`. Maybe we could use this as a feature.
-* Tokenize and exploit emojis. See [#1](https://github.com/jabalazs/implicit_emotion/issues/1).
+* ~Tokenize and exploit emojis. See [#1](https://github.com/jabalazs/implicit_emotion/issues/1).~
 
 ## Model tuning
 
-* Try using other pre-trained word embeddings
+* ~Try using other pre-trained word embeddings~ `glove.840B.300d` seem to perform best
 * ~Shuffle training examples at each epoch~
 * Try using attention for aggregating character-level representations into word representations
-* Try using learning rate decay
+* Try different learning rate decays schedules
 * Try different regularization methods
   - l2-norm (see `weight_decay` [here](https://pytorch.org/docs/stable/optim.html))
   - dropout
@@ -95,3 +95,12 @@ The idea would be to control the stopping policies from a centralized place, so 
 * Epoch greater than 10
 * Learning rate lower than 1e-5
 * Validation accuracy has not improved in the last 2 epochs
+
+### Show models that have a saved checkpoint in database
+Right now I have to look at the experiment hash and navigate to the corresponding directory to see whether it was saved during training or not.
+
+An option could be to save every model, but given that they are around 350MB in size this might not be practical.
+
+Another solution would be to perform a check somewhere at some point to update this field for every row. However this might create a great overhead in projects with lots of experiments.
+
+Another option, and the simplest one, is to create the database entry indicating the experiment doesn't have a corresponding checkpoint, and then change this field when the model is saved. The problem with this approach is that if the model is deleted manually the database will keep showing as if there was one.
