@@ -50,6 +50,9 @@ arg_parser.add_argument('--embeddings', type=str, default="glove",
 arg_parser.add_argument('--lstm_hidden_size', type=int, default=2048,
                         help='Hidden dimension size for the word-level LSTM')
 
+arg_parser.add_argument('--sent_enc_layers', type=int, default=1,
+                        help='Number of layers for the word-level LSTM')
+
 arg_parser.add_argument('--force_reload', action='store_true',
                         help='Whether to reload pickles or not (makes the '
                         'process slower, but ensures data coherence)')
@@ -59,6 +62,11 @@ arg_parser.add_argument('--pooling_method', type=str, default='max',
                         choices=['mean', 'sum', 'last', 'max'],
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
+
+arg_parser.add_argument('--lstm_dropout', type=float, default=0.0,
+                        help='Dropout between sentence encoding lstm layers. '
+                             '0 means no dropout.')
+
 arg_parser.add_argument('--dropout', type=float, default=0.1,
                         help='Dropout applied to layers. 0 means no dropout.')
 
@@ -103,16 +111,11 @@ def main():
     if torch.cuda.is_available() and not hp.no_cuda:
         CUDA = True
 
-    # these must match the ones found in config.corpora_dict
-    if hp.corpus == 'iest':
-        CorpusClass = IESTCorpus
-    else:
-        raise NotImplementedError('Corpus not implemented')
-
-    corpus = CorpusClass(force_reload=hp.force_reload,
-                         train_data_proportion=hp.train_data_proportion,
-                         dev_data_proportion=hp.dev_data_proportion,
-                         batch_size=hp.batch_size)
+    corpus = IESTCorpus(hp.corpus,
+                        force_reload=hp.force_reload,
+                        train_data_proportion=hp.train_data_proportion,
+                        dev_data_proportion=hp.dev_data_proportion,
+                        batch_size=hp.batch_size)
 
     if hp.model_hash:
         experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
@@ -162,7 +165,9 @@ def main():
                            use_cuda=CUDA,
                            pooling_method=hp.pooling_method,
                            batch_first=True,
-                           dropout=hp.dropout)
+                           dropout=hp.dropout,
+                           lstm_dropout=hp.lstm_dropout,
+                           sent_enc_layers=hp.sent_enc_layers)
 
     if CUDA:
         model.cuda()

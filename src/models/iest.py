@@ -252,9 +252,11 @@ class IESTClassifier(nn.Module):
                  word_char_aggregation_method=None,
                  sent_encoding_method='infersent',
                  hidden_sizes=None,
+                 sent_enc_layers=1,
                  pooling_method='max',
                  batch_first=True,
                  dropout=0.0,
+                 lstm_dropout=0.0,
                  use_cuda=True):
 
         super(IESTClassifier, self).__init__()
@@ -262,6 +264,7 @@ class IESTClassifier(nn.Module):
         self.batch_size = batch_size
         self.batch_first = batch_first
         self.dropout = dropout
+        self.lstm_dropout = lstm_dropout
 
         self.use_cuda = use_cuda
 
@@ -270,6 +273,7 @@ class IESTClassifier(nn.Module):
         self.word_encoding_method = word_encoding_method
         self.sent_encoding_method = sent_encoding_method
         self.hidden_sizes = hidden_sizes
+        self.sent_enc_layers = sent_enc_layers
 
         self.char_embeddings = None
         if char_embeddings:
@@ -289,8 +293,10 @@ class IESTClassifier(nn.Module):
             self.sent_encoding_method,
             self.word_encoding_layer.embedding_dim,
             hidden_sizes=self.hidden_sizes,
+            num_layers=self.sent_enc_layers,
             batch_first=self.batch_first,
-            use_cuda=self.use_cuda
+            use_cuda=self.use_cuda,
+            dropout=self.lstm_dropout
         )
 
         self.pooling_layer = PoolingLayer(self.pooling_method)

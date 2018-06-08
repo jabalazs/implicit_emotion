@@ -46,7 +46,7 @@ class Embeddings(object):
                 i += 1
                 if k_most_frequent and i == k_most_frequent:
                     # This assumes that vectors in the embedding file are
-                    # sorted according to their frquency (such as GloVe)
+                    # sorted according to their frequency (such as GloVe)
                     break
         return dict_repr
 

@@ -10,13 +10,13 @@ from .. import config
 
 
 class BaseCorpus(object):
-    def __init__(self, paths_dict, mode='train', use_chars=True,
+    def __init__(self, paths_dict, corpus_name, use_chars=True,
                  force_reload=False, train_data_proportion=1.0,
                  dev_data_proportion=1.0, batch_size=64,
                  shuffle_batches=False, batch_first=True):
 
-        self.paths = paths_dict
-        self.mode = mode
+        self.paths = paths_dict[corpus_name]
+        self.corpus_name = corpus_name
 
         self.use_chars = use_chars
 
@@ -34,7 +34,14 @@ class IESTCorpus(BaseCorpus):
 
     # @profile(immediate=True)
     def __init__(self, *args, **kwargs):
-        super(IESTCorpus, self).__init__(config.corpora_dict['iest'],
+        """args:
+            paths_dict: a dict with two levels: <corpus_name>: <train/dev/rest>
+            corpus_name: the <corpus_name> you want to use.
+
+            We pass the whole dict containing all the paths for every corpus
+            because it makes it easier to save and manage the cache pickles
+        """
+        super(IESTCorpus, self).__init__(config.corpora_dict,
                                          *args, **kwargs)
 
         train_sents = open(self.paths['train']).readlines()
@@ -46,7 +53,9 @@ class IESTCorpus(BaseCorpus):
         dev_sents = open(self.paths['dev']).readlines()
         self.dev_sents = [s.rstrip().split() for s in dev_sents]
 
-        lang_pickle_path = os.path.join(config.CACHE_PATH, 'lang.pkl')
+        lang_pickle_path = os.path.join(config.CACHE_PATH,
+                                        self.corpus_name + '_lang.pkl')
+
         self.lang = load_or_create(lang_pickle_path,
                                    Lang,
                                    self.train_sents,
@@ -54,24 +63,36 @@ class IESTCorpus(BaseCorpus):
 
         self.label2id = {key: value for key, value in config.LABEL2ID.items()}
 
-        self.train_examples = self._create_examples(self.train_sents, mode='train')
-        self.dev_examples = self._create_examples(self.dev_sents, mode='dev')
+        self.train_examples = self._create_examples(
+            self.train_sents,
+            mode='train',
+            prefix=self.corpus_name,
+        )
+        self.dev_examples = self._create_examples(
+            self.dev_sents,
+            mode='dev',
+            prefix=self.corpus_name,
+        )
 
-        self.train_batches = BatchIterator(self.train_examples,
-                                           self.batch_size,
-                                           data_proportion=self.train_data_proportion,
-                                           shuffle=True,
-                                           batch_first=self.batch_first,
-                                           use_chars=self.use_chars)
+        self.train_batches = BatchIterator(
+            self.train_examples,
+            self.batch_size,
+            data_proportion=self.train_data_proportion,
+            shuffle=True,
+            batch_first=self.batch_first,
+            use_chars=self.use_chars,
+        )
 
-        self.dev_batches = BatchIterator(self.dev_examples,
-                                         self.batch_size,
-                                         data_proportion=self.dev_data_proportion,
-                                         shuffle=False,
-                                         batch_first=self.batch_first,
-                                         use_chars=self.use_chars)
+        self.dev_batches = BatchIterator(
+            self.dev_examples,
+            self.batch_size,
+            data_proportion=self.dev_data_proportion,
+            shuffle=False,
+            batch_first=self.batch_first,
+            use_chars=self.use_chars
+        )
 
-    def _create_examples(self, sents, mode):
+    def _create_examples(self, sents, mode, prefix):
         """
         sents: list of strings
         mode: (string) train, dev or test
@@ -84,14 +105,21 @@ class IESTCorpus(BaseCorpus):
         if mode not in allowed_modes:
             raise ValueError(f'Mode not recognized, try one of {allowed_modes}')
 
-        id_sents_pickle_path = os.path.join(config.CACHE_PATH, mode + '.pkl')
+        id_sents_pickle_path = os.path.join(
+            config.CACHE_PATH,
+            prefix + '_' + mode + '.pkl',
+        )
+
         id_sents = load_or_create(id_sents_pickle_path,
                                   self.lang.sents2ids,
                                   sents,
                                   force_reload=self.force_reload)
 
-        chars_pickle_path = os.path.join(config.CACHE_PATH,
-                                         mode + '_chars.pkl')
+        chars_pickle_path = os.path.join(
+            config.CACHE_PATH,
+            prefix + '_' + mode + '_chars.pkl',
+        )
+
         char_id_sents = load_or_create(chars_pickle_path,
                                        self.lang.sents2char_ids,
                                        sents,

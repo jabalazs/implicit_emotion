@@ -20,8 +20,12 @@ GLOVE_TWITTER_25_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.25d.
 TRAIN = os.path.join(PREPROCESSED_DATA_PATH, 'train_no_emojis.csv')
 DEV = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
 
+TRAIN_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'train.csv')
+DEV_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
+
 # FIXME: CHANGE THIS WHEN WE HAVE THE REAL TEST DATA
 TEST = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
+TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
 
 TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
 DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
@@ -40,6 +44,9 @@ embedding_dict = {
 corpora_dict = {'iest': {'train': TRAIN,
                          'dev': DEV,
                          'test': TEST},
+                'iest_emoji': {'train': TRAIN_EMOJI,
+                               'dev': DEV_EMOJI,
+                               'test': TEST_EMOJI},
                 }
 
 LABEL_PATHS = {'train': TRAIN_LABELS,
