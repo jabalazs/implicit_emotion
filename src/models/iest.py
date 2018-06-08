@@ -1,20 +1,82 @@
+import numpy as np
+
 import torch
 
 from torch import nn
 import torch.nn.functional as F
 
 from ..layers.pooling import PoolingLayer
+
 from ..layers.layers import (
-                             CharEmbeddingLayer,
-                             WordEmbeddingLayer,
-                             CharEncoder
-                            )
+    CharEmbeddingLayer,
+    WordEmbeddingLayer,
+    CharEncoder,
+    InfersentAggregationLayer,
+)
 
 from ..utils.torch import to_var, pack_forward
 
 
+class AttentionLayer(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(AttentionLayer, self).__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+
+        v = np.random.uniform(-0.01, 0.01, size=(self.output_dim))
+        v = torch.from_numpy(v).float().requires_grad_()
+        self.v = torch.nn.Parameter(v)
+
+        self.linear_layer = torch.nn.Linear(self.input_dim, self.output_dim)
+
+    def forward(self, sequence, vector, char_masks):
+        """sequence: a batch of sequences of vector representations of dim
+                     (B, S, word_len, D1), batch, sequence length, word length,
+                     hidden dim
+
+           vector: a batch of vectors these are the ones we want to compare
+           the sequences against. dim: (B, S, D2),
+
+           char_masks: (B, S, word_len)"""
+
+        B, S, word_len, D1 = sequence.size()
+        _, _, D2 = vector.size()
+        # (output_dim) -> (B, S, word_len, output_dim)
+        v = self.v.expand(B, S, word_len, -1)
+
+        # (B, S, D2) -> (B, S, word_len, D2)
+        vector = vector.unsqueeze(2).expand(-1, -1, word_len, -1)
+
+        # -> (B, S, word_len, D1 + D2)
+        concatted = torch.cat((sequence, vector), dim=3)
+
+        # (B, S, word_len, D1 + D2) -> (B, S, word_len, output_dim)
+        linearized = self.linear_layer(concatted)
+
+        linearized = torch.tanh(linearized)
+
+        linearized = linearized.view(B * S * word_len, self.output_dim).unsqueeze(2)
+        v = v.view(B * S * word_len, self.output_dim).unsqueeze(1)
+        score = torch.bmm(v, linearized).unsqueeze(1).unsqueeze(1)
+        score = score.view(B, S, word_len)
+
+        # We transform the elements corresponding to paddings to -inf
+        inf_batch_mask = (1 - char_masks).byte()
+        score.masked_fill_(inf_batch_mask, -1e16)
+
+        # (B * S, 1, word_len)
+        alphas = F.softmax(score, dim=2).unsqueeze(2).view(B * S, 1, word_len)
+
+        # (B * S, 1, D1)
+        weighted = torch.bmm(alphas, sequence.view(B * S, word_len, D1))
+
+        weighted = weighted.squeeze(1).view(B, S, D1)
+
+        return weighted
+
+
 class WordCharEncodingLayer(nn.Module):
-    AGGREGATION_METHODS = ['cat', 'scalar_gate', 'vector_gate']
+    AGGREGATION_METHODS = ['cat', 'scalar_gate', 'vector_gate', 'infersent', 'attention']
 
     def __init__(self, word_embeddings, char_embeddings,
                  char_hidden_size=50, word_char_aggregation_method='cat',
@@ -38,9 +100,15 @@ class WordCharEncodingLayer(nn.Module):
         self.char_embedding_layer = CharEmbeddingLayer(char_embeddings,
                                                        use_cuda=self.use_cuda)
 
+        fw_bw_aggregation_method = 'linear_sum'
+        if self.aggregation_method == 'attention':
+            # if we use attention we need the char encoding layer to return the
+            # non-aggregated character-level representations.
+            fw_bw_aggregation_method = None
+
         self.char_encoding_layer = CharEncoder(char_embeddings.embedding_dim,
                                                self.char_hidden_size,
-                                               fw_bw_aggregation_method='linear_sum',
+                                               fw_bw_aggregation_method=fw_bw_aggregation_method,
                                                bidirectional=True,
                                                train_char_embeddings=True,
                                                use_cuda=self.use_cuda)
@@ -58,7 +126,16 @@ class WordCharEncodingLayer(nn.Module):
             self.vector_gate = nn.Linear(self.char_encoding_layer.out_dim,
                                          self.char_encoding_layer.out_dim)
 
-    def forward(self, word_batch, char_batch, word_lengths):
+        elif self.aggregation_method == 'infersent':
+            self.embedding_dim = 2 * (self.char_encoding_layer.out_dim + word_embeddings.embedding_dim)
+            self.infersent_aggregation = InfersentAggregationLayer()
+
+        elif self.aggregation_method == 'attention':
+            self.embedding_dim = self.char_encoding_layer.out_dim
+            self.attention_layer = AttentionLayer(self.char_encoding_layer.out_dim + word_embeddings.embedding_dim,
+                                                  self.char_encoding_layer.out_dim)
+
+    def forward(self, word_batch, char_batch, word_lengths, char_masks):
         emb_word_batch = self.word_embedding_layer(word_batch)
         emb_char_batch = self.char_embedding_layer(char_batch)
 
@@ -77,6 +154,14 @@ class WordCharEncodingLayer(nn.Module):
             word_reprs = (1.0 - gate_result) * emb_word_batch + gate_result * char_lvl_word_repr
             self.gate_result = gate_result
 
+        elif self.aggregation_method == 'infersent':
+            word_reprs = self.infersent_aggregation(emb_word_batch, char_lvl_word_repr)
+
+        elif self.aggregation_method == 'attention':
+            word_reprs = self.attention_layer(char_lvl_word_repr,
+                                              emb_word_batch,
+                                              char_masks)
+
         return word_reprs
 
 
@@ -90,6 +175,7 @@ class WordEncodingLayer(nn.Module):
             # FIXME: Hideous. Fix by using partials from functools or metaclasses
             kwargs.pop('char_embeddings')
             kwargs.pop('char_hidden_size')
+            kwargs.pop('char_masks')
             kwargs.pop('train_char_embeddings')
             kwargs.pop('word_char_aggregation_method')
             return WordEmbeddingLayer(*args, **kwargs)
@@ -310,7 +396,7 @@ class IESTClassifier(nn.Module):
 
     def encode(self, batch, char_batch,
                sent_lengths, word_lengths,
-               masks=None, embed_words=True):
+               masks=None, char_masks=None, embed_words=True):
         """ Encode a batch of ids into a sentence representation.
 
             This method exists for compatibility with facebook's senteval
@@ -324,7 +410,8 @@ class IESTClassifier(nn.Module):
         """
 
         if embed_words:
-            embedded = self.word_encoding_layer(batch, char_batch, word_lengths)
+            embedded = self.word_encoding_layer(batch, char_batch, word_lengths,
+                                                char_masks)
         else:
             embedded = batch
         sent_embedding = self.sent_encoding_layer(embedded, sent_lengths)
@@ -360,11 +447,16 @@ class IESTClassifier(nn.Module):
                                   self.use_cuda,
                                   requires_grad=False)
 
+            char_masks = to_var(torch.LongTensor(char_masks),
+                                self.use_cuda,
+                                requires_grad=False)
+
         sent_vec = self.encode(sequences,
                                char_batch=char_sequences,
                                sent_lengths=sent_lengths,
                                word_lengths=word_lengths,
-                               masks=masks)
+                               masks=masks,
+                               char_masks=char_masks)
 
         logits = self.dense_layer(sent_vec)
 

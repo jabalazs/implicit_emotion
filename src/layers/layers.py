@@ -46,7 +46,7 @@ class WordEmbeddingLayer(nn.Module):
 
 
 class CharEncoder(nn.Module):
-    FORWARD_BACKWARD_AGGREGATION_METHODS = ['cat', 'linear_sum']
+    FORWARD_BACKWARD_AGGREGATION_METHODS = ['cat', 'linear_sum', None]
 
     def __init__(self, char_embedding_dim, hidden_size,
                  fw_bw_aggregation_method='cat',
@@ -79,6 +79,11 @@ class CharEncoder(nn.Module):
             self.linear_layer = nn.Linear(self.hidden_x_dirs,
                                           self.char_hidden_dim)
 
+        elif self.fw_bw_aggregation_method is None:
+            self.out_dim = self.hidden_x_dirs
+            # self.linear_layer = nn.Linear(self.hidden_x_dirs,
+            #                               self.char_hidden_dim)
+
     def forward(self, char_batch, word_lengths):
         """char_batch: (batch_size, seq_len, word_len, char_emb_dim)
            word_lengths: (batch_size, seq_len)"""
@@ -94,6 +99,12 @@ class CharEncoder(nn.Module):
 
         word_lengths = word_lengths.view(batch_size * seq_len)
         word_lvl_repr = pack_forward(self.char_lstm, char_batch, word_lengths)
+
+        if self.fw_bw_aggregation_method is None:
+            return word_lvl_repr.view(batch_size,
+                                      seq_len,
+                                      word_len,
+                                      self.hidden_x_dirs)
 
         word_lvl_repr = self.gather_last(word_lvl_repr, lengths=word_lengths)
 
@@ -111,3 +122,45 @@ class CharEncoder(nn.Module):
             word_lvl_repr = self.linear_layer(word_lvl_repr)
 
         return word_lvl_repr
+
+
+class InfersentAggregationLayer(nn.Module):
+
+    def __init__(self):
+        """
+
+        Simply concatenate the provided tensors on their last dimension
+        which needs to have the same size,  along with their
+        element-wise multiplication and difference
+
+        Taken from the paper:
+             "Learning Natural Language Inference using Bidirectional
+             LSTM model and Inner-Attention"
+             https://arxiv.org/abs/1605.09090
+
+        """
+        super(InfersentAggregationLayer, self).__init__()
+
+    def forward(self, input_1, input_2):
+        """
+
+        :param : input_1
+            Size is (*, hidden_size)
+
+        :param input_2:
+            Size is (*, hidden_size)
+
+        :return:
+
+            Merged vectors, size is (*, 4*hidden size)
+        """
+        assert input_1.size(-1) == input_2.size(-1)
+        mult_combined_vec = torch.mul(input_1, input_2)
+        diff_combined_vec = torch.abs(input_1 - input_2)
+
+        combined_vec = torch.cat((input_1,
+                                  input_2,
+                                  mult_combined_vec,
+                                  diff_combined_vec), input_1.dim()-1)
+
+        return combined_vec
