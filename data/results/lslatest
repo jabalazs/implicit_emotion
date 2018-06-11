@@ -25,8 +25,5 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        best_epoch
                                    FROM runs
                                    WHERE embeddings = "glove"
-                                       AND best_valid_acc > 0.615
-                                       AND "commit" IS NOT NULL
-                                   --ORDER BY datetime DESC
-                                   ORDER BY best_valid_acc DESC
-                                   LIMIT 200'
+                                   ORDER BY datetime DESC
+                                   LIMIT 1'
