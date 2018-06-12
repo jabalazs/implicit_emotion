@@ -11,6 +11,9 @@ EMBEDDINGS_DIR = os.path.join(DATA_PATH, 'word_embeddings')
 FASTTEXT_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'wiki.en.vec')
 GLOVE_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.840B.300d.txt')
 
+ELMO_OPTIONS = os.path.join(EMBEDDINGS_DIR, 'elmo_2x4096_512_2048cnn_2xhighway_options.json')
+ELMO_WEIGHTS = os.path.join(EMBEDDINGS_DIR, 'elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5')
+
 GLOVE_TWITTER_200_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.200d.txt')
 GLOVE_TWITTER_100_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.100d.txt')
 GLOVE_TWITTER_50_EMB_PATH = os.path.join(EMBEDDINGS_DIR, 'glove.twitter.27B.50d.txt')

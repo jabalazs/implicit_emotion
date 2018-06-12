@@ -13,7 +13,7 @@ class BaseCorpus(object):
     def __init__(self, paths_dict, corpus_name, use_chars=True,
                  force_reload=False, train_data_proportion=1.0,
                  dev_data_proportion=1.0, batch_size=64,
-                 shuffle_batches=False, batch_first=True):
+                 shuffle_batches=False, batch_first=True, lowercase=False):
 
         self.paths = paths_dict[corpus_name]
         self.corpus_name = corpus_name
@@ -28,6 +28,8 @@ class BaseCorpus(object):
         self.batch_size = batch_size
         self.shuffle_batches = shuffle_batches
         self.batch_first = batch_first
+
+        self.lowercase = lowercase
 
 
 class IESTCorpus(BaseCorpus):
@@ -49,6 +51,8 @@ class IESTCorpus(BaseCorpus):
         # This assumes the data comes nicely separated by spaces. That's the
         # task of the tokenizer who should be called elsewhere
         self.train_sents = [s.rstrip().split() for s in train_sents]
+        if self.lowercase:
+            self.train_sents = [[t.lower() for t in s] for s in self.train_sents]
 
         dev_sents = open(self.paths['dev']).readlines()
         self.dev_sents = [s.rstrip().split() for s in dev_sents]

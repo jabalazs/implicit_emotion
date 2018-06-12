@@ -85,6 +85,11 @@ arg_parser.add_argument('--word_char_aggregation_method', '-wcam',
                         help='Way in which character-level and word-level word '
                              'representations are aggregated')
 
+arg_parser.add_argument('--lowercase', '-lc', action='store_true',
+                        help='Whether to lowercase data or not. WARNING: '
+                             'REMEBER TO CLEAR THE CACHE BY PASSING '
+                             '--force_reload or deleting .cache')
+
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
@@ -115,7 +120,8 @@ def main():
                         force_reload=hp.force_reload,
                         train_data_proportion=hp.train_data_proportion,
                         dev_data_proportion=hp.dev_data_proportion,
-                        batch_size=hp.batch_size)
+                        batch_size=hp.batch_size,
+                        lowercase=hp.lowercase)
 
     if hp.model_hash:
         experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
