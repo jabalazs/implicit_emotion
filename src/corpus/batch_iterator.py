@@ -55,6 +55,7 @@ class IESTBatch(BaseNLPBatch):
         sequences = [example['sequence'] for example in self.examples]
         padded_sequences, sent_lengths, masks = self._pad1d(sequences)
 
+        self['raw_sequences'] = [example['raw_sequence'] for example in self.examples]
         self['sequences'] = padded_sequences
         self['sent_lengths'] = sent_lengths
         self['masks'] = masks
@@ -95,7 +96,6 @@ class IESTBatch(BaseNLPBatch):
 
 class BatchIterator(object):
 
-    # TODO: Add method for reshuffling examples
     def __init__(self, examples, batch_size, data_proportion=1.0,
                  shuffle=False, batch_first=False, use_chars=False):
 

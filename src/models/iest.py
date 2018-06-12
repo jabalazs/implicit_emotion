@@ -14,6 +14,8 @@ from ..layers.layers import (
     InfersentAggregationLayer,
 )
 
+from ..layers.elmo import ElmoWordEncodingLayer
+
 from ..utils.torch import to_var, pack_forward
 
 
@@ -167,18 +169,23 @@ class WordCharEncodingLayer(nn.Module):
 
 class WordEncodingLayer(nn.Module):
 
-    WORD_ENCODING_METHODS = ['embed', 'char_linear', 'char_lstm']
+    WORD_ENCODING_METHODS = ['embed', 'char_linear', 'char_lstm', 'elmo']
 
     @staticmethod
     def factory(word_encoding_method, *args, **kwargs):
-        if word_encoding_method == 'embed':
+        if word_encoding_method in ['embed', 'elmo']:
             # FIXME: Hideous. Fix by using partials from functools or metaclasses
             kwargs.pop('char_embeddings')
             kwargs.pop('char_hidden_size')
-            kwargs.pop('char_masks')
+            # kwargs.pop('char_masks')
             kwargs.pop('train_char_embeddings')
             kwargs.pop('word_char_aggregation_method')
-            return WordEmbeddingLayer(*args, **kwargs)
+
+            if word_encoding_method == 'embed':
+                return WordEmbeddingLayer(*args, **kwargs)
+            elif word_encoding_method == 'elmo':
+                return ElmoWordEncodingLayer(**kwargs)
+
         if word_encoding_method == 'char_linear':
             # return WordEmbeddingLayer(*args, **kwargs)
             raise NotImplementedError
@@ -336,7 +343,7 @@ class IESTClassifier(nn.Module):
                  char_embeddings=None,
                  word_encoding_method='embed',
                  word_char_aggregation_method=None,
-                 sent_encoding_method='infersent',
+                 sent_encoding_method='bilstm',
                  hidden_sizes=None,
                  sent_enc_layers=1,
                  pooling_method='max',
@@ -396,7 +403,8 @@ class IESTClassifier(nn.Module):
 
     def encode(self, batch, char_batch,
                sent_lengths, word_lengths,
-               masks=None, char_masks=None, embed_words=True):
+               masks=None, char_masks=None, embed_words=True,
+               raw_sequences=None):
         """ Encode a batch of ids into a sentence representation.
 
             This method exists for compatibility with facebook's senteval
@@ -411,7 +419,7 @@ class IESTClassifier(nn.Module):
 
         if embed_words:
             embedded = self.word_encoding_layer(batch, char_batch, word_lengths,
-                                                char_masks)
+                                                char_masks, raw_sequences)
         else:
             embedded = batch
         sent_embedding = self.sent_encoding_layer(embedded, sent_lengths)
@@ -423,6 +431,7 @@ class IESTClassifier(nn.Module):
     def forward(self, batch):
         # batch is created in Batch Iterator
         sequences = batch['sequences']
+        raw_sequences = batch['raw_sequences']
         sent_lengths = batch['sent_lengths']
         masks = batch['masks']
 
@@ -456,7 +465,8 @@ class IESTClassifier(nn.Module):
                                sent_lengths=sent_lengths,
                                word_lengths=word_lengths,
                                masks=masks,
-                               char_masks=char_masks)
+                               char_masks=char_masks,
+                               raw_sequences=raw_sequences)
 
         logits = self.dense_layer(sent_vec)
 

@@ -35,8 +35,9 @@ class WordEmbeddingLayer(nn.Module):
         self.use_cuda = use_cuda
         self.embedding_dim = embeddings.embedding_dim
 
-    def forward(self, np_batch, char_batch=None, word_lengths=None):
-        """np_batch: (batch_size, seq_len)"""
+    def forward(self, np_batch, char_batch=None, word_lengths=None, char_masks=None):
+        """np_batch: (batch_size, seq_len)
+           char_masks is for compatibility with other embedding/encoding layers"""
         batch = to_var(torch.LongTensor(np_batch),
                        use_cuda=self.use_cuda,
                        requires_grad=False)

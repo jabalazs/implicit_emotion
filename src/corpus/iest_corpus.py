@@ -138,13 +138,15 @@ class IESTCorpus(BaseCorpus):
         ids = range(len(id_sents))
 
         examples = zip(ids,
+                       sents,
                        id_sents,
                        char_id_sents,
                        id_labels)
 
         examples = [{'id': ex[0],
-                     'sequence': ex[1],
-                     'char_sequence': ex[2],
-                     'label': ex[3]} for ex in examples]
+                     'raw_sequence': ex[1],
+                     'sequence': ex[2],
+                     'char_sequence': ex[3],
+                     'label': ex[4]} for ex in examples]
 
         return examples
