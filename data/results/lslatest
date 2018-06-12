@@ -9,8 +9,10 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        corpus,
                                        --model,
                                        char_emb_dim,
+                                       lstm_hidden_size as lstm_out_dim,
+                                       dropout as dpout,
                                        sent_enc_layers as sent_l,
-                                       --word_encoding_method as wem,
+                                       word_encoding_method as wem,
                                        word_char_aggregation_method as wcam,
                                        --batch_size as batch,
                                        --train_data_proportion as tdp,
@@ -24,6 +26,5 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        ROUND(best_valid_acc, 4) AS acc,
                                        best_epoch
                                    FROM runs
-                                   WHERE embeddings = "glove"
                                    ORDER BY datetime DESC
                                    LIMIT 1'
