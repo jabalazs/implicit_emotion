@@ -51,11 +51,13 @@ class IESTCorpus(BaseCorpus):
         # This assumes the data comes nicely separated by spaces. That's the
         # task of the tokenizer who should be called elsewhere
         self.train_sents = [s.rstrip().split() for s in train_sents]
-        if self.lowercase:
-            self.train_sents = [[t.lower() for t in s] for s in self.train_sents]
 
         dev_sents = open(self.paths['dev']).readlines()
         self.dev_sents = [s.rstrip().split() for s in dev_sents]
+
+        if self.lowercase:
+            self.train_sents = [[t.lower() for t in s] for s in self.train_sents]
+            self.dev_sents = [[t.lower() for t in s] for s in self.dev_sents]
 
         lang_pickle_path = os.path.join(config.CACHE_PATH,
                                         self.corpus_name + '_lang.pkl')
