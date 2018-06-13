@@ -28,6 +28,16 @@ pip install -r requirements.txt
 ```
 conda install matplotlib scikit-learn
 ```
+
+## AllenNLP
+To use Elmo embeddings we need to install AllenNLP. Specific instructions can be found at https://github.com/allenai/allennlp
+We recommend using the following method: Within a conda environment with python 3.6 run the following commands:
+```
+git clone https://github.com/allenai/allennlp.git
+cd allennlp
+INSTALL_TEST_REQUIREMENTS=false scripts/install_requirements.sh
+```
+
 ## Data
 * Get the data by running the following command and typing your password when prompted
 ```
@@ -39,13 +49,24 @@ conda install matplotlib scikit-learn
 ./preprocess.sh
 ```
 
-## Pre-trained Embeddings
+## External Data
+TODO: create script to automate this process.
+
+### Pre-trained Embeddings
 The code expects a directory named `word_embeddings` in `data`
 containing embeddings in `.txt` format with their default name,
 e.g., `glove.840B.300d.txt`. See [`config.py`](src/config.py) for more details
 on naming conventions and directory structure.
 
-TODO: create script to automate this process.
+### Elmo options and weights
+To use Elmo we need 2 files provided by their developers. Run the following commands within the project dir, assuming you already created the `word_embeddings` dir:
+```
+cd data/word_embeddings
+wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
+wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
+```
+
+See [this tutorial](https://github.com/allenai/allennlp/blob/master/tutorials/how_to/elmo.md) for more details
 
 ---
 To test if you installed everything correctly run `python run.py --help`.
@@ -53,20 +74,20 @@ To test if you installed everything correctly run `python run.py --help`.
 # Preliminary results
 
 ```
-date                 hash        commit      seed        corpus      char_emb_dim  sent_l      wcam        ulr         acc         best_epoch
--------------------  ----------  ----------  ----------  ----------  ------------  ----------  ----------  ----------  ----------  ----------
-2018-06-08 11:23:26  49736fd     36ee296     42          iest_emoji  150           1           cat         1           0.6287      1
-2018-06-08 08:38:15  aed323b     ccc3e4d     44          iest        150           1           vector_gat  1           0.6259      1
-2018-06-08 10:24:28  40a35e4     36ee296     44          iest_emoji  150           1           vector_gat  1           0.625       1
-2018-06-07 16:35:42  69fd297     ccc3e4d     42          iest        150           1           cat         1           0.6239      1
-2018-06-07 15:47:05  8a44651     ccc3e4d     42          iest        150           1           scalar_gat  1           0.6236      1
-2018-06-07 10:07:12  a3d35de     9953057     43          iest        100           1           cat         1           0.6235      1
+date                 hash        commit      seed        corpus      char_emb_dim  lstm_out_dim  dpout       sent_l      wem         wcam        ulr         acc         best_epoch
+-------------------  ----------  ----------  ----------  ----------  ------------  ------------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
+2018-06-13 10:41:58  edc78f7     f62ac12     43          iest_emoji  200           1024          0.1         1           elmo                    1           0.6506      4
+2018-06-12 16:55:39  f2c9380     0353618     43          iest        200           1024          0.1         1           elmo                    1           0.644       7
+2018-06-11 15:10:44  f9c5ff4     0b57c42     43          iest_emoji  200           1024          0.1         1           char_lstm   vector_gat  1           0.63        1
+2018-06-11 11:50:39  08b1ba0     0b57c42     42          iest_emoji  200           1024          0.1         1           char_lstm   cat         1           0.629       1
+2018-06-08 11:23:26  49736fd     36ee296     42          iest_emoji  150           1024          0.1         1           char_lstm   cat         1           0.6287      1
+2018-06-08 08:38:15  aed323b     ccc3e4d     44          iest        150           1024          0.1         1           char_lstm   vector_gat  1           0.6259      1
 ```
 
 ## Best Performance
-Currently the best validation accuracy (0.6287) is obtained at the end of the second epoch by running:
+Currently the best validation accuracy (0.6506) is obtained at the end of the 5th epoch by running:
 ```bash
-python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=char_lstm --word_char_aggregation_method=cat --char_emb_dim=150 --update_learning_rate --seed=42
+python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=elmo --update_learning_rate --seed=43 -cem=200
 ```
 
 # TODO
