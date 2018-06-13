@@ -1,5 +1,7 @@
 # [Implicit Emotion Shared Task](http://implicitemotions.wassa2018.com/)
 
+[Competition website](https://competitions.codalab.org/competitions/19214)
+
 # Requirements
 * Python 3
 * Pytorch 0.4.0
@@ -79,7 +81,7 @@ python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=1024 --word_encod
 
 * ~Try using other pre-trained word embeddings~ `glove.840B.300d` seem to perform best
 * ~Shuffle training examples at each epoch~
-* Try using attention for aggregating character-level representations into word representations
+* ~Try using attention for aggregating character-level representations into word representations~ Preliminary experiments were not promising. It might be worth to try attention over the raw aggregation of the character-level vectors, instead of doing it over the pre-trained GloVe embedding.
 * Try different learning rate decays schedules
 * Try different regularization methods
   - l2-norm (see `weight_decay` [here](https://pytorch.org/docs/stable/optim.html))
