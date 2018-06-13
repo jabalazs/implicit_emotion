@@ -1,4 +1,7 @@
 import sys
+
+from torch import nn
+
 from .. import config
 from ..utils.torch import to_var
 
@@ -8,9 +11,13 @@ from allennlp.modules.elmo import Elmo, batch_to_ids
 
 
 class ElmoWordEncodingLayer(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         kwargs.pop('use_cuda')
-        self._embedder = Elmo(config.ELMO_OPTIONS, config.ELMO_WEIGHTS, *args,
+        kwargs.pop('char_embeddings')
+        kwargs.pop('char_hidden_size')
+        kwargs.pop('train_char_embeddings')
+        kwargs.pop('word_char_aggregation_method')
+        self._embedder = Elmo(config.ELMO_OPTIONS, config.ELMO_WEIGHTS,
                               num_output_representations=1, **kwargs)
         self._embedder = self._embedder.cuda()
         self.embedding_dim = 1024
@@ -18,7 +25,7 @@ class ElmoWordEncodingLayer(object):
     def __call__(self, *args):
         """Sents a batch of N sentences represented as list of tokens"""
 
-        # -1 is the raw_sequences element passed in the encode function of thr
+        # -1 is the raw_sequences element passed in the encode function of the
         # IESTClassifier
         sents = args[-1]
         char_ids = batch_to_ids(sents)

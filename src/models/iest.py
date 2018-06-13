@@ -137,7 +137,11 @@ class WordCharEncodingLayer(nn.Module):
             self.attention_layer = AttentionLayer(self.char_encoding_layer.out_dim + word_embeddings.embedding_dim,
                                                   self.char_encoding_layer.out_dim)
 
-    def forward(self, word_batch, char_batch, word_lengths, char_masks):
+    def forward(self, word_batch, char_batch, word_lengths, char_masks, *args):
+        """args is here for compatibility with other encoding layers, specifically
+        for accepting the raw_sequences parameter used in the elmo encoding layer"""
+        # FIXME: really need to find a way to avoid having dummy parameters such as
+        # args here
         emb_word_batch = self.word_embedding_layer(word_batch)
         emb_char_batch = self.char_embedding_layer(char_batch)
 
@@ -174,13 +178,6 @@ class WordEncodingLayer(nn.Module):
     @staticmethod
     def factory(word_encoding_method, *args, **kwargs):
         if word_encoding_method in ['embed', 'elmo']:
-            # FIXME: Hideous. Fix by using partials from functools or metaclasses
-            kwargs.pop('char_embeddings')
-            kwargs.pop('char_hidden_size')
-            # kwargs.pop('char_masks')
-            kwargs.pop('train_char_embeddings')
-            kwargs.pop('word_char_aggregation_method')
-
             if word_encoding_method == 'embed':
                 return WordEmbeddingLayer(*args, **kwargs)
             elif word_encoding_method == 'elmo':

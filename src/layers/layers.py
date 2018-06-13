@@ -29,15 +29,16 @@ class CharEmbeddingLayer(nn.Module):
 
 
 class WordEmbeddingLayer(nn.Module):
-    def __init__(self, embeddings, use_cuda=True):
+    def __init__(self, embeddings, use_cuda=True, *args, **kwargs):
         super(WordEmbeddingLayer, self).__init__()
         self.embeddings = embeddings
         self.use_cuda = use_cuda
         self.embedding_dim = embeddings.embedding_dim
 
-    def forward(self, np_batch, char_batch=None, word_lengths=None, char_masks=None):
+    # def forward(self, np_batch, char_batch=None, word_lengths=None, char_masks=None, raw_sequences=None):
+    def forward(self, np_batch, *args, **kwargs):
         """np_batch: (batch_size, seq_len)
-           char_masks is for compatibility with other embedding/encoding layers"""
+        args and kwargs are kept for compatibility with other encoding layers"""
         batch = to_var(torch.LongTensor(np_batch),
                        use_cuda=self.use_cuda,
                        requires_grad=False)
