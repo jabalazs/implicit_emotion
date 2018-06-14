@@ -1,5 +1,8 @@
 import os
 
+HOME_DIR = os.environ['HOME']
+ALLENNLP_PATH = os.path.join(HOME_DIR, 'repos/allennlp')
+
 DATA_PATH = 'data/'
 CACHE_PATH = '.cache'
 PREPROCESSED_DATA_PATH = os.path.join(DATA_PATH, 'preprocessed')

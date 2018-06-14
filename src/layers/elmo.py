@@ -1,11 +1,9 @@
 import sys
 
-from torch import nn
-
 from .. import config
 from ..utils.torch import to_var
 
-sys.path.append('/home/jabalazs/repos/allennlp/')
+sys.path.append(config.ALLENNLP_PATH)
 
 from allennlp.modules.elmo import Elmo, batch_to_ids
 

@@ -10,3 +10,4 @@ runs
 paper
 server_name
 data/*
+.cache

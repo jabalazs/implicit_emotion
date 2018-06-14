@@ -184,7 +184,6 @@ class WordEncodingLayer(nn.Module):
                 return ElmoWordEncodingLayer(**kwargs)
 
         if word_encoding_method == 'char_linear':
-            # return WordEmbeddingLayer(*args, **kwargs)
             raise NotImplementedError
         if word_encoding_method == 'char_lstm':
             return WordCharEncodingLayer(*args, **kwargs)
@@ -205,6 +204,13 @@ class WordEncodingLayer(nn.Module):
 
     def __call__(self, *args, **kwargs):
         return self.word_encoding_layer(*args, **kwargs)
+
+    def __repr__(self):
+        s = '{name}('
+        s += 'method={word_encoding_method}'
+        s += ')'
+        return s.format(name=self.__class__.__name__,
+                        **self.__dict__)
 
 
 class StackedShortcutLSTM(nn.Module):
