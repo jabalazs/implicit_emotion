@@ -128,6 +128,7 @@ def main():
         ext_experiment_path = glob(experiment_path)
         assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
         model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
+        # FIXME: This will get replaced by the model being loaded below
         model = torch.load(model_path)
 
     # Load pre-trained embeddings
@@ -140,10 +141,6 @@ def main():
     print(f'{len(embeddings.unknown_tokens)} words from vocabulary not found '
           f'in {hp.embeddings} embeddings. ')
 
-    # Initialize torch Embedding object with subset of pre-trained embeddings
-    torch_embeddings = torch.nn.Embedding(*embedding_matrix.shape)
-    torch_embeddings.weight = torch.nn.Parameter(torch.Tensor(embedding_matrix))
-
     # Repeat process for character embeddings with the difference that they are
     # not pretrained
 
@@ -152,9 +149,6 @@ def main():
     char_embedding_matrix = np.random.uniform(-0.05, 0.05,
                                               size=(char_vocab_size,
                                                     hp.char_emb_dim))
-    char_torch_embeddings = torch.nn.Embedding(*char_embedding_matrix.shape)
-    char_torch_embeddings.weight = torch.nn.Parameter(
-                                            torch.Tensor(char_embedding_matrix))
 
     # Define some specific parameters for the model
     num_classes = len(corpus.label2id)
@@ -162,8 +156,8 @@ def main():
 
     hidden_sizes = hp.lstm_hidden_size
     model = IESTClassifier(num_classes, batch_size,
-                           torch_embeddings=torch_embeddings,
-                           char_embeddings=char_torch_embeddings,
+                           embedding_matrix=embedding_matrix,
+                           char_embedding_matrix=char_embedding_matrix,
                            word_encoding_method=hp.word_encoding_method,
                            word_char_aggregation_method=hp.word_char_aggregation_method,
                            sent_encoding_method=hp.model,

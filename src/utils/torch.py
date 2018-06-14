@@ -105,3 +105,12 @@ def get_free_gpu_index(max_memory=10, unallowed_gpus=None):
             return gpu_idx
     logger.debug('No allowed free GPUs')
     return None
+
+
+def to_torch_embedding(embedding_matrix: np.ndarray) -> torch.nn.Embedding:
+    """Transform a numpy matrix into a torch Embedding object"""
+
+    torch_embedding = torch.nn.Embedding(*embedding_matrix.shape)
+    torch_embedding.weight = torch.nn.Parameter(torch.Tensor(embedding_matrix))
+
+    return torch_embedding
