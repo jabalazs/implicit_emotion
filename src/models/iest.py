@@ -16,7 +16,7 @@ from ..layers.layers import (
 
 from ..layers.elmo import ElmoWordEncodingLayer
 
-from ..utils.torch import to_var, pack_forward
+from ..utils.torch import to_var, pack_forward, to_torch_embedding
 
 
 class AttentionLayer(nn.Module):
@@ -337,12 +337,28 @@ class SentenceEncodingLayer(nn.Module):
 
 
 class IESTClassifier(nn.Module):
-    """Args:
-        embeddings: torch word embeddings
+    """ Classifier for the Implicit Emotion Shared Task
+
+    Parameters
+    ----------
+    num_classes: int
+    batch_size : int
+    embedding_matrix: numpy.ndarray
+    char_embedding_matrix: numpy.ndarray
+    word_encoding_method: str
+    word_char_aggregation_method: str
+    sent_encoding_method: str
+    hidden_sizes:
+    sent_enc_layers: int
+    pooling_method: str
+    batch_first: bool
+    dropout: float
+    lstm_dropout: float
+    use_cuda: bool
         """
     def __init__(self, num_classes, batch_size,
-                 torch_embeddings=None,
-                 char_embeddings=None,
+                 embedding_matrix=None,
+                 char_embedding_matrix=None,
                  word_encoding_method='embed',
                  word_char_aggregation_method=None,
                  sent_encoding_method='bilstm',
@@ -371,8 +387,10 @@ class IESTClassifier(nn.Module):
         self.sent_enc_layers = sent_enc_layers
 
         self.char_embeddings = None
-        if char_embeddings:
-            self.char_embeddings = char_embeddings
+        if char_embedding_matrix is not None:
+            self.char_embeddings = to_torch_embedding(char_embedding_matrix)
+
+        torch_embeddings = to_torch_embedding(embedding_matrix)
 
         self.word_encoding_layer = WordEncodingLayer(
             self.word_encoding_method,
