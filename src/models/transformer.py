@@ -428,7 +428,7 @@ class LabelSmoothing(nn.Module):
         true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
         true_dist[:, self.padding_idx] = 0
         mask = torch.nonzero(target.data == self.padding_idx)
-        if mask.dim() > 0:
+        if mask.nelement() > 0:
             true_dist.index_fill_(0, mask.squeeze(), 0.0)
         self.true_dist = true_dist
         return self.criterion(x, true_dist)
@@ -488,6 +488,8 @@ if __name__ == '__main__':
         predict = torch.FloatTensor([[0, x / d, 1 / d, 1 / d, 1 / d],
                                      ])
         # print(predict)
-        return crit(predict.log(),
-                    torch.LongTensor([1])).data[0]
+        kl_divergence = crit(predict.log(), torch.LongTensor([1])).item()
+        return kl_divergence
+
     plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
+    plt.show()
