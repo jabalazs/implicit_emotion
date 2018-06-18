@@ -15,6 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 # import seaborn
 
+import colored_traceback
+colored_traceback.add_hook(always=True)
+
 
 class EncoderDecoder(nn.Module):
     """
@@ -340,9 +343,95 @@ class NoamOpt:
 
 
 def get_std_opt(model):
-    return NoamOpt(model.src_embed[0].d_model, 2, 4000,
-                   torch.optim.Adam(model.parameters(),
-                                    lr=0, betas=(0.9, 0.98), eps=1e-9))
+    model_size = model.src_embed[0].d_model
+    factor = 2
+    warmup = 4000
+    optimizer = torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98),
+                                 eps=1e-9)
+
+    return NoamOpt(model_size, factor, warmup, optimizer)
+
+
+# class LabelSmoothing(nn.Module):
+
+#     """Implement label smoothing"""
+
+#     def __init__(self, size, padding_idx=None, smoothing=0.0):
+#         """
+
+#         Parameters
+#         ----------
+#         size : TODO
+#         padding_idx : TODO, optional
+#         smoothing : TODO, optional
+
+
+#         """
+#         super(LabelSmoothing, self).__init__()
+
+#         self.size = size
+#         self.padding_idx = padding_idx
+#         self.smoothing = smoothing
+#         self.criterion = nn.KLDivLoss(size_average=False)
+#         self.confidence = 1.0 - smoothing
+#         self.true_dist = None
+
+#     def forward(self, x, target):
+#         """
+
+#         Parameters
+#         ----------
+#         x : torch.FLoatTensor (batch, num_classes)
+#             Log probabilities outputted by prediction model
+#         target : torch.LongTensor (batch)
+#             True labels. Each element should be in [0, num_classes - 1]
+
+#         Returns
+#         -------
+#         TODO
+
+#         """
+#         assert x.size(1) == self.size
+#         true_dist = x.clone()
+#         true_dist.fill_(self.smoothing / (self.size - 2))
+#         true_dist.scatter_(1, target.unsqueeze(1), self.confidence)
+#         if self.padding_idx is not None:
+#             true_dist[:, self.padding_idx] = 0
+#             mask = torch.nonzero(target == self.padding_idx)
+#             if mask.dim() > 0:
+#                 try:
+#                     true_dist.index_fill_(0, mask.squeeze(), 0.0)
+#                 except IndexError:
+#                     import ipdb; ipdb.set_trace(context=10)
+#                 except RuntimeError:
+#                     import ipdb; ipdb.set_trace(context=10)
+
+#         self.true_dist = true_dist
+#         return self.criterion(x, true_dist)
+
+
+class LabelSmoothing(nn.Module):
+    "Implement label smoothing."
+    def __init__(self, size, padding_idx, smoothing=0.0):
+        super(LabelSmoothing, self).__init__()
+        self.criterion = nn.KLDivLoss(size_average=False)
+        self.padding_idx = padding_idx
+        self.confidence = 1.0 - smoothing
+        self.smoothing = smoothing
+        self.size = size
+        self.true_dist = None
+
+    def forward(self, x, target):
+        assert x.size(1) == self.size
+        true_dist = x.data.clone()
+        true_dist.fill_(self.smoothing / (self.size - 2))
+        true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
+        true_dist[:, self.padding_idx] = 0
+        mask = torch.nonzero(target.data == self.padding_idx)
+        if mask.dim() > 0:
+            true_dist.index_fill_(0, mask.squeeze(), 0.0)
+        self.true_dist = true_dist
+        return self.criterion(x, true_dist)
 
 
 if __name__ == '__main__':
@@ -352,5 +441,53 @@ if __name__ == '__main__':
     # plt.plot(np.arange(100), y[0, :, 4:8].numpy())
     # plt.legend([f'dim {p}' for p in [4, 5, 6, 7]])
     # plt.show()
-    tmp_model = make_model(10, 10, 2)
-    print(tmp_model)
+
+    # tmp_model = make_model(10, 10, 2)
+    # print(tmp_model)
+
+    # opts = [NoamOpt(512, 1, 4000, None),
+    #         NoamOpt(512, 1, 8000, None),
+    #         NoamOpt(256, 1, 4000, None)]
+    # plt.plot(np.arange(1, 20000), [[opt.rate(i) for opt in opts] for i in range(1, 20000)])
+    # plt.legend(['512:4000', '512:8000', '256:4000'])
+    # plt.show()
+
+    # crit = LabelSmoothing(5, 1, 0.4)
+    # crit = LabelSmoothing(5, padding_idx=1, smoothing=0.4)
+    # predict = torch.FloatTensor([[0, 0.2, 0.7, 0.1, 0],
+    #                              [0, 0.2, 0.7, 0.1, 0],
+    #                              [0, 0.2, 0.7, 0.1, 0]])
+    # v = crit(predict.log(),
+    #          torch.LongTensor([2, 1, 0]))
+
+    # crit = LabelSmoothing(5, padding_idx=0, smoothing=0.1)
+
+    # def loss(x):
+    #     d = x + 3 * 1
+    #     predict = torch.FloatTensor([[0, x / d, 1 / d, 1 / d, 1 / d],
+    #                                  ])
+    #     kldiv_loss = crit(predict.log(), torch.LongTensor([1]))[0]
+    #     return kldiv_loss
+
+    # plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
+    # plt.show()
+
+    crit = LabelSmoothing(5, 0, 0.4)
+    predict = torch.FloatTensor([[0, 0.2, 0.7, 0.1, 0],
+                                 [0, 0.2, 0.7, 0.1, 0],
+                                 [0, 0.2, 0.7, 0.1, 0]])
+    v = crit(predict.log(),
+             torch.LongTensor([2, 1, 0]))
+
+    # Show the target distributions expected by the system.
+    # plt.imshow(crit.true_dist)
+    crit = LabelSmoothing(5, 0, 0.1)
+
+    def loss(x):
+        d = x + 3 * 1
+        predict = torch.FloatTensor([[0, x / d, 1 / d, 1 / d, 1 / d],
+                                     ])
+        # print(predict)
+        return crit(predict.log(),
+                    torch.LongTensor([1])).data[0]
+    plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
