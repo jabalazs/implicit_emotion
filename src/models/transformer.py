@@ -144,13 +144,7 @@ class DecoderLayer(nn.Module):
         m = memory
         x = self.sublayers[0](x, lambda x: self.slf_attn(x, x, x, tgt_mask))
         x = self.sublayers[1](x, lambda x: self.src_attn(x, m, m, src_mask))
-        return self.sublayer[2](x, self.feed_forward)
-
-
-def subsequent_mask(size):
-    attn_shape = (1, size, size)
-    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
-    return torch.from_numpy(subsequent_mask) == 0
+        return self.sublayers[2](x, self.feed_forward)
 
 
 def attention(query, key, value, mask=None, dropout=None):
@@ -191,8 +185,8 @@ class MultiHeadedAttention(nn.Module):
 
         # Concat using a view and apply final layer
         # FIXME: why are we using dimensions 1 and 2 here?
-        x = x.transpose(1, 2).contiguous \
-             .view(num_batches, -1, self.h * self.d_k)
+        x = (x.transpose(1, 2).contiguous()
+             .view(num_batches, -1, self.h * self.d_k))
 
         # FIXME: We already iterated over all layers, why are we using the last
         # layer again?
@@ -238,7 +232,7 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         # FIXME: in the original implementation this is declared as a Variable
         # with `requires_grad=False`
-        x = x + self.pe[:, :x.size(1)]
+        x = x + self.pe[:, :x.size(1)].detach()
         return self.dropout(x)
 
 
@@ -260,23 +254,6 @@ def make_model(src_vocab, tgt_vocab, N=6,
         if p.dim() > 1:
             nn.init.xavier_uniform_(p)
         return model
-
-
-class Batch:
-    def __init__(self, src, tgt=None, pad=0):
-        self.src = src
-        self.src_mask = (src != pad).unsqueeze(-2)
-        if tgt is not None:
-            self.tgt = tgt[:, :-1]
-            self.tgt_y = tgt[:, 1:]
-            self.tgt_mask = self.make_std_mask(self.tgt, pad)
-            self.num_tokens = (self.tgt_y != pad).data.sum()
-
-    @staticmethod
-    def make_std_mask(tgt, pad):
-        tgt_mask = (tgt != pad).unsqueeze(-2)
-        tgt_mask = (tgt_mask &
-                    subsequent_mask(tgt.size(-1)).type_as(tgt_mask.data))
 
 
 def run_epoch(data_iter, model, loss_compute):
@@ -352,86 +329,138 @@ def get_std_opt(model):
     return NoamOpt(model_size, factor, warmup, optimizer)
 
 
-# class LabelSmoothing(nn.Module):
-
-#     """Implement label smoothing"""
-
-#     def __init__(self, size, padding_idx=None, smoothing=0.0):
-#         """
-
-#         Parameters
-#         ----------
-#         size : TODO
-#         padding_idx : TODO, optional
-#         smoothing : TODO, optional
-
-
-#         """
-#         super(LabelSmoothing, self).__init__()
-
-#         self.size = size
-#         self.padding_idx = padding_idx
-#         self.smoothing = smoothing
-#         self.criterion = nn.KLDivLoss(size_average=False)
-#         self.confidence = 1.0 - smoothing
-#         self.true_dist = None
-
-#     def forward(self, x, target):
-#         """
-
-#         Parameters
-#         ----------
-#         x : torch.FLoatTensor (batch, num_classes)
-#             Log probabilities outputted by prediction model
-#         target : torch.LongTensor (batch)
-#             True labels. Each element should be in [0, num_classes - 1]
-
-#         Returns
-#         -------
-#         TODO
-
-#         """
-#         assert x.size(1) == self.size
-#         true_dist = x.clone()
-#         true_dist.fill_(self.smoothing / (self.size - 2))
-#         true_dist.scatter_(1, target.unsqueeze(1), self.confidence)
-#         if self.padding_idx is not None:
-#             true_dist[:, self.padding_idx] = 0
-#             mask = torch.nonzero(target == self.padding_idx)
-#             if mask.dim() > 0:
-#                 try:
-#                     true_dist.index_fill_(0, mask.squeeze(), 0.0)
-#                 except IndexError:
-#                     import ipdb; ipdb.set_trace(context=10)
-#                 except RuntimeError:
-#                     import ipdb; ipdb.set_trace(context=10)
-
-#         self.true_dist = true_dist
-#         return self.criterion(x, true_dist)
-
-
 class LabelSmoothing(nn.Module):
-    "Implement label smoothing."
-    def __init__(self, size, padding_idx, smoothing=0.0):
+
+    """Implement label smoothing"""
+
+    def __init__(self, size, padding_idx=None, smoothing=0.0):
+        """
+
+        Parameters
+        ----------
+        size : TODO
+        padding_idx : TODO, optional
+        smoothing : TODO, optional
+
+
+        """
         super(LabelSmoothing, self).__init__()
-        self.criterion = nn.KLDivLoss(size_average=False)
-        self.padding_idx = padding_idx
-        self.confidence = 1.0 - smoothing
-        self.smoothing = smoothing
+
         self.size = size
+        self.padding_idx = padding_idx
+        self.smoothing = smoothing
+        self.criterion = nn.KLDivLoss(size_average=False)
+        self.confidence = 1.0 - smoothing
         self.true_dist = None
 
     def forward(self, x, target):
+        """
+
+        Parameters
+        ----------
+        x : torch.FLoatTensor (batch, num_classes)
+            Log probabilities outputted by prediction model
+        target : torch.LongTensor (batch)
+            True labels. Each element should be in [0, num_classes - 1]
+
+        Returns
+        -------
+        TODO
+
+        """
         assert x.size(1) == self.size
-        true_dist = x.data.clone()
+        true_dist = x.clone()
         true_dist.fill_(self.smoothing / (self.size - 2))
-        true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
-        true_dist[:, self.padding_idx] = 0
-        mask = torch.nonzero(target.data == self.padding_idx)
-        if mask.nelement() > 0:
-            true_dist.index_fill_(0, mask.squeeze(), 0.0)
+        true_dist.scatter_(1, target.unsqueeze(1), self.confidence)
+        if self.padding_idx is not None:
+            true_dist[:, self.padding_idx] = 0
+            mask = torch.nonzero(target == self.padding_idx)
+            if mask.nelement() > 0:
+                true_dist.index_fill_(0, mask.squeeze(), 0.0)
         self.true_dist = true_dist
-        return self.criterion(x, true_dist)
+        return self.criterion(x, true_dist.detach())
+
+
+def subsequent_mask(size):
+    attn_shape = (1, size, size)
+    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    return torch.from_numpy(subsequent_mask) == 0
+
+
+class Batch:
+    def __init__(self, src, tgt=None, pad=0):
+        self.src = src
+        self.src_mask = (src != pad).unsqueeze(-2)
+        if tgt is not None:
+            self.tgt = tgt[:, :-1]
+            self.tgt_y = tgt[:, 1:]
+            self.tgt_mask = self.make_std_mask(self.tgt, pad)
+            self.num_tokens = (self.tgt_y != pad).sum().item()
+
+    @staticmethod
+    def make_std_mask(tgt, pad):
+        tgt_mask = (tgt != pad).unsqueeze(-2)
+        tgt_mask = (tgt_mask &
+                    subsequent_mask(tgt.size(-1)).type_as(tgt_mask))
+        return tgt_mask
+
+
+def data_gen(V, batch, num_batches):
+    """Generate random data for a src-tgt copy task
+
+    Parameters
+    ----------
+    V : TODO
+    batch : TODO
+    num_batches : TODO
+
+    Returns
+    -------
+    TODO
+
+    """
+    for i in range(num_batches):
+        data = torch.from_numpy(np.random.randint(1, V, size=(batch, 10)))
+        data = data.cuda()
+        data[:, 0] = 1
+        src = data
+        tgt = data
+        yield Batch(src, tgt, 0)
+
+
+class SimpleLossCompute(object):
+
+    """A simple loss compute and train function"""
+
+    def __init__(self, generator, criterion, opt=None):
+        """TODO: to be defined.
+
+        Parameters
+        ----------
+        generator : TODO
+        criterion : TODO
+        opt : TODO, optional
+
+
+        """
+        self.generator = generator
+        self.criterion = criterion
+        self.opt = opt
+
+    def __call__(self, x, y, norm):
+        x = self.generator(x)
+        try:
+            loss = self.criterion(x.contiguous().view(-1, x.size(-1)),
+                                  y.contiguous().view(-1))
+            norm_loss = loss / norm
+        except RuntimeError:
+            import ipdb; ipdb.set_trace(context=10)
+
+        norm_loss.backward()
+        if self.opt is not None:
+            self.opt.step()
+            self.opt.optimizer.zero_grad()
+        return norm_loss.item() * norm
 
 
 if __name__ == '__main__':
@@ -481,15 +510,42 @@ if __name__ == '__main__':
 
     # Show the target distributions expected by the system.
     # plt.imshow(crit.true_dist)
-    crit = LabelSmoothing(5, 0, 0.1)
+    crit = LabelSmoothing(5, padding_idx=0, smoothing=0.1)
 
     def loss(x):
         d = x + 3 * 1
-        predict = torch.FloatTensor([[0, x / d, 1 / d, 1 / d, 1 / d],
-                                     ])
+        predict = torch.FloatTensor([
+            [0, x / d, 1 / d, 1 / d, 1 / d],
+            # [x, x, x, x, x],
+            # [1, 1, 1, 1, 1],
+        ])
         # print(predict)
         kl_divergence = crit(predict.log(), torch.LongTensor([1])).item()
         return kl_divergence
 
-    plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
-    plt.show()
+    # plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
+    # plt.show()
+
+    V = 11
+    criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0)
+    model = make_model(V, V, N=2)
+    model = model.cuda()
+    model_opt = NoamOpt(
+        model.src_embed[0].d_model,
+        1,
+        400,
+        torch.optim.Adam(
+            model.parameters(),
+            lr=0,
+            betas=(0.9, 0.98),
+            eps=1e-9
+        )
+    )
+
+    for epoch in range(100):
+        model.train()
+        run_epoch(data_gen(V, 30, 20), model,
+                  SimpleLossCompute(model.generator, criterion, model_opt))
+        model.eval()
+        run_epoch(data_gen(V, 30, 5), model,
+                  SimpleLossCompute(model.generator, criterion, None))
