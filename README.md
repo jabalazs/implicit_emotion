@@ -76,19 +76,21 @@ To test if you installed everything correctly run `python run.py --help`.
 ```
 date                 hash        commit      seed        corpus      char_emb_dim  lstm_out_dim  dpout       sent_l      wem         wcam        ulr         acc         best_epoch
 -------------------  ----------  ----------  ----------  ----------  ------------  ------------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
-2018-06-13 10:41:58  edc78f7     f62ac12     43          iest_emoji  200           1024          0.1         1           elmo                    1           0.6506      4
-2018-06-12 16:55:39  f2c9380     0353618     43          iest        200           1024          0.1         1           elmo                    1           0.644       7
-2018-06-11 15:10:44  f9c5ff4     0b57c42     43          iest_emoji  200           1024          0.1         1           char_lstm   vector_gat  1           0.63        1
-2018-06-11 11:50:39  08b1ba0     0b57c42     42          iest_emoji  200           1024          0.1         1           char_lstm   cat         1           0.629       1
-2018-06-08 11:23:26  49736fd     36ee296     42          iest_emoji  150           1024          0.1         1           char_lstm   cat         1           0.6287      1
-2018-06-08 08:38:15  aed323b     ccc3e4d     44          iest        150           1024          0.1         1           char_lstm   vector_gat  1           0.6259      1
+2018-06-20 17:32:01  5047214     6eb5bac     42          iest_emoji  200           2048          0.1         1           elmo                    1           0.6745      6
+2018-06-20 13:04:45  73e08f6     6eb5bac     43          iest_emoji  200           2048          0.1         1           elmo                    1           0.6677      6
+2018-06-20 10:40:43  75c72f2     6eb5bac     444         iest_emoji  200           2048          0.1         1           elmo                    1           0.6653      5
+2018-06-15 07:57:18  a37d98a     ea5e5c3     444         iest_emoji  200           2048          0.1         1           elmo                    1           0.6548      4
+2018-06-13 12:20:02  375a9ba     c4b07c8     43          iest_emoji  200           2048          0.1         1           elmo                    1           0.6543      6
+2018-06-13 10:41:58  edc78f7     f62ac12     43          iest_emoji  200           1024          0.1         1           elmo                    1           0.6524      6
+2018-06-18 11:21:23  03bf597     ea5e5c3     46          iest_emoji  200           2048          0.1         1           elmo                    1           0.6519      8
 ```
 
 ## Best Performance
-Currently the best validation accuracy (0.6506) is obtained at the end of the 5th epoch by running:
+Currently the best validation accuracy (0.6745) is obtained at the end of the 5th epoch by running:
 ```bash
-python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=1024 --word_encoding_method=elmo --update_learning_rate --seed=43 -cem=200
+python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=2048 --word_encoding_method=elmo --update_learning_rate --seed=42 -cem=200
 ```
+**Note**: The big bump in performance from 0.6548 up was due to the organizers fixing mislabeled examples in the dataset.
 
 # TODO
 
