@@ -12,11 +12,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # import seaborn
 
 import colored_traceback
 colored_traceback.add_hook(always=True)
+
+np.random.seed(42)
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
 
 
 class EncoderDecoder(nn.Module):
@@ -39,6 +43,9 @@ class EncoderDecoder(nn.Module):
         return self.encoder(self.src_embed(src), src_mask)
 
     def decode(self, memory, src_mask, tgt, tgt_mask):
+        # memory here is just the output of the encoder at the sequence level,
+        # or in other words the tensor containing the vector representation for
+        # each word; dim = (batch_size, sequence_length, hidden_dim)
         return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)
 
 
@@ -50,9 +57,9 @@ class Generator(nn.Module):
     function for obtaining the logprobs
     """
 
-    def __init__(self, d_model, vocab):
+    def __init__(self, d_model, vocab_size):
         super(Generator, self).__init__()
-        self.proj = nn.Linear(d_model, vocab)
+        self.proj = nn.Linear(d_model, vocab_size)
 
     def forward(self, x):
         return F.log_softmax(self.proj(x), dim=-1)
@@ -126,6 +133,8 @@ class Decoder(nn.Module):
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, memory, src_mask, tgt_mask):
+        """Here the input x will simply be the embedded target sequence, and
+        memory will be the output of the encoder"""
         for layer in self.layers:
             x = layer(x, memory, src_mask, tgt_mask)
         return self.norm(x)
@@ -148,6 +157,14 @@ class DecoderLayer(nn.Module):
 
 
 def attention(query, key, value, mask=None, dropout=None):
+    """
+    Parameters
+    ----------
+
+    query: torch.FloatTensor, dimension(Batch, num_heads, seq_len, d_k)
+    key: torch.FloatTensor, dimension(Batch, num_heads, seq_len, d_k)
+    value: torch.FloatTensor, dimension(Batch, num_heads, seq_len, d_k)
+    """
     d_k = query.size(-1)
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     if mask is not None:
@@ -163,7 +180,7 @@ class MultiHeadedAttention(nn.Module):
         super(MultiHeadedAttention, self).__init__()
         assert d_model % h == 0
 
-        self.d_k = d_model // h
+        self.d_k = d_model // h  # We'll have h heads of dimension d_k,
         self.h = h
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
@@ -172,11 +189,11 @@ class MultiHeadedAttention(nn.Module):
     def forward(self, query, key, value, mask=None):
         if mask is not None:
             mask = mask.unsqueeze(1)
-        num_batches = query.size(0)
+        batch_size = query.size(0)
 
         # Do all the linear projections in batch from d_model -> h x d_k
         query, key, value = \
-            [l(x).view(num_batches, -1, self.h, self.d_k).transpose(1, 2)
+            [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
 
         # Apply attention on all the projected vectors in batch
@@ -184,12 +201,18 @@ class MultiHeadedAttention(nn.Module):
                                  dropout=self.dropout)
 
         # Concat using a view and apply final layer
-        # FIXME: why are we using dimensions 1 and 2 here?
+        # Q: why are we transposing dimensions 1 and 2 here?
+        # A: Because the attention returns a tensor of shape
+        # (batch_size, h, seq_len, d_k) and we want to make it
+        # (batch_size, seq_len, h, d_k) so we can later recover d_model = h * d_k
         x = (x.transpose(1, 2).contiguous()
-             .view(num_batches, -1, self.h * self.d_k))
+             .view(batch_size, -1, self.h * self.d_k))
 
-        # FIXME: We already iterated over all layers, why are we using the last
+        # Q: We already iterated over all layers, why are we using the last
         # layer again?
+        # A: We haven't iterated over all layers. self.linears has 4 elements; when
+        # doing the zip operations only the first 3 are matched with the
+        # (query, key, value) tuple.
         return self.linears[-1](x)
 
 
@@ -205,9 +228,9 @@ class PositionwiseFeedforward(nn.Module):
 
 
 class Embeddings(nn.Module):
-    def __init__(self, d_model, vocab):
+    def __init__(self, vocab_size, d_model):
         super(Embeddings, self).__init__()
-        self.lut = nn.Embedding(vocab, d_model)
+        self.lut = nn.Embedding(vocab_size, d_model)
         self.d_model = d_model
 
     def forward(self, x):
@@ -230,69 +253,10 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        # FIXME: in the original implementation this is declared as a Variable
+        # NOTE: in the original implementation this is declared as a Variable
         # with `requires_grad=False`
         x = x + self.pe[:, :x.size(1)].detach()
         return self.dropout(x)
-
-
-def make_model(src_vocab, tgt_vocab, N=6,
-               d_model=512, d_ff=2048, h=8, dropout=0.1):
-    c = copy.deepcopy
-    attn = MultiHeadedAttention(h, d_model)
-    ff = PositionwiseFeedforward(d_model, d_ff, dropout)
-    position = PositionalEncoding(d_model, dropout)
-    model = EncoderDecoder(
-        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-        Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), N),
-        nn.Sequential(Embeddings(d_model, src_vocab), c(position)),
-        nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)),
-        Generator(d_model, tgt_vocab)
-    )
-
-    for p in model.parameters():
-        if p.dim() > 1:
-            nn.init.xavier_uniform_(p)
-        return model
-
-
-def run_epoch(data_iter, model, loss_compute):
-    start = time.time()
-    total_tokens = 0
-    total_loss = 0
-    tokens = 0
-    for i, batch in enumerate(data_iter):
-        out = model.forward(batch.src, batch.tgt,
-                            batch.src_mask, batch.tgt_mask)
-        loss = loss_compute(out, batch.tgt_y, batch.num_tokens)
-        total_loss += loss
-        total_tokens += batch.num_tokens
-        tokens += batch.num_tokens
-        if i % 50 == 1:
-            elapsed = time.time() - start
-            print(f'Epoch Step: {i}, Loss: {loss / batch.num_tokens}, '
-                  f'Tokens per sec: {tokens / elapsed}')
-            start = time.time()
-            tokens = 0
-
-    return total_loss / total_tokens
-
-
-global max_src_in_batch, max_tgt_in_batch
-
-
-def batch_size_fn(new, count, sofar):
-    """Keep augmenting batch and calculate total number of tokens + padding"""
-    global max_src_in_batch, max_tgt_in_batch
-    if count == 1:
-        max_src_in_batch = 0
-        max_tgt_in_batch = 0
-
-    max_src_in_batch = max(max_src_in_batch, len(new.src))
-    max_tgt_in_batch = max(max_tgt_in_batch, len(new.tgt) + 2)
-    src_elements = count * max_src_in_batch
-    tgt_elements = count * max_tgt_in_batch
-    return max(src_elements, tgt_elements)
 
 
 class NoamOpt:
@@ -317,16 +281,6 @@ class NoamOpt:
             step = self._step
         return self.factor * (self.model_size ** (-0.5) *
                               min(step ** (-0.5), step * self.warmup ** (-1.5)))
-
-
-def get_std_opt(model):
-    model_size = model.src_embed[0].d_model
-    factor = 2
-    warmup = 4000
-    optimizer = torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98),
-                                 eps=1e-9)
-
-    return NoamOpt(model_size, factor, warmup, optimizer)
 
 
 class LabelSmoothing(nn.Module):
@@ -405,21 +359,21 @@ class Batch:
         return tgt_mask
 
 
-def data_gen(V, batch, num_batches):
+def data_gen(V, batch, batch_size):
     """Generate random data for a src-tgt copy task
 
     Parameters
     ----------
     V : TODO
     batch : TODO
-    num_batches : TODO
+    batch_size : TODO
 
     Returns
     -------
     TODO
 
     """
-    for i in range(num_batches):
+    for i in range(batch_size):
         data = torch.from_numpy(np.random.randint(1, V, size=(batch, 10)))
         data = data.cuda()
         data[:, 0] = 1
@@ -463,7 +417,122 @@ class SimpleLossCompute(object):
         return norm_loss.item() * norm
 
 
+def make_model(src_vocab_size, tgt_vocab_size, N=6,
+               d_model=512, d_ff=2048, h=8, dropout=0.1):
+    """Build model from hyperparameters
+
+    Parameters
+    ----------
+    src_vocab_size: int
+        Size of the source vocabulary
+    tgt_vocab_size: int
+        Size of the target vocabulary
+    N: int
+        Number of encoder and decoder layers
+    d_model: int
+        Model dimensionality
+    d_ff: int
+        Position-wise Feed-Forward Network dimensionality
+    h: int
+        The number of heads for the Multi-Head Attention module
+    dropout: float
+    """
+    c = copy.deepcopy
+    attn = MultiHeadedAttention(h, d_model)
+    ff = PositionwiseFeedforward(d_model, d_ff, dropout)
+    position = PositionalEncoding(d_model, dropout)
+    model = EncoderDecoder(
+        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
+        Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), N),
+        nn.Sequential(Embeddings(src_vocab_size, d_model), c(position)),
+        nn.Sequential(Embeddings(tgt_vocab_size, d_model), c(position)),
+        Generator(d_model, tgt_vocab_size)
+    )
+
+    for p in model.parameters():
+        if p.dim() > 1:
+            nn.init.xavier_uniform_(p)
+        return model
+
+
+def run_epoch(data_iter, model, loss_compute):
+    start = time.time()
+    total_tokens = 0
+    total_loss = 0
+    tokens = 0
+    for i, batch in enumerate(data_iter):
+        out = model.forward(batch.src, batch.tgt,
+                            batch.src_mask, batch.tgt_mask)
+        loss = loss_compute(out, batch.tgt_y, batch.num_tokens)
+        total_loss += loss
+        total_tokens += batch.num_tokens
+        tokens += batch.num_tokens
+        if i % 50 == 1:
+            elapsed = time.time() - start
+            print(f'Epoch Step: {i}, Loss: {loss / batch.num_tokens}, '
+                  f'Tokens per sec: {tokens / elapsed}')
+            start = time.time()
+            tokens = 0
+
+    return total_loss / total_tokens
+
+
+global max_src_in_batch, max_tgt_in_batch
+
+
+def batch_size_fn(new, count, sofar):
+    """Keep augmenting batch and calculate total number of tokens + padding"""
+    global max_src_in_batch, max_tgt_in_batch
+    if count == 1:
+        max_src_in_batch = 0
+        max_tgt_in_batch = 0
+
+    max_src_in_batch = max(max_src_in_batch, len(new.src))
+    max_tgt_in_batch = max(max_tgt_in_batch, len(new.tgt) + 2)
+    src_elements = count * max_src_in_batch
+    tgt_elements = count * max_tgt_in_batch
+    return max(src_elements, tgt_elements)
+
+
+def get_std_opt(model):
+    model_size = model.src_embed[0].d_model
+    factor = 2
+    warmup = 4000
+    optimizer = torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98),
+                                 eps=1e-9)
+
+    return NoamOpt(model_size, factor, warmup, optimizer)
+
+
+def predict_synthetic_data():
+    V = 11
+    criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
+    model = make_model(V, V, N=2)
+    model = model.cuda()
+    model_opt = NoamOpt(
+        model.src_embed[0].d_model,
+        1,
+        400,
+        torch.optim.Adam(
+            model.parameters(),
+            lr=0,
+            betas=(0.9, 0.98),
+            eps=1e-9
+        )
+    )
+
+    for epoch in range(10):
+        model.train()
+        run_epoch(data_gen(V, 30, 20), model,
+                  SimpleLossCompute(model.generator, criterion, model_opt))
+        # model.eval()
+        # run_epoch(data_gen(V, 30, 5), model,
+        #           SimpleLossCompute(model.generator, criterion, None))
+
+
 if __name__ == '__main__':
+    predict_synthetic_data()
+    exit()
     # plt.figure(figsize=(15, 5))
     # pe = PositionalEncoding(20, 0)
     # y = pe.forward(torch.zeros(1, 100, 20))
@@ -525,27 +594,3 @@ if __name__ == '__main__':
 
     # plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
     # plt.show()
-
-    V = 11
-    criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0)
-    model = make_model(V, V, N=2)
-    model = model.cuda()
-    model_opt = NoamOpt(
-        model.src_embed[0].d_model,
-        1,
-        400,
-        torch.optim.Adam(
-            model.parameters(),
-            lr=0,
-            betas=(0.9, 0.98),
-            eps=1e-9
-        )
-    )
-
-    for epoch in range(100):
-        model.train()
-        run_epoch(data_gen(V, 30, 20), model,
-                  SimpleLossCompute(model.generator, criterion, model_opt))
-        model.eval()
-        run_epoch(data_gen(V, 30, 5), model,
-                  SimpleLossCompute(model.generator, criterion, None))
