@@ -97,10 +97,10 @@ class SublayerConnection(nn.Module):
 
 
 class Encoder(nn.Module):
-    """Core encoder is a stack of N encoder layers"""
-    def __init__(self, layer, N):
+    """Core encoder is a stack of num_layers encoder layers"""
+    def __init__(self, layer, num_layers):
         super(Encoder, self).__init__()
-        self.layers = clones(layer, N)
+        self.layers = clones(layer, num_layers)
         # NOTE: `size` here refers to a custom property of our layers, not to
         # the built-in tensor.size() function
         self.norm = LayerNorm(layer.size)
@@ -126,10 +126,10 @@ class EncoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    """Generic decoder composed of N decoder layers with masking"""
-    def __init__(self, layer, N):
+    """Generic decoder composed of num_layers decoder layers with masking"""
+    def __init__(self, layer, num_layers):
         super(Decoder, self).__init__()
-        self.layers = clones(layer, N)
+        self.layers = clones(layer, num_layers)
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, memory, src_mask, tgt_mask):
@@ -176,12 +176,12 @@ def attention(query, key, value, mask=None, dropout=None):
 
 
 class MultiHeadedAttention(nn.Module):
-    def __init__(self, h, d_model, dropout=0.1):
+    def __init__(self, num_heads, d_model, dropout=0.1):
         super(MultiHeadedAttention, self).__init__()
-        assert d_model % h == 0
+        assert d_model % num_heads == 0
 
-        self.d_k = d_model // h  # We'll have h heads of dimension d_k,
-        self.h = h
+        self.d_k = d_model // num_heads  # We'll have num_heads heads of dimension d_k,
+        self.num_heads = num_heads
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
         self.dropout = nn.Dropout(p=dropout)
@@ -191,9 +191,9 @@ class MultiHeadedAttention(nn.Module):
             mask = mask.unsqueeze(1)
         batch_size = query.size(0)
 
-        # Do all the linear projections in batch from d_model -> h x d_k
+        # Do all the linear projections in batch from d_model -> num_heads x d_k
         query, key, value = \
-            [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
+            [l(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
 
         # Apply attention on all the projected vectors in batch
@@ -204,9 +204,9 @@ class MultiHeadedAttention(nn.Module):
         # Q: why are we transposing dimensions 1 and 2 here?
         # A: Because the attention returns a tensor of shape
         # (batch_size, h, seq_len, d_k) and we want to make it
-        # (batch_size, seq_len, h, d_k) so we can later recover d_model = h * d_k
+        # (batch_size, seq_len, h, d_k) so we can later recover d_model = num_heads * d_k
         x = (x.transpose(1, 2).contiguous()
-             .view(batch_size, -1, self.h * self.d_k))
+             .view(batch_size, -1, self.num_heads * self.d_k))
 
         # Q: We already iterated over all layers, why are we using the last
         # layer again?
@@ -287,12 +287,12 @@ class LabelSmoothing(nn.Module):
 
     """Implement label smoothing"""
 
-    def __init__(self, size, padding_idx=None, smoothing=0.0):
+    def __init__(self, num_labels, padding_idx=None, smoothing=0.0):
         """
 
         Parameters
         ----------
-        size : TODO
+        num_labels : int
         padding_idx : TODO, optional
         smoothing : TODO, optional
 
@@ -300,7 +300,7 @@ class LabelSmoothing(nn.Module):
         """
         super(LabelSmoothing, self).__init__()
 
-        self.size = size
+        self.num_labels = num_labels
         self.padding_idx = padding_idx
         self.smoothing = smoothing
         self.criterion = nn.KLDivLoss(size_average=False)
@@ -322,9 +322,10 @@ class LabelSmoothing(nn.Module):
         TODO
 
         """
-        assert x.size(1) == self.size
+        assert x.size(1) == self.num_labels
+        import ipdb; ipdb.set_trace(context=10)
         true_dist = x.clone()
-        true_dist.fill_(self.smoothing / (self.size - 2))
+        true_dist.fill_(self.smoothing / (self.num_labels - 2))
         true_dist.scatter_(1, target.unsqueeze(1), self.confidence)
         if self.padding_idx is not None:
             true_dist[:, self.padding_idx] = 0
@@ -359,12 +360,12 @@ class Batch:
         return tgt_mask
 
 
-def data_gen(V, batch, batch_size):
+def data_gen(vocab_size, batch, batch_size):
     """Generate random data for a src-tgt copy task
 
     Parameters
     ----------
-    V : TODO
+    vocab_size : TODO
     batch : TODO
     batch_size : TODO
 
@@ -374,7 +375,7 @@ def data_gen(V, batch, batch_size):
 
     """
     for i in range(batch_size):
-        data = torch.from_numpy(np.random.randint(1, V, size=(batch, 10)))
+        data = torch.from_numpy(np.random.randint(1, vocab_size, size=(batch, 10)))
         data = data.cuda()
         data[:, 0] = 1
         src = data
@@ -417,8 +418,8 @@ class SimpleLossCompute(object):
         return norm_loss.item() * norm
 
 
-def make_model(src_vocab_size, tgt_vocab_size, N=6,
-               d_model=512, d_ff=2048, h=8, dropout=0.1):
+def make_model(src_vocab_size, tgt_vocab_size, num_layers=6,
+               d_model=512, d_ff=2048, num_heads=8, dropout=0.1):
     """Build model from hyperparameters
 
     Parameters
@@ -427,23 +428,23 @@ def make_model(src_vocab_size, tgt_vocab_size, N=6,
         Size of the source vocabulary
     tgt_vocab_size: int
         Size of the target vocabulary
-    N: int
+    num_layers: int
         Number of encoder and decoder layers
     d_model: int
         Model dimensionality
     d_ff: int
         Position-wise Feed-Forward Network dimensionality
-    h: int
+    num_heads: int
         The number of heads for the Multi-Head Attention module
     dropout: float
     """
     c = copy.deepcopy
-    attn = MultiHeadedAttention(h, d_model)
+    attn = MultiHeadedAttention(num_heads, d_model)
     ff = PositionwiseFeedforward(d_model, d_ff, dropout)
     position = PositionalEncoding(d_model, dropout)
     model = EncoderDecoder(
-        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-        Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), N),
+        Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), num_layers),
+        Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), num_layers),
         nn.Sequential(Embeddings(src_vocab_size, d_model), c(position)),
         nn.Sequential(Embeddings(tgt_vocab_size, d_model), c(position)),
         Generator(d_model, tgt_vocab_size)
@@ -505,15 +506,15 @@ def get_std_opt(model):
 
 
 def predict_synthetic_data():
-    V = 11
-    criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
-    model = make_model(V, V, N=2)
+    vocab_size = 11
+    criterion = LabelSmoothing(num_labels=vocab_size, padding_idx=0, smoothing=0.0)
+    model = make_model(vocab_size, vocab_size, num_layers=2)
     model = model.cuda()
     model_opt = NoamOpt(
         model.src_embed[0].d_model,
-        1,
-        400,
-        torch.optim.Adam(
+        factor=1,
+        warmup=400,
+        optimizer=torch.optim.Adam(
             model.parameters(),
             lr=0,
             betas=(0.9, 0.98),
@@ -523,10 +524,10 @@ def predict_synthetic_data():
 
     for epoch in range(10):
         model.train()
-        run_epoch(data_gen(V, 30, 20), model,
+        run_epoch(data_gen(vocab_size, 30, 20), model,
                   SimpleLossCompute(model.generator, criterion, model_opt))
         # model.eval()
-        # run_epoch(data_gen(V, 30, 5), model,
+        # run_epoch(data_gen(vocab_size, 30, 5), model,
         #           SimpleLossCompute(model.generator, criterion, None))
 
 
