@@ -2,9 +2,9 @@
 
 PREPROCESSED_DATA_DIR="data/preprocessed"
 
-TRAIN_DATA_PATH="data/train-v2.csv"
-DEV_DATA_PATH="data/trial-v2.csv"
-DEV_LABELS_PATH_ORIG="data/trial-v2.labels"
+TRAIN_DATA_PATH="data/train-v3.csv"
+DEV_DATA_PATH="data/trial-v3.csv"
+DEV_LABELS_PATH_ORIG="data/trial-v3.labels"
 
 CLEAN_TRAIN_DATA_PATH="$PREPROCESSED_DATA_DIR/train.csv"
 TRAIN_LABELS_PATH="$PREPROCESSED_DATA_DIR/train_labels.csv"
