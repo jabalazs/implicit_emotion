@@ -63,8 +63,7 @@ class AttentionLayer(nn.Module):
         score = score.view(B, S, word_len)
 
         # We transform the elements corresponding to paddings to -inf
-        inf_batch_mask = (1 - char_masks).byte()
-        score.masked_fill_(inf_batch_mask, -1e16)
+        score.masked_fill_(char_masks == 0, -1e9)
 
         # (B * S, 1, word_len)
         alphas = F.softmax(score, dim=2).unsqueeze(2).view(B * S, 1, word_len)
