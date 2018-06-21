@@ -282,6 +282,9 @@ class NoamOpt:
         self._rate = rate
         self.optimizer.step()
 
+    def zero_grad(self):
+        self.optimizer.zero_grad()
+
     def rate(self, step=None):
         if step is None:
             step = self._step
@@ -380,13 +383,15 @@ def data_gen(vocab_size, batch_size, num_batches):
     TODO
 
     """
+    batches = []
     for i in range(num_batches):
-        data = torch.from_numpy(np.random.randint(2, vocab_size, size=(batch_size, 10)))
+        data = torch.from_numpy(np.random.randint(1, vocab_size, size=(batch_size, 10)))
         data = data.cuda()
         data[:, 0] = 1
         src = data
         tgt = data
-        yield Batch(src, tgt, 0)
+        batches.append(Batch(src, tgt, 0))
+    return batches
 
 
 class SimpleLossCompute(object):
@@ -426,7 +431,7 @@ class SimpleLossCompute(object):
         norm_loss.backward()
         if self.opt is not None:
             self.opt.step()
-            self.opt.optimizer.zero_grad()
+            self.opt.zero_grad()
         return norm_loss.item() * norm
 
 
@@ -522,21 +527,28 @@ def predict_synthetic_data():
     criterion = LabelSmoothing(num_labels=vocab_size, padding_idx=0, smoothing=0.0)
     model = make_model(vocab_size, vocab_size, num_layers=2)
     model = model.cuda()
-    model_opt = NoamOpt(
-        model.src_embed[0].d_model,
-        factor=1,
-        warmup=400,
-        optimizer=torch.optim.Adam(
+    # model_opt = NoamOpt(
+    #     model.src_embed[0].d_model,
+    #     factor=1,
+    #     warmup=400,
+    #     optimizer=torch.optim.Adam(
+    #         model.parameters(),
+    #         lr=0,
+    #         betas=(0.9, 0.98),
+    #         eps=1e-9
+    #     )
+    # )
+    model_opt = torch.optim.Adam(
             model.parameters(),
-            lr=0,
-            betas=(0.9, 0.98),
-            eps=1e-9
+            lr=0.0001,
+            # betas=(0.9, 0.98),
+            # eps=1e-9
         )
-    )
 
-    for epoch in range(10):
+    batches = data_gen(vocab_size, 30, 20)
+    for epoch in range(1000):
         model.train()
-        run_epoch(data_gen(vocab_size, 30, 20), model,
+        run_epoch(batches, model,
                   SimpleLossCompute(model.generator, criterion, model_opt))
         # model.eval()
         # run_epoch(data_gen(vocab_size, 30, 5), model,
