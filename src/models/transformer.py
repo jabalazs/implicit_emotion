@@ -62,6 +62,12 @@ class Generator(nn.Module):
         self.proj = nn.Linear(d_model, vocab_size)
 
     def forward(self, x):
+        """Generate a logprob distribution based on word-level representations
+
+        Parameters
+        ----------
+
+        x: torch.FloatTensor of dim ()"""
         return F.log_softmax(self.proj(x), dim=-1)
 
 
@@ -133,8 +139,8 @@ class Decoder(nn.Module):
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, memory, src_mask, tgt_mask):
-        """Here the input x will simply be the embedded target sequence, and
-        memory will be the output of the encoder"""
+        """Here the input x is the embedded target sequence, and memory is the
+        output of the encoder"""
         for layer in self.layers:
             x = layer(x, memory, src_mask, tgt_mask)
         return self.norm(x)
@@ -255,7 +261,7 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         # NOTE: in the original implementation this is declared as a Variable
         # with `requires_grad=False`
-        x = x + self.pe[:, :x.size(1)].detach()
+        x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
 
 
@@ -323,8 +329,8 @@ class LabelSmoothing(nn.Module):
 
         """
         assert x.size(1) == self.num_labels
-        import ipdb; ipdb.set_trace(context=10)
         true_dist = x.clone()
+        true_dist = true_dist.detach()
         true_dist.fill_(self.smoothing / (self.num_labels - 2))
         true_dist.scatter_(1, target.unsqueeze(1), self.confidence)
         if self.padding_idx is not None:
@@ -333,7 +339,7 @@ class LabelSmoothing(nn.Module):
             if mask.nelement() > 0:
                 true_dist.index_fill_(0, mask.squeeze(), 0.0)
         self.true_dist = true_dist
-        return self.criterion(x, true_dist.detach())
+        return self.criterion(x, true_dist)
 
 
 def subsequent_mask(size):
@@ -360,22 +366,22 @@ class Batch:
         return tgt_mask
 
 
-def data_gen(vocab_size, batch, batch_size):
+def data_gen(vocab_size, batch_size, num_batches):
     """Generate random data for a src-tgt copy task
 
     Parameters
     ----------
     vocab_size : TODO
-    batch : TODO
     batch_size : TODO
+    num_batches : TODO
 
     Returns
     -------
     TODO
 
     """
-    for i in range(batch_size):
-        data = torch.from_numpy(np.random.randint(1, vocab_size, size=(batch, 10)))
+    for i in range(num_batches):
+        data = torch.from_numpy(np.random.randint(2, vocab_size, size=(batch_size, 10)))
         data = data.cuda()
         data[:, 0] = 1
         src = data
@@ -403,6 +409,12 @@ class SimpleLossCompute(object):
         self.opt = opt
 
     def __call__(self, x, y, norm):
+        """
+        Parameters
+        ----------
+        x: torch.FloatTensor, dim=(batch_size, seq_len, model_dim)
+            A tensor containing word level representations
+        """
         x = self.generator(x)
         try:
             loss = self.criterion(x.contiguous().view(-1, x.size(-1)),
@@ -453,7 +465,7 @@ def make_model(src_vocab_size, tgt_vocab_size, num_layers=6,
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform_(p)
-        return model
+    return model
 
 
 def run_epoch(data_iter, model, loss_compute):
