@@ -15,6 +15,7 @@ from ..layers.layers import (
 )
 
 from ..layers.elmo import ElmoWordEncodingLayer
+from .transformer_encoder import TransformerEncoder
 
 from ..utils.torch import to_var, pack_forward, to_torch_embedding
 
@@ -299,14 +300,15 @@ class BLSTMEncoder(nn.Module):
         # either all weights are on cpu or they are on gpu
         return 'cuda' in str(type(self.enc_lstm.bias_hh_l0.data))
 
-    def forward(self, emb_batch, lengths):
+    def forward(self, emb_batch, lengths=None, masks=None):
+        """mask kept for compatibility with transformer layer"""
         sent_output = pack_forward(self.enc_lstm, emb_batch, lengths)
         return sent_output
 
 
 class SentenceEncodingLayer(nn.Module):
 
-    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm']
+    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm', 'transformer']
 
     @staticmethod
     def factory(sent_encoding_method, *args,  **kwargs):
@@ -317,6 +319,8 @@ class SentenceEncodingLayer(nn.Module):
             # return BaselineLSTM()
         elif sent_encoding_method == 'bilstm':
             return BLSTMEncoder(*args, **kwargs)
+        elif sent_encoding_method == 'transformer':
+            return TransformerEncoder(*args, **kwargs)
 
     def __init__(self, sent_encoding_method, *args, **kwargs):
         super(SentenceEncodingLayer, self).__init__()
@@ -440,9 +444,22 @@ class IESTClassifier(nn.Module):
         if embed_words:
             embedded = self.word_encoding_layer(batch, char_batch, word_lengths,
                                                 char_masks, raw_sequences)
+
+            # FIXME: Find nicer way to do this <2018-06-25 16:05:20, Jorge Balazs>
+            if self.word_encoding_method == 'elmo':
+                embedded, elmo_masks = embedded
+                elmo_masks = elmo_masks.float()
+                # We only need the masks returned by elmo if we're using the
+                # transformer
+                if self.sent_encoding_method == 'transformer':
+                    masks = elmo_masks
+
         else:
             embedded = batch
-        sent_embedding = self.sent_encoding_layer(embedded, sent_lengths)
+
+        sent_embedding = self.sent_encoding_layer(embedded,
+                                                  lengths=sent_lengths,
+                                                  masks=masks)
         agg_sent_embedding = self.pooling_layer(sent_embedding,
                                                 lengths=sent_lengths,
                                                 masks=masks)

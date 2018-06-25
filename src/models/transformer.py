@@ -51,10 +51,10 @@ class EncoderDecoder(nn.Module):
 
 class Generator(nn.Module):
     """
-    Generate a logprobability distribution over the vocab conditioned on a vector
+    Generate a logprob distribution over the vocab conditioned on a vector
 
-    This layer is composed of a simple Linear projection layer and a log_softmax
-    function for obtaining the logprobs
+    This layer is composed of a simple Linear projection layer and a
+    log_softmax function for obtaining the logprobs
     """
 
     def __init__(self, d_model, vocab_size):
@@ -127,6 +127,7 @@ class EncoderLayer(nn.Module):
         self.size = size
 
     def forward(self, x, mask):
+        """mask: (batch_size, 1, seq_len)"""
         x = self.sublayers[0](x, lambda x: self.attention(x, x, x, mask))
         return self.sublayers[1](x, self.feed_forward)
 
@@ -186,7 +187,9 @@ class MultiHeadedAttention(nn.Module):
         super(MultiHeadedAttention, self).__init__()
         assert d_model % num_heads == 0
 
-        self.d_k = d_model // num_heads  # We'll have num_heads heads of dimension d_k,
+        # We'll have num_heads heads of dimension d_k
+        self.d_k = d_model // num_heads
+
         self.num_heads = num_heads
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
@@ -194,10 +197,11 @@ class MultiHeadedAttention(nn.Module):
 
     def forward(self, query, key, value, mask=None):
         if mask is not None:
+            # (batch_size, 1, seq_len) -> (batch_size, 1, 1, seq_len)
             mask = mask.unsqueeze(1)
         batch_size = query.size(0)
 
-        # Do all the linear projections in batch from d_model -> num_heads x d_k
+        # Do all the linear projs in batch from d_model -> num_heads x d_k
         query, key, value = \
             [l(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
              for l, x in zip(self.linears, (query, key, value))]
@@ -210,14 +214,15 @@ class MultiHeadedAttention(nn.Module):
         # Q: why are we transposing dimensions 1 and 2 here?
         # A: Because the attention returns a tensor of shape
         # (batch_size, h, seq_len, d_k) and we want to make it
-        # (batch_size, seq_len, h, d_k) so we can later recover d_model = num_heads * d_k
+        # (batch_size, seq_len, h, d_k) so we can later recover
+        # d_model = num_heads * d_k
         x = (x.transpose(1, 2).contiguous()
              .view(batch_size, -1, self.num_heads * self.d_k))
 
         # Q: We already iterated over all layers, why are we using the last
         # layer again?
-        # A: We haven't iterated over all layers. self.linears has 4 elements; when
-        # doing the zip operations only the first 3 are matched with the
+        # A: We haven't iterated over all layers. self.linears has 4 elements;
+        # when doing the zip operations only the first 3 are matched with the
         # (query, key, value) tuple.
         return self.linears[-1](x)
 
@@ -385,7 +390,8 @@ def data_gen(vocab_size, batch_size, num_batches):
     """
     batches = []
     for i in range(num_batches):
-        data = torch.from_numpy(np.random.randint(1, vocab_size, size=(batch_size, 10)))
+        data = torch.from_numpy(np.random.randint(1, vocab_size,
+                                                  size=(batch_size, 10)))
         data = data.cuda()
         data[:, 0] = 1
         src = data
@@ -524,13 +530,14 @@ def get_std_opt(model):
 
 def predict_synthetic_data():
     vocab_size = 11
-    criterion = LabelSmoothing(num_labels=vocab_size, padding_idx=0, smoothing=0.0)
+    criterion = LabelSmoothing(num_labels=vocab_size, padding_idx=0,
+                               smoothing=0.0)
     model = make_model(vocab_size, vocab_size, num_layers=2)
     model = model.cuda()
     # model_opt = NoamOpt(
     #     model.src_embed[0].d_model,
     #     factor=1,
-    #     warmup=400,
+    #     warmup=4000,
     #     optimizer=torch.optim.Adam(
     #         model.parameters(),
     #         lr=0,
