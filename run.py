@@ -91,6 +91,9 @@ arg_parser.add_argument('--lowercase', '-lc', action='store_true',
                              'REMEBER TO CLEAR THE CACHE BY PASSING '
                              '--force_reload or deleting .cache')
 
+arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
+                        help="During how many iterations to increase the learning rate")
+
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
@@ -182,7 +185,7 @@ def main():
         optimizer = NoamOpt(
             1024,  # ELMo output dimension; FIXME: shouldn't be hardcoded
             factor=1,
-            warmup=4000,
+            warmup=hp.warmup_iters,
             optimizer=torch.optim.Adam(
                 model.parameters(),
                 lr=0,
@@ -210,9 +213,10 @@ def main():
         best_accuracy = None
         for epoch in tqdm(range(hp.epochs), desc='Epoch'):
             total_loss = 0
-            trainer.train_epoch(epoch, writer)
 
-            eval_dict = trainer.evaluate()
+            trainer.train_epoch(epoch, writer)
+            eval_dict = trainer.evaluate(epoch, writer)
+
             if hp.update_learning_rate:
                 if hp.model != 'transformer':
                     optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
