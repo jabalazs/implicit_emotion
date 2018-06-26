@@ -27,7 +27,7 @@ class Trainer(object):
         self.use_cuda = use_cuda
         self.log_interval = log_interval
 
-    def train_epoch(self, epoch):
+    def train_epoch(self, epoch, writer=None):
         self.model.train()  # Depends on using pytorch
         num_batches = self.train_batches.num_batches
 
@@ -51,6 +51,9 @@ class Trainer(object):
 
             batch_loss.backward()
             self.optimizer.step()
+            if writer is not None:
+                writer.add_scalar('data/lr', self.optimizer.lr,
+                                  self.optimizer.step_num)
 
             # We ignore batch 0's output for prettier logging
             if batch_index != 0:

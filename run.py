@@ -4,10 +4,9 @@ from glob import glob
 
 import torch
 import colored_traceback
-
 import numpy as np
-
 from tqdm import tqdm
+from tensorboardX import SummaryWriter
 
 from src.corpus.iest_corpus import IESTCorpus
 from src.corpus.embeddings import Embeddings
@@ -25,6 +24,8 @@ from src.models.iest import (
                              WordCharEncodingLayer,
                              SentenceEncodingLayer,
                             )
+
+from src.models.transformer import NoamOpt
 
 from base_args import base_parser, CustomArgumentParser
 
@@ -177,13 +178,26 @@ def main():
 
     logger.write_current_run_details(str(model))
 
-    optimizer = OptimWithDecay(model.parameters(),
-                               method=hp.optim,
-                               initial_lr=hp.learning_rate,
-                               max_grad_norm=hp.grad_clipping,
-                               lr_decay=hp.learning_rate_decay,
-                               start_decay_at=hp.start_decay_at,
-                               decay_every=hp.decay_every)
+    if hp.model == 'transformer':
+        optimizer = NoamOpt(
+            1024,  # ELMo output dimension; FIXME: shouldn't be hardcoded
+            factor=1,
+            warmup=4000,
+            optimizer=torch.optim.Adam(
+                model.parameters(),
+                lr=0,
+                betas=(0.9, 0.98),
+                eps=1e-9
+            )
+        )
+    else:
+        optimizer = OptimWithDecay(model.parameters(),
+                                   method=hp.optim,
+                                   initial_lr=hp.learning_rate,
+                                   max_grad_norm=hp.grad_clipping,
+                                   lr_decay=hp.learning_rate_decay,
+                                   start_decay_at=hp.start_decay_at,
+                                   decay_every=hp.decay_every)
 
     loss_function = torch.nn.CrossEntropyLoss()
 
@@ -191,27 +205,29 @@ def main():
                       optimizer, loss_function, num_epochs=hp.epochs,
                       use_cuda=CUDA, log_interval=hp.log_interval)
 
+    writer = SummaryWriter(logger.run_savepath)
     try:
         best_accuracy = None
         for epoch in tqdm(range(hp.epochs), desc='Epoch'):
             total_loss = 0
-            trainer.train_epoch(epoch)
+            trainer.train_epoch(epoch, writer)
 
             eval_dict = trainer.evaluate()
             if hp.update_learning_rate:
-                optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
-                lr_threshold = 1e-5
-                if new_lr < lr_threshold:
-                    tqdm.write(f'Learning rate smaller than {lr_threshold}, '
-                               f'stopping.')
-                    break
+                if hp.model != 'transformer':
+                    optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
+                    lr_threshold = 1e-5
+                    if new_lr < lr_threshold:
+                        tqdm.write(f'Learning rate smaller than {lr_threshold}, '
+                                   f'stopping.')
+                        break
                 if optim_updated:
                     tqdm.write(f'Learning rate decayed to {new_lr}')
 
-            elif hp.update_learning_rate_nie:
-                optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)
-                if optim_updated:
-                    tqdm.write(f'Learning rate decayed to {new_lr}')
+            # elif hp.update_learning_rate_nie:
+            #     optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)
+            #     if optim_updated:
+            #         tqdm.write(f'Learning rate decayed to {new_lr}')
 
             accuracy = eval_dict['accuracy']
             if not best_accuracy or accuracy > best_accuracy:
