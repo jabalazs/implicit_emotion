@@ -96,7 +96,7 @@ python run.py --corpus=iest_emoji -lr=0.001 --lstm_hidden_size=2048 --word_encod
 
 ## Data
 * Try augmenting the training dataset, if that's allowed
-* Try removing examples which have the `un[#TRIGGERWORD#]` variant, or conditioning on it. See [this](https://groups.google.com/forum/#!topic/implicit-emotions-shared-task-wassa-2018/2wIdY_lmCoY) thread.
+* ~Try removing examples which have the `un[#TRIGGERWORD#]` variant, or conditioning on it. See [this](https://groups.google.com/forum/#!topic/implicit-emotions-shared-task-wassa-2018/2wIdY_lmCoY) thread.~ The organizers fixed this.
 * Related to the previous point, in some examples the trigger word is a hashtag: `#[#TRIGGERWORD#]`. Maybe we could use this as a feature.
 * ~Tokenize and exploit emojis. See [#1](https://github.com/jabalazs/implicit_emotion/issues/1).~
 
@@ -129,3 +129,14 @@ An option could be to save every model, but given that they are around 350MB in 
 Another solution would be to perform a check somewhere at some point to update this field for every row. However this might create a great overhead in projects with lots of experiments.
 
 Another option, and the simplest one, is to create the database entry indicating the experiment doesn't have a corresponding checkpoint, and then change this field when the model is saved. The problem with this approach is that if the model is deleted manually the database will keep showing as if there was one.
+
+## Implement better optimizer class
+This class should be able to:
+* Accept specific parameters for the underlying pytorch optimizers
+* Implement different learning rate schedules
+  - Transformer's linear increase & O(sqrt(n)) decrease ([paper](https://papers.nips.cc/paper/7181-attention-is-all-you-need))
+  - Triangular learning rates ([paper](https://arxiv.org/abs/1506.01186))
+  - Slanted triangular learning rates ([paper](https://arxiv.org/abs/1801.06146))
+  - Linearly decreasing learning rates
+* Switch the underlying pytorch optimizer during training
+
