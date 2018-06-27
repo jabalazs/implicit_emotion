@@ -5,35 +5,57 @@ from torch import nn
 
 class PoolingLayer(nn.Module):
 
-    POOLING_METHODS = ['mean', 'sum', 'last', 'max']
+    POOLING_METHODS = ['mean', 'sum', 'last', 'max', 'combined']
 
     @staticmethod
-    def factory(pooling_method):
+    def factory(pooling_method, in_dim):
         if pooling_method == 'mean':
-            return MeanPoolingLayer()
+            return MeanPoolingLayer(in_dim)
         elif pooling_method == 'sum':
-            return SumPoolingLayer()
+            return SumPoolingLayer(in_dim)
         elif pooling_method == 'last':
-            return GatherLastLayer()
+            return GatherLastLayer(in_dim)
         elif pooling_method == 'max':
-            return MaxPoolingLayer()
+            return MaxPoolingLayer(in_dim)
+        elif pooling_method == 'combined':
+            return CombinedPoolingLayer(in_dim)
 
-    def __init__(self, pooling_method):
+    def __init__(self, pooling_method, in_dim):
         super(PoolingLayer, self).__init__()
         if pooling_method not in self.POOLING_METHODS:
             raise AttributeError(f'{pooling_method} not recognized. Try using '
                                  'one of {self.POOLING_METHODS}')
 
-        self.pooling_layer = self.factory(pooling_method)
+        self.pooling_layer = self.factory(pooling_method, in_dim)
+        self.out_dim = self.pooling_layer.out_dim
 
     def __call__(self, *args, **kwargs):
         return self.pooling_layer(*args, **kwargs)
 
 
+class CombinedPoolingLayer(nn.Module):
+
+    """Mean, Max and Last pooling"""
+
+    def __init__(self, in_dim):
+        super(CombinedPoolingLayer, self).__init__()
+        self.max_pooling_layer = MaxPoolingLayer(in_dim)
+        self.mean_pooling_layer = MeanPoolingLayer(in_dim)
+        self.last_pooling_layer = GatherLastLayer(in_dim)
+        self.out_dim = 3 * in_dim
+
+    def forward(self, sequences, **kwargs):
+        max_pooled = self.max_pooling_layer(sequences, **kwargs)
+        mean_pooled = self.mean_pooling_layer(sequences, **kwargs)
+        last_pooled = self.last_pooling_layer(sequences, **kwargs)
+        return torch.cat([max_pooled, mean_pooled, last_pooled], dim=-1)
+
+
 class SumPoolingLayer(nn.Module):
 
-    def __init__(self):
+    def __init__(self, in_dim):
         super(SumPoolingLayer, self).__init__()
+        self.out_dim = in_dim
 
     def forward(self, sequences, **kwargs):
 
@@ -67,9 +89,10 @@ class SumPoolingLayer(nn.Module):
 
 class MeanPoolingLayer(nn.Module):
 
-    def __init__(self):
+    def __init__(self, in_dim):
         super(MeanPoolingLayer, self).__init__()
-        self.sum_pooling_layer = SumPoolingLayer()
+        self.sum_pooling_layer = SumPoolingLayer(in_dim)
+        self.out_dim = in_dim
 
     def forward(self, sequences, **kwargs):
 
@@ -111,8 +134,9 @@ class MeanPoolingLayer(nn.Module):
 
 class MaxPoolingLayer(nn.Module):
 
-    def __init__(self):
+    def __init__(self, in_dim):
         super(MaxPoolingLayer, self).__init__()
+        self.out_dim = in_dim
 
     def forward(self, sequences, **kwargs):
 
@@ -146,7 +170,7 @@ class MaxPoolingLayer(nn.Module):
 
 class GatherLastLayer(nn.Module):
 
-    def __init__(self, bidirectional=True):
+    def __init__(self, in_dim, bidirectional=True):
         """
 
         Return the last hidden state of a tensor returned by an RNN
@@ -154,6 +178,7 @@ class GatherLastLayer(nn.Module):
         """
         super(GatherLastLayer, self).__init__()
         self.bidirectional = bidirectional
+        self.out_dim = in_dim
 
     def forward(self, sequences, **kwargs):
         """
@@ -205,8 +230,8 @@ class GatherLastLayer(nn.Module):
         # we want 2 chunks in the last dimension (2)
         out_fw, out_bw = torch.chunk(sequences, 2, 2)
 
-        h_t_fw = torch.gather(out_fw, 1, lengths_fw)
-        h_t_bw = torch.gather(out_bw, 1, lengths_bw)
+        h_t_fw = torch.gather(out_fw, 1, lengths_fw.long())
+        h_t_bw = torch.gather(out_bw, 1, lengths_bw.long())
 
         # -> (batch_size, hidden_x_dirs)
         last_hidden_out = torch.cat([h_t_fw, h_t_bw], 2).squeeze()

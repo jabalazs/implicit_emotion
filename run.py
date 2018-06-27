@@ -25,6 +25,8 @@ from src.models.iest import (
                              SentenceEncodingLayer,
                             )
 
+from src.layers.pooling import PoolingLayer
+
 from src.models.transformer import NoamOpt
 
 from base_args import base_parser, CustomArgumentParser
@@ -60,7 +62,7 @@ arg_parser.add_argument('--force_reload', action='store_true',
 arg_parser.add_argument('--char_emb_dim', '-ced', type=int, default=50,
                         help='Char embedding dimension')
 arg_parser.add_argument('--pooling_method', type=str, default='max',
-                        choices=['mean', 'sum', 'last', 'max'],
+                        choices=PoolingLayer.POOLING_METHODS,
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
 

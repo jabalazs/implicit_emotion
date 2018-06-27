@@ -431,10 +431,11 @@ class IESTClassifier(nn.Module):
             dropout=self.sent_enc_dropout
         )
 
-        self.pooling_layer = PoolingLayer(self.pooling_method)
+        self.pooling_layer = PoolingLayer(self.pooling_method,
+                                          self.sent_encoding_layer.out_dim)
 
         self.dense_layer = nn.Sequential(
-            nn.Linear(self.sent_encoding_layer.out_dim, 512),
+            nn.Linear(self.pooling_layer.out_dim, 512),
             nn.ReLU(),
             nn.Dropout(self.dropout),
             nn.Linear(512, self.num_classes)
