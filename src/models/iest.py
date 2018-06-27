@@ -306,9 +306,22 @@ class BLSTMEncoder(nn.Module):
         return sent_output
 
 
+class IdentityEncoder(nn.Module):
+
+    """No op on the input"""
+
+    def __init__(self, embedding_dim, *args, **kwargs):
+        """  """
+        super(IdentityEncoder, self).__init__()
+        self.out_dim = embedding_dim
+
+    def forward(self, x, *args, **kwargs):
+        return x
+
+
 class SentenceEncodingLayer(nn.Module):
 
-    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm', 'transformer']
+    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm', 'transformer', 'none']
 
     @staticmethod
     def factory(sent_encoding_method, *args,  **kwargs):
@@ -321,6 +334,8 @@ class SentenceEncodingLayer(nn.Module):
             return BLSTMEncoder(*args, **kwargs)
         elif sent_encoding_method == 'transformer':
             return TransformerEncoder(*args, **kwargs)
+        elif sent_encoding_method == 'none':
+            return IdentityEncoder(*args, **kwargs)
 
     def __init__(self, sent_encoding_method, *args, **kwargs):
         super(SentenceEncodingLayer, self).__init__()
@@ -357,7 +372,7 @@ class IESTClassifier(nn.Module):
     pooling_method: str
     batch_first: bool
     dropout: float
-    lstm_dropout: float
+    sent_enc_dropout: float
     use_cuda: bool
         """
     def __init__(self, num_classes, batch_size,
@@ -371,7 +386,7 @@ class IESTClassifier(nn.Module):
                  pooling_method='max',
                  batch_first=True,
                  dropout=0.0,
-                 lstm_dropout=0.0,
+                 sent_enc_dropout=0.0,
                  use_cuda=True):
 
         super(IESTClassifier, self).__init__()
@@ -379,7 +394,7 @@ class IESTClassifier(nn.Module):
         self.batch_size = batch_size
         self.batch_first = batch_first
         self.dropout = dropout
-        self.lstm_dropout = lstm_dropout
+        self.sent_enc_dropout = sent_enc_dropout
 
         self.use_cuda = use_cuda
 
@@ -413,7 +428,7 @@ class IESTClassifier(nn.Module):
             num_layers=self.sent_enc_layers,
             batch_first=self.batch_first,
             use_cuda=self.use_cuda,
-            dropout=self.lstm_dropout
+            dropout=self.sent_enc_dropout
         )
 
         self.pooling_layer = PoolingLayer(self.pooling_method)
@@ -451,7 +466,7 @@ class IESTClassifier(nn.Module):
                 elmo_masks = elmo_masks.float()
                 # We only need the masks returned by elmo if we're using the
                 # transformer
-                if self.sent_encoding_method == 'transformer':
+                if self.sent_encoding_method in ['transformer', 'none']:
                     masks = elmo_masks
 
         else:
