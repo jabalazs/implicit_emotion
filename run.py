@@ -4,10 +4,9 @@ from glob import glob
 
 import torch
 import colored_traceback
-
 import numpy as np
-
 from tqdm import tqdm
+from tensorboardX import SummaryWriter
 
 from src.corpus.iest_corpus import IESTCorpus
 from src.corpus.embeddings import Embeddings
@@ -25,6 +24,10 @@ from src.models.iest import (
                              WordCharEncodingLayer,
                              SentenceEncodingLayer,
                             )
+
+from src.layers.pooling import PoolingLayer
+
+from src.models.transformer import NoamOpt
 
 from base_args import base_parser, CustomArgumentParser
 
@@ -59,11 +62,11 @@ arg_parser.add_argument('--force_reload', action='store_true',
 arg_parser.add_argument('--char_emb_dim', '-ced', type=int, default=50,
                         help='Char embedding dimension')
 arg_parser.add_argument('--pooling_method', type=str, default='max',
-                        choices=['mean', 'sum', 'last', 'max'],
+                        choices=PoolingLayer.POOLING_METHODS,
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
 
-arg_parser.add_argument('--lstm_dropout', type=float, default=0.0,
+arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.0,
                         help='Dropout between sentence encoding lstm layers. '
                              '0 means no dropout.')
 
@@ -89,6 +92,9 @@ arg_parser.add_argument('--lowercase', '-lc', action='store_true',
                         help='Whether to lowercase data or not. WARNING: '
                              'REMEBER TO CLEAR THE CACHE BY PASSING '
                              '--force_reload or deleting .cache')
+
+arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
+                        help="During how many iterations to increase the learning rate")
 
 
 def validate_args(hp):
@@ -128,6 +134,7 @@ def main():
         ext_experiment_path = glob(experiment_path)
         assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
         model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
+        # FIXME: This will get replaced by the model being loaded below
         model = torch.load(model_path)
 
     # Load pre-trained embeddings
@@ -140,10 +147,6 @@ def main():
     print(f'{len(embeddings.unknown_tokens)} words from vocabulary not found '
           f'in {hp.embeddings} embeddings. ')
 
-    # Initialize torch Embedding object with subset of pre-trained embeddings
-    torch_embeddings = torch.nn.Embedding(*embedding_matrix.shape)
-    torch_embeddings.weight = torch.nn.Parameter(torch.Tensor(embedding_matrix))
-
     # Repeat process for character embeddings with the difference that they are
     # not pretrained
 
@@ -152,9 +155,6 @@ def main():
     char_embedding_matrix = np.random.uniform(-0.05, 0.05,
                                               size=(char_vocab_size,
                                                     hp.char_emb_dim))
-    char_torch_embeddings = torch.nn.Embedding(*char_embedding_matrix.shape)
-    char_torch_embeddings.weight = torch.nn.Parameter(
-                                            torch.Tensor(char_embedding_matrix))
 
     # Define some specific parameters for the model
     num_classes = len(corpus.label2id)
@@ -162,8 +162,8 @@ def main():
 
     hidden_sizes = hp.lstm_hidden_size
     model = IESTClassifier(num_classes, batch_size,
-                           torch_embeddings=torch_embeddings,
-                           char_embeddings=char_torch_embeddings,
+                           embedding_matrix=embedding_matrix,
+                           char_embedding_matrix=char_embedding_matrix,
                            word_encoding_method=hp.word_encoding_method,
                            word_char_aggregation_method=hp.word_char_aggregation_method,
                            sent_encoding_method=hp.model,
@@ -172,7 +172,7 @@ def main():
                            pooling_method=hp.pooling_method,
                            batch_first=True,
                            dropout=hp.dropout,
-                           lstm_dropout=hp.lstm_dropout,
+                           sent_enc_dropout=hp.sent_enc_dropout,
                            sent_enc_layers=hp.sent_enc_layers)
 
     if CUDA:
@@ -183,13 +183,26 @@ def main():
 
     logger.write_current_run_details(str(model))
 
-    optimizer = OptimWithDecay(model.parameters(),
-                               method=hp.optim,
-                               initial_lr=hp.learning_rate,
-                               max_grad_norm=hp.grad_clipping,
-                               lr_decay=hp.learning_rate_decay,
-                               start_decay_at=hp.start_decay_at,
-                               decay_every=hp.decay_every)
+    if hp.model == 'transformer':
+        optimizer = NoamOpt(
+            1024,  # ELMo output dimension; FIXME: shouldn't be hardcoded
+            factor=1,
+            warmup=hp.warmup_iters,
+            optimizer=torch.optim.Adam(
+                model.parameters(),
+                lr=0,
+                betas=(0.9, 0.98),
+                eps=1e-9
+            )
+        )
+    else:
+        optimizer = OptimWithDecay(model.parameters(),
+                                   method=hp.optim,
+                                   initial_lr=hp.learning_rate,
+                                   max_grad_norm=hp.grad_clipping,
+                                   lr_decay=hp.learning_rate_decay,
+                                   start_decay_at=hp.start_decay_at,
+                                   decay_every=hp.decay_every)
 
     loss_function = torch.nn.CrossEntropyLoss()
 
@@ -197,27 +210,30 @@ def main():
                       optimizer, loss_function, num_epochs=hp.epochs,
                       use_cuda=CUDA, log_interval=hp.log_interval)
 
+    writer = SummaryWriter(logger.run_savepath)
     try:
         best_accuracy = None
         for epoch in tqdm(range(hp.epochs), desc='Epoch'):
             total_loss = 0
-            trainer.train_epoch(epoch)
 
-            eval_dict = trainer.evaluate()
+            trainer.train_epoch(epoch, writer)
+            eval_dict = trainer.evaluate(epoch, writer)
+
             if hp.update_learning_rate:
-                optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
-                lr_threshold = 1e-5
-                if new_lr < lr_threshold:
-                    tqdm.write(f'Learning rate smaller than {lr_threshold}, '
-                               f'stopping.')
-                    break
+                if hp.model != 'transformer':
+                    optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
+                    lr_threshold = 1e-5
+                    if new_lr < lr_threshold:
+                        tqdm.write(f'Learning rate smaller than {lr_threshold}, '
+                                   f'stopping.')
+                        break
                 if optim_updated:
                     tqdm.write(f'Learning rate decayed to {new_lr}')
 
-            elif hp.update_learning_rate_nie:
-                optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)
-                if optim_updated:
-                    tqdm.write(f'Learning rate decayed to {new_lr}')
+            # elif hp.update_learning_rate_nie:
+            #     optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)
+            #     if optim_updated:
+            #         tqdm.write(f'Learning rate decayed to {new_lr}')
 
             accuracy = eval_dict['accuracy']
             if not best_accuracy or accuracy > best_accuracy:

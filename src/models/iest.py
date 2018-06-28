@@ -15,8 +15,9 @@ from ..layers.layers import (
 )
 
 from ..layers.elmo import ElmoWordEncodingLayer
+from .transformer_encoder import TransformerEncoder
 
-from ..utils.torch import to_var, pack_forward
+from ..utils.torch import to_var, pack_forward, to_torch_embedding
 
 
 class AttentionLayer(nn.Module):
@@ -299,14 +300,28 @@ class BLSTMEncoder(nn.Module):
         # either all weights are on cpu or they are on gpu
         return 'cuda' in str(type(self.enc_lstm.bias_hh_l0.data))
 
-    def forward(self, emb_batch, lengths):
+    def forward(self, emb_batch, lengths=None, masks=None):
+        """mask kept for compatibility with transformer layer"""
         sent_output = pack_forward(self.enc_lstm, emb_batch, lengths)
         return sent_output
 
 
+class IdentityEncoder(nn.Module):
+
+    """No op on the input"""
+
+    def __init__(self, embedding_dim, *args, **kwargs):
+        """  """
+        super(IdentityEncoder, self).__init__()
+        self.out_dim = embedding_dim
+
+    def forward(self, x, *args, **kwargs):
+        return x
+
+
 class SentenceEncodingLayer(nn.Module):
 
-    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm']
+    SENTENCE_ENCODING_METHODS = ['stacked', 'lstm', 'bilstm', 'transformer', 'none']
 
     @staticmethod
     def factory(sent_encoding_method, *args,  **kwargs):
@@ -317,6 +332,10 @@ class SentenceEncodingLayer(nn.Module):
             # return BaselineLSTM()
         elif sent_encoding_method == 'bilstm':
             return BLSTMEncoder(*args, **kwargs)
+        elif sent_encoding_method == 'transformer':
+            return TransformerEncoder(*args, **kwargs)
+        elif sent_encoding_method == 'none':
+            return IdentityEncoder(*args, **kwargs)
 
     def __init__(self, sent_encoding_method, *args, **kwargs):
         super(SentenceEncodingLayer, self).__init__()
@@ -337,12 +356,28 @@ class SentenceEncodingLayer(nn.Module):
 
 
 class IESTClassifier(nn.Module):
-    """Args:
-        embeddings: torch word embeddings
+    """ Classifier for the Implicit Emotion Shared Task
+
+    Parameters
+    ----------
+    num_classes: int
+    batch_size : int
+    embedding_matrix: numpy.ndarray
+    char_embedding_matrix: numpy.ndarray
+    word_encoding_method: str
+    word_char_aggregation_method: str
+    sent_encoding_method: str
+    hidden_sizes:
+    sent_enc_layers: int
+    pooling_method: str
+    batch_first: bool
+    dropout: float
+    sent_enc_dropout: float
+    use_cuda: bool
         """
     def __init__(self, num_classes, batch_size,
-                 torch_embeddings=None,
-                 char_embeddings=None,
+                 embedding_matrix=None,
+                 char_embedding_matrix=None,
                  word_encoding_method='embed',
                  word_char_aggregation_method=None,
                  sent_encoding_method='bilstm',
@@ -351,7 +386,7 @@ class IESTClassifier(nn.Module):
                  pooling_method='max',
                  batch_first=True,
                  dropout=0.0,
-                 lstm_dropout=0.0,
+                 sent_enc_dropout=0.0,
                  use_cuda=True):
 
         super(IESTClassifier, self).__init__()
@@ -359,7 +394,7 @@ class IESTClassifier(nn.Module):
         self.batch_size = batch_size
         self.batch_first = batch_first
         self.dropout = dropout
-        self.lstm_dropout = lstm_dropout
+        self.sent_enc_dropout = sent_enc_dropout
 
         self.use_cuda = use_cuda
 
@@ -371,8 +406,10 @@ class IESTClassifier(nn.Module):
         self.sent_enc_layers = sent_enc_layers
 
         self.char_embeddings = None
-        if char_embeddings:
-            self.char_embeddings = char_embeddings
+        if char_embedding_matrix is not None:
+            self.char_embeddings = to_torch_embedding(char_embedding_matrix)
+
+        torch_embeddings = to_torch_embedding(embedding_matrix)
 
         self.word_encoding_layer = WordEncodingLayer(
             self.word_encoding_method,
@@ -391,13 +428,14 @@ class IESTClassifier(nn.Module):
             num_layers=self.sent_enc_layers,
             batch_first=self.batch_first,
             use_cuda=self.use_cuda,
-            dropout=self.lstm_dropout
+            dropout=self.sent_enc_dropout
         )
 
-        self.pooling_layer = PoolingLayer(self.pooling_method)
+        self.pooling_layer = PoolingLayer(self.pooling_method,
+                                          self.sent_encoding_layer.out_dim)
 
         self.dense_layer = nn.Sequential(
-            nn.Linear(self.sent_encoding_layer.out_dim, 512),
+            nn.Linear(self.pooling_layer.out_dim, 512),
             nn.ReLU(),
             nn.Dropout(self.dropout),
             nn.Linear(512, self.num_classes)
@@ -422,9 +460,22 @@ class IESTClassifier(nn.Module):
         if embed_words:
             embedded = self.word_encoding_layer(batch, char_batch, word_lengths,
                                                 char_masks, raw_sequences)
+
+            # FIXME: Find nicer way to do this <2018-06-25 16:05:20, Jorge Balazs>
+            if self.word_encoding_method == 'elmo':
+                embedded, elmo_masks = embedded
+                elmo_masks = elmo_masks.float()
+                # We only need the masks returned by elmo if we're using the
+                # transformer
+                if self.sent_encoding_method in ['transformer', 'none']:
+                    masks = elmo_masks
+
         else:
             embedded = batch
-        sent_embedding = self.sent_encoding_layer(embedded, sent_lengths)
+
+        sent_embedding = self.sent_encoding_layer(embedded,
+                                                  lengths=sent_lengths,
+                                                  masks=masks)
         agg_sent_embedding = self.pooling_layer(sent_embedding,
                                                 lengths=sent_lengths,
                                                 masks=masks)

@@ -27,7 +27,7 @@ class Trainer(object):
         self.use_cuda = use_cuda
         self.log_interval = log_interval
 
-    def train_epoch(self, epoch):
+    def train_epoch(self, epoch, writer=None):
         self.model.train()  # Depends on using pytorch
         num_batches = self.train_batches.num_batches
 
@@ -51,6 +51,9 @@ class Trainer(object):
 
             batch_loss.backward()
             self.optimizer.step()
+            if writer is not None:
+                writer.add_scalar('data/lr', self.optimizer.lr,
+                                  self.optimizer.step_num)
 
             # We ignore batch 0's output for prettier logging
             if batch_index != 0:
@@ -60,11 +63,16 @@ class Trainer(object):
 
                 avg_loss = total_loss / self.log_interval
                 tqdm.write(f'Epoch: {epoch}, batch: {batch_index}, loss: {avg_loss}')
+                if writer is not None:
+                    #  FIXME: using the optimizer step as global step is hacky.
+                    # Should have a proper global step <2018-06-26 15:18:11, Jorge Balazs>
+                    writer.add_scalar('data/train_loss', avg_loss,
+                                      self.optimizer.step_num)
                 total_loss = 0
 
         self.train_batches.shuffle_examples()
 
-    def evaluate(self):
+    def evaluate(self, epoch, writer=None):
         self.model.eval()
         num_batches = self.dev_batches.num_batches
         outputs = []
@@ -86,6 +94,8 @@ class Trainer(object):
         num_total = len(pred_labels)
         accuracy = num_correct / num_total
         tqdm.write(f'\nAccuracy: {accuracy:.3f}\n')
+        if writer is not None:
+            writer.add_scalar('data/valid_accuracy', accuracy, epoch)
 
         # Generate prediction list
         pred_labels = pred_labels.tolist()

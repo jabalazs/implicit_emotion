@@ -34,8 +34,9 @@ class ElmoWordEncodingLayer(object):
         embedded = self._embedder(char_ids)
 
         embeddings = embedded['elmo_representations'][0]
+        mask = embedded['mask']
         embeddings = to_var(embeddings,
                             use_cuda=True,
                             requires_grad=False)
 
-        return embeddings
+        return embeddings, mask

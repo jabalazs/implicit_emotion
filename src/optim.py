@@ -40,8 +40,11 @@ class OptimWithDecay(object):
 
         self.last_accuracy = 0
 
+        self.step_num = 0
+
     def step(self):
         # Compute gradients norm.
+        self.step_num += 1
         if self.max_grad_norm:
             clip_grad_norm_(self.params, self.max_grad_norm)
         self.optimizer.step()

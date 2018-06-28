@@ -5,9 +5,9 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        SUBSTR("commit", 0, 8) as "commit",
                                        --server_name,
                                        seed,
-                                       --embeddings as emb,
+                                       embeddings as emb,
                                        corpus,
-                                       --model,
+                                       model,
                                        char_emb_dim,
                                        lstm_hidden_size as lstm_out_dim,
                                        dropout as dpout,
@@ -26,8 +26,8 @@ sqlite3 --header --column runs.db 'SELECT datetime as date,
                                        ROUND(best_valid_acc, 4) AS acc,
                                        best_epoch
                                    FROM runs
-                                   WHERE embeddings = "glove"
-                                       AND best_valid_acc > 0.615
+                                   WHERE --embeddings = "glove"
+                                        best_valid_acc > 0.615
                                        AND "commit" IS NOT NULL
                                    --ORDER BY datetime DESC
                                    ORDER BY best_valid_acc DESC
