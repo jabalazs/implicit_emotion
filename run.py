@@ -15,8 +15,8 @@ from src.utils.logger import Logger
 from src.utils.ops import np_softmax
 
 from src.train import Trainer
-from src.optim.optim import OptimWithDecay, NoamOpt, ScheduledOptim
-from src.optim.schedulers import SlantedTriangularScheduler
+from src.optim.optim import OptimWithDecay, ScheduledOptim
+from src.optim.schedulers import SlantedTriangularScheduler, TransformerScheduler
 from src import config
 
 from src.models.iest import (
@@ -189,12 +189,12 @@ def main():
             betas=(0.9, 0.98),
             eps=1e-9
         )
-        optimizer = NoamOpt(
-            1024,  # ELMo output dimension; FIXME: shouldn't be hardcoded
+        transformer_scheduler = TransformerScheduler(
+            1024,
             factor=1,
-            warmup=hp.warmup_iters,
-            optimizer=core_optimizer
+            warmup_steps=hp.warmup_iters
         )
+        optimizer = ScheduledOptim(core_optimizer, transformer_scheduler)
     else:
         # optimizer = OptimWithDecay(model.parameters(),
         #                            method=hp.optim,
@@ -207,8 +207,6 @@ def main():
         core_optimizer = torch.optim.Adam(
             model.parameters(),
             lr=0,
-            betas=(0.9, 0.98),
-            eps=1e-9
         )
 
         max_iter = corpus.train_batches.num_batches * hp.epochs

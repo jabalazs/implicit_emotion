@@ -64,3 +64,38 @@ class SlantedTriangularScheduler(object):
         learning_rate = self.max_lr * (1 + p * (self.ratio - 1)) / self.ratio
 
         return learning_rate
+
+
+class TransformerScheduler(object):
+
+    """Implement linear lr growth and O(sqrt(n)) lr decay
+
+    From Attention is All You Need (2017)
+    https://arxiv.org/abs/1706.03762"""
+
+    def __init__(self, model_size, factor, warmup_steps):
+        """TODO: Docstring for __init__.
+
+        Parameters
+        ----------
+        model_size : int
+            Dimensionality of vector returned by encoder
+        factor : float
+            Multiplicative factor for lr returned by scheduler
+        warmup_steps : int
+            During how many steps to increase the learning rate
+
+
+        Returns
+        -------
+        learning_rate : float
+            The learning rate corresponding to the current step
+
+        """
+        self.model_size = model_size
+        self.factor = factor
+        self.warmup_steps = warmup_steps
+
+    def get_rate(self, step):
+        return self.factor * (self.model_size ** (-0.5) *
+                              min(step ** (-0.5), step * self.warmup_steps ** (-1.5)))
