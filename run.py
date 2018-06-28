@@ -15,7 +15,8 @@ from src.utils.logger import Logger
 from src.utils.ops import np_softmax
 
 from src.train import Trainer
-from src.optim import OptimWithDecay, NoamOpt
+from src.optim.optim import OptimWithDecay, NoamOpt, ScheduledOptim
+from src.optim.schedulers import SlantedTriangularScheduler
 from src import config
 
 from src.models.iest import (
@@ -195,13 +196,29 @@ def main():
             optimizer=core_optimizer
         )
     else:
-        optimizer = OptimWithDecay(model.parameters(),
-                                   method=hp.optim,
-                                   initial_lr=hp.learning_rate,
-                                   max_grad_norm=hp.grad_clipping,
-                                   lr_decay=hp.learning_rate_decay,
-                                   start_decay_at=hp.start_decay_at,
-                                   decay_every=hp.decay_every)
+        # optimizer = OptimWithDecay(model.parameters(),
+        #                            method=hp.optim,
+        #                            initial_lr=hp.learning_rate,
+        #                            max_grad_norm=hp.grad_clipping,
+        #                            lr_decay=hp.learning_rate_decay,
+        #                            start_decay_at=hp.start_decay_at,
+        #                            decay_every=hp.decay_every)
+
+        core_optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=0,
+            betas=(0.9, 0.98),
+            eps=1e-9
+        )
+
+        max_iter = corpus.train_batches.num_batches * hp.epochs
+        slanted_triangular_scheduler = SlantedTriangularScheduler(
+            max_iter,
+            max_lr=0.005,
+            cut_fraction=0.1,
+            ratio=32
+        )
+        optimizer = ScheduledOptim(core_optimizer, slanted_triangular_scheduler)
 
     loss_function = torch.nn.CrossEntropyLoss()
 

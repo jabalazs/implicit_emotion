@@ -69,7 +69,8 @@ class CharEncoder(nn.Module):
                                  bidirectional=self.bidirectional,
                                  dropout=0.0)
 
-        self.gather_last = GatherLastLayer(bidirectional=self.bidirectional)
+        self.gather_last = GatherLastLayer(self.char_hidden_dim,
+                                           bidirectional=self.bidirectional)
 
         self.fw_bw_aggregation_method = fw_bw_aggregation_method
 

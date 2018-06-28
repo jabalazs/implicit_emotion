@@ -3,8 +3,6 @@ OtimWithDecay taken from
 https://github.com/pytorch/examples/blob/master/OpenNMT/onmt/Optim.py
 """
 
-import math
-
 import torch.optim as optim
 from torch.nn.utils import clip_grad_norm_
 
@@ -37,42 +35,91 @@ class NoamOpt:
                               min(step ** (-0.5), step * self.warmup ** (-1.5)))
 
 
-def slanted_triangular_lr(step, max_step, max_lr=0.01, cut_fraction=0.1, ratio=32):
-    """Calculate triangular-shaped learning rate schedule
+# class OptimSlantedTriangular(object):
 
-    From Howard & Ruder's (2018) paper:
-    Universal Language Model Fine-tuning for Text Classification
-    https://arxiv.org/abs/1801.06146
+#     """Optimizer with slanted triangular learning rate schedule"""
 
-    Parameters
-    ----------
-    step : int
-        Current step during training
-    max_step : int
-        Last training step (probably should equal num_batches * num_epochs)
-    max_lr : float, optional
-        Maximum desired learning rate
-    cut_fraction : int, optional
-        Fraction of steps during which to increase the learning rate
-    ratio : int, optional
-        How many times bigger is the maximum learning rate as compared to the
-        minimum one
+#     def __init__(self, core_optimizer, max_step, max_lr=0.01, cut_fraction=0.1,
+#                  ratio=32):
+#         """
+
+#         Parameters
+#         ----------
+#         core_optimizer : torch.optim.Optimizer
+#             torch object containing the model parameters
+#         max_step : int
+#         max_lr : float, optional
+#         cut_fraction : float, optional
+#         ratio : int, optional
 
 
-    Returns
-    -------
-    learning_rate : float
-        The learning rate for a given step
+#         """
+#         self.optimizer = core_optimizer
+#         self.max_step = max_step
+#         self.max_lr = max_lr
+#         self.cut_fraction = cut_fraction
+#         self.ratio = ratio
 
-    """
-    cut = math.floor(max_step * cut_fraction)
-    if step < cut:
-        p = step / cut
-    else:
-        p = 1 - ((step - cut) / (cut * (1 / cut_fraction - 1)))
-    learning_rate = max_lr * (1 + p * (ratio - 1)) / ratio
+#         self.lr = None
+#         self.step_num = 0
 
-    return learning_rate
+#     def step(self):
+#         self.step_num += 1
+#         rate = self.get_rate()
+#         for p in self.optimizer.param_groups:
+#             p['lr'] = rate
+#         self.lr = rate
+#         self.optimizer.step()
+
+#     def get_rate(self, step=None):
+#         if step is None:
+#             step = self.step_num
+
+#         return slanted_triangular_lr(
+#             step,
+#             self.max_step,
+#             max_lr=self.max_lr,
+#             cut_fraction=self.cut_fraction,
+#             ratio=self.ratio
+#         )
+
+
+class ScheduledOptim(object):
+
+    """Optimizer with predefined learning rate schedule"""
+
+    def __init__(self, core_optimizer, lr_scheduler):
+        """
+
+        Parameters
+        ----------
+        core_optimizer : torch.optim.Optimizer
+        lr_scheduler : Scheduler instance
+
+
+        """
+        self.optimizer = core_optimizer
+        self.lr_scheduler = lr_scheduler
+
+        self.step_num = 0
+        self.lr = None
+
+    def step(self):
+        self.step_num += 1
+        rate = self.get_rate()
+        for p in self.optimizer.param_groups:
+            p['lr'] = rate
+        self.lr = rate
+        self.optimizer.step()
+
+    def get_rate(self, step=None):
+        if step is None:
+            step = self.step_num
+
+        return self.lr_scheduler.get_rate(step)
+
+    def zero_grad(self):
+        self.optimizer.zero_grad()
 
 
 class OptimWithDecay(object):

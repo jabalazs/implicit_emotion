@@ -18,7 +18,7 @@ import numpy as np
 import colored_traceback
 colored_traceback.add_hook(always=True)
 
-from ..optim import NoamOpt
+from ..optim.optim import NoamOpt
 
 np.random.seed(42)
 torch.manual_seed(42)
