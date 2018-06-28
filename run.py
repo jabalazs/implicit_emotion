@@ -15,7 +15,7 @@ from src.utils.logger import Logger
 from src.utils.ops import np_softmax
 
 from src.train import Trainer
-from src.optim import OptimWithDecay
+from src.optim import OptimWithDecay, NoamOpt
 from src import config
 
 from src.models.iest import (
@@ -26,8 +26,6 @@ from src.models.iest import (
                             )
 
 from src.layers.pooling import PoolingLayer
-
-from src.models.transformer import NoamOpt
 
 from base_args import base_parser, CustomArgumentParser
 
@@ -184,16 +182,17 @@ def main():
     logger.write_current_run_details(str(model))
 
     if hp.model == 'transformer':
+        core_optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=0,
+            betas=(0.9, 0.98),
+            eps=1e-9
+        )
         optimizer = NoamOpt(
             1024,  # ELMo output dimension; FIXME: shouldn't be hardcoded
             factor=1,
             warmup=hp.warmup_iters,
-            optimizer=torch.optim.Adam(
-                model.parameters(),
-                lr=0,
-                betas=(0.9, 0.98),
-                eps=1e-9
-            )
+            optimizer=core_optimizer
         )
     else:
         optimizer = OptimWithDecay(model.parameters(),
@@ -227,8 +226,8 @@ def main():
                         tqdm.write(f'Learning rate smaller than {lr_threshold}, '
                                    f'stopping.')
                         break
-                if optim_updated:
-                    tqdm.write(f'Learning rate decayed to {new_lr}')
+                    if optim_updated:
+                        tqdm.write(f'Learning rate decayed to {new_lr}')
 
             # elif hp.update_learning_rate_nie:
             #     optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)

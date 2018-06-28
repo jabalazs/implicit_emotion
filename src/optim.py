@@ -1,10 +1,78 @@
 """
-Taken from
+OtimWithDecay taken from
 https://github.com/pytorch/examples/blob/master/OpenNMT/onmt/Optim.py
 """
 
+import math
+
 import torch.optim as optim
 from torch.nn.utils import clip_grad_norm_
+
+
+class NoamOpt:
+    def __init__(self, model_size, factor, warmup, optimizer):
+        self.model_size = model_size
+        self.factor = factor
+        self.warmup = warmup
+        self.optimizer = optimizer
+
+        self.step_num = 0
+        self.lr = 0
+
+    def step(self):
+        self.step_num += 1
+        rate = self.get_rate()
+        for p in self.optimizer.param_groups:
+            p['lr'] = rate
+        self.lr = rate
+        self.optimizer.step()
+
+    def zero_grad(self):
+        self.optimizer.zero_grad()
+
+    def get_rate(self, step=None):
+        if step is None:
+            step = self.step_num
+        return self.factor * (self.model_size ** (-0.5) *
+                              min(step ** (-0.5), step * self.warmup ** (-1.5)))
+
+
+def slanted_triangular_lr(step, max_step, max_lr=0.01, cut_fraction=0.1, ratio=32):
+    """Calculate triangular-shaped learning rate schedule
+
+    From Howard & Ruder's (2018) paper:
+    Universal Language Model Fine-tuning for Text Classification
+    https://arxiv.org/abs/1801.06146
+
+    Parameters
+    ----------
+    step : int
+        Current step during training
+    max_step : int
+        Last training step (probably should equal num_batches * num_epochs)
+    max_lr : float, optional
+        Maximum desired learning rate
+    cut_fraction : int, optional
+        Fraction of steps during which to increase the learning rate
+    ratio : int, optional
+        How many times bigger is the maximum learning rate as compared to the
+        minimum one
+
+
+    Returns
+    -------
+    learning_rate : float
+        The learning rate for a given step
+
+    """
+    cut = math.floor(max_step * cut_fraction)
+    if step < cut:
+        p = step / cut
+    else:
+        p = 1 - ((step - cut) / (cut * (1 / cut_fraction - 1)))
+    learning_rate = max_lr * (1 + p * (ratio - 1)) / ratio
+
+    return learning_rate
 
 
 class OptimWithDecay(object):
@@ -75,3 +143,14 @@ class OptimWithDecay(object):
 
         self._makeOptimizer()
         return updated, self.lr
+
+
+if __name__ == "__main__":
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    max_step = 2000
+    plt.plot(np.arange(1, max_step), [slanted_triangular_lr(step, max_step) for step in range(1, max_step)])
+    plt.show()
+

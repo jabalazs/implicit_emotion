@@ -18,6 +18,8 @@ import numpy as np
 import colored_traceback
 colored_traceback.add_hook(always=True)
 
+from ..optim import NoamOpt
+
 np.random.seed(42)
 torch.manual_seed(42)
 torch.cuda.manual_seed_all(42)
@@ -268,34 +270,6 @@ class PositionalEncoding(nn.Module):
         # with `requires_grad=False`
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
-
-
-class NoamOpt:
-    def __init__(self, model_size, factor, warmup, optimizer):
-        self.model_size = model_size
-        self.factor = factor
-        self.warmup = warmup
-        self.optimizer = optimizer
-
-        self.step_num = 0
-        self.lr = 0
-
-    def step(self):
-        self.step_num += 1
-        rate = self.get_rate()
-        for p in self.optimizer.param_groups:
-            p['lr'] = rate
-        self.lr = rate
-        self.optimizer.step()
-
-    def zero_grad(self):
-        self.optimizer.zero_grad()
-
-    def get_rate(self, step=None):
-        if step is None:
-            step = self.step_num
-        return self.factor * (self.model_size ** (-0.5) *
-                              min(step ** (-0.5), step * self.warmup ** (-1.5)))
 
 
 class LabelSmoothing(nn.Module):
