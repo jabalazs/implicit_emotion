@@ -29,12 +29,13 @@ DEV = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
 TRAIN_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'train.csv')
 DEV_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
 
+TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
+DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
+
 # FIXME: CHANGE THIS WHEN WE HAVE THE REAL TEST DATA
 TEST = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
 TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
-
-TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
-DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
+TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
 
 # MAPPINGS
@@ -56,7 +57,8 @@ corpora_dict = {'iest': {'train': TRAIN,
                 }
 
 LABEL_PATHS = {'train': TRAIN_LABELS,
-               'dev': DEV_LABELS}
+               'dev': DEV_LABELS,
+               'test': TEST_LABELS}
 
 WRITE_MODES = {'none': None,
                'file': 'FILE',

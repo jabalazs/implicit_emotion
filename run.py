@@ -128,8 +128,6 @@ def main():
                         batch_size=hp.batch_size,
                         lowercase=hp.lowercase)
 
-
-
     # Load pre-trained embeddings
     embeddings = Embeddings(config.embedding_dict[hp.embeddings],
                             k_most_frequent=None,

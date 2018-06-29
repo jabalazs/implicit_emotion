@@ -55,9 +55,13 @@ class IESTCorpus(BaseCorpus):
         dev_sents = open(self.paths['dev']).readlines()
         self.dev_sents = [s.rstrip().split() for s in dev_sents]
 
+        test_sents = open(self.paths['test']).readlines()
+        self.test_sents = [s.rstrip().split() for s in test_sents]
+
         if self.lowercase:
             self.train_sents = [[t.lower() for t in s] for s in self.train_sents]
             self.dev_sents = [[t.lower() for t in s] for s in self.dev_sents]
+            self.test_sents = [[t.lower() for t in s] for s in self.test_sents]
 
         lang_pickle_path = os.path.join(config.CACHE_PATH,
                                         self.corpus_name + '_lang.pkl')
@@ -79,6 +83,11 @@ class IESTCorpus(BaseCorpus):
             mode='dev',
             prefix=self.corpus_name,
         )
+        self.test_examples = self._create_examples(
+            self.test_sents,
+            mode='test',
+            prefix=self.corpus_name,
+        )
 
         self.train_batches = BatchIterator(
             self.train_examples,
@@ -93,6 +102,15 @@ class IESTCorpus(BaseCorpus):
             self.dev_examples,
             self.batch_size,
             data_proportion=self.dev_data_proportion,
+            shuffle=False,
+            batch_first=self.batch_first,
+            use_chars=self.use_chars
+        )
+
+        self.test_batches = BatchIterator(
+            self.test_examples,
+            self.batch_size,
+            data_proportion=1.0,
             shuffle=False,
             batch_first=self.batch_first,
             use_chars=self.use_chars
@@ -131,6 +149,8 @@ class IESTCorpus(BaseCorpus):
                                        sents,
                                        force_reload=self.force_reload)
 
+        #  FIXME: Assuming all 3 modes will have labels. This might not be the
+        # case for test data <2018-06-29 10:49:29, Jorge Balazs>
         labels = open(config.LABEL_PATHS[mode]).readlines()
         labels = [l.rstrip() for l in labels]
         id_labels = [self.label2id[label] for label in labels]
