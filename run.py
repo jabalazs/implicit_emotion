@@ -220,8 +220,7 @@ def main():
 
     loss_function = torch.nn.CrossEntropyLoss()
 
-    trainer = Trainer(model, corpus.train_batches, corpus.dev_batches,
-                      optimizer, loss_function, num_epochs=hp.epochs,
+    trainer = Trainer(model, optimizer, loss_function, num_epochs=hp.epochs,
                       use_cuda=CUDA, log_interval=hp.log_interval)
 
     writer = SummaryWriter(logger.run_savepath)
@@ -230,8 +229,9 @@ def main():
         for epoch in tqdm(range(hp.epochs), desc='Epoch'):
             total_loss = 0
 
-            trainer.train_epoch(epoch, writer)
-            eval_dict = trainer.evaluate(epoch, writer)
+            trainer.train_epoch(corpus.train_batches, epoch, writer)
+            corpus.train_batches.shuffle_examples()
+            eval_dict = trainer.evaluate(corpus.dev_batches, epoch, writer)
 
             if hp.update_learning_rate:
                 if hp.model != 'transformer':

@@ -10,14 +10,10 @@ from . import config
 
 
 class Trainer(object):
-    def __init__(self, model, train_batches, dev_batches, optimizer,
-                 loss_function, num_epochs=10,
-                 use_cuda=True,
-                 log_interval=20):
-        self.model = model
+    def __init__(self, model, optimizer, loss_function, num_epochs=10,
+                 use_cuda=True, log_interval=20):
 
-        self.train_batches = train_batches
-        self.dev_batches = dev_batches
+        self.model = model
 
         self.optimizer = optimizer
         self.loss_function = loss_function
@@ -27,14 +23,14 @@ class Trainer(object):
         self.use_cuda = use_cuda
         self.log_interval = log_interval
 
-    def train_epoch(self, epoch, writer=None):
+    def train_epoch(self, train_batches, epoch, writer=None):
         self.model.train()  # Depends on using pytorch
-        num_batches = self.train_batches.num_batches
+        num_batches = train_batches.num_batches
 
         total_loss = 0
         for batch_index in tqdm(range(num_batches), desc='Batch'):
             self.model.zero_grad()
-            batch = self.train_batches[batch_index]
+            batch = train_batches[batch_index]
             ret_dict = self.model(batch)
 
             # FIXME: This part depends both on the way the batch is built and
@@ -70,16 +66,14 @@ class Trainer(object):
                                       self.optimizer.step_num)
                 total_loss = 0
 
-        self.train_batches.shuffle_examples()
-
-    def evaluate(self, epoch, writer=None):
+    def evaluate(self, dev_batches, epoch, writer=None):
         self.model.eval()
-        num_batches = self.dev_batches.num_batches
+        num_batches = dev_batches.num_batches
         outputs = []
         true_labels = []
         tqdm.write("Evaluating...")
         for batch_index in range(num_batches):
-            batch = self.dev_batches[batch_index]
+            batch = dev_batches[batch_index]
             out = self.model(batch)
             # FIXME: Shouldn't call data()
             outputs.append(out['logits'].cpu().data.numpy())
