@@ -95,6 +95,9 @@ arg_parser.add_argument('--lowercase', '-lc', action='store_true',
 arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
                         help="During how many iterations to increase the learning rate")
 
+arg_parser.add_argument("--test", action="store_true",
+                        help="Run this script in test mode")
+
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
@@ -151,7 +154,8 @@ def main():
         experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
         ext_experiment_path = glob(experiment_path)
         assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
-        model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
+        ext_experiment_path = ext_experiment_path[0]
+        model_path = os.path.join(ext_experiment_path, 'best_model.pth')
         model = torch.load(model_path)
 
     else:
@@ -195,32 +199,57 @@ def main():
         )
         optimizer = ScheduledOptim(core_optimizer, transformer_scheduler)
     else:
-        # optimizer = OptimWithDecay(model.parameters(),
-        #                            method=hp.optim,
-        #                            initial_lr=hp.learning_rate,
-        #                            max_grad_norm=hp.grad_clipping,
-        #                            lr_decay=hp.learning_rate_decay,
-        #                            start_decay_at=hp.start_decay_at,
-        #                            decay_every=hp.decay_every)
+        optimizer = OptimWithDecay(model.parameters(),
+                                   method=hp.optim,
+                                   initial_lr=hp.learning_rate,
+                                   max_grad_norm=hp.grad_clipping,
+                                   lr_decay=hp.learning_rate_decay,
+                                   start_decay_at=hp.start_decay_at,
+                                   decay_every=hp.decay_every)
 
-        core_optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=0,
-        )
+        # core_optimizer = torch.optim.Adam(
+        #     model.parameters(),
+        #     lr=0,
+        # )
 
-        max_iter = corpus.train_batches.num_batches * hp.epochs
-        slanted_triangular_scheduler = SlantedTriangularScheduler(
-            max_iter,
-            max_lr=0.005,
-            cut_fraction=0.1,
-            ratio=32
-        )
-        optimizer = ScheduledOptim(core_optimizer, slanted_triangular_scheduler)
+        # max_iter = corpus.train_batches.num_batches * hp.epochs
+        # slanted_triangular_scheduler = SlantedTriangularScheduler(
+        #     max_iter,
+        #     max_lr=0.005,
+        #     cut_fraction=0.1,
+        #     ratio=32
+        # )
+        # optimizer = ScheduledOptim(core_optimizer, slanted_triangular_scheduler)
 
     loss_function = torch.nn.CrossEntropyLoss()
 
     trainer = Trainer(model, optimizer, loss_function, num_epochs=hp.epochs,
                       use_cuda=CUDA, log_interval=hp.log_interval)
+
+    #  FIXME: This test block of code looks ugly here <2018-06-29 11:41:51, Jorge Balazs>
+    if hp.test:
+        if hp.model_hash is None:
+            raise RuntimeError(
+                'You should have provided a pre-trained model hash with the '
+                '--model_hash flag'
+            )
+
+        print(f'Testing model {model_path}')
+        eval_dict = trainer.evaluate(corpus.test_batches)
+        probs = np_softmax(eval_dict['output'])
+        probs_filepath = os.path.join(ext_experiment_path,
+                                      'test_probs.csv')
+        np.savetxt(probs_filepath, probs,
+                   delimiter=',', fmt='%.8f')
+        print(f'Saved prediction probs in {probs_filepath}')
+
+        labels_filepath = os.path.join(ext_experiment_path,
+                                       'predictions.txt')
+        labels = [label + '\n' for label in eval_dict['labels']]
+        with open(labels_filepath, 'w', encoding='utf-8') as f:
+            f.writelines(labels)
+        print(f'Saved prediction file in {labels_filepath}')
+        exit()
 
     writer = None
     if hp.write_mode != 'NONE':
@@ -264,7 +293,7 @@ def main():
                                delimiter=',', fmt='%.8f')
 
                     labels_filepath = os.path.join(logger.run_savepath,
-                                                   'predictions.txt')
+                                                   'predictions_dev.txt')
                     labels = [label + '\n' for label in eval_dict['labels']]
                     with open(labels_filepath, 'w', encoding='utf-8') as f:
                         f.writelines(labels)

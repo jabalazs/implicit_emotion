@@ -66,7 +66,7 @@ class Trainer(object):
                                       self.optimizer.step_num)
                 total_loss = 0
 
-    def evaluate(self, dev_batches, epoch, writer=None):
+    def evaluate(self, dev_batches, epoch=None, writer=None):
         self.model.eval()
         num_batches = dev_batches.num_batches
         outputs = []
@@ -88,7 +88,7 @@ class Trainer(object):
         num_total = len(pred_labels)
         accuracy = num_correct / num_total
         tqdm.write(f'\nAccuracy: {accuracy:.3f}\n')
-        if writer is not None:
+        if writer is not None and epoch is not None:
             writer.add_scalar('data/valid_accuracy', accuracy, epoch)
 
         # Generate prediction list
