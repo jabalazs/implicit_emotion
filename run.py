@@ -128,13 +128,7 @@ def main():
                         batch_size=hp.batch_size,
                         lowercase=hp.lowercase)
 
-    if hp.model_hash:
-        experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
-        ext_experiment_path = glob(experiment_path)
-        assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
-        model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
-        # FIXME: This will get replaced by the model being loaded below
-        model = torch.load(model_path)
+
 
     # Load pre-trained embeddings
     embeddings = Embeddings(config.embedding_dict[hp.embeddings],
@@ -155,24 +149,31 @@ def main():
                                               size=(char_vocab_size,
                                                     hp.char_emb_dim))
 
-    # Define some specific parameters for the model
-    num_classes = len(corpus.label2id)
-    batch_size = corpus.train_batches.batch_size
+    if hp.model_hash:
+        experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
+        ext_experiment_path = glob(experiment_path)
+        assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
+        model_path = os.path.join(ext_experiment_path[0], 'best_model.pth')
+        model = torch.load(model_path)
 
-    hidden_sizes = hp.lstm_hidden_size
-    model = IESTClassifier(num_classes, batch_size,
-                           embedding_matrix=embedding_matrix,
-                           char_embedding_matrix=char_embedding_matrix,
-                           word_encoding_method=hp.word_encoding_method,
-                           word_char_aggregation_method=hp.word_char_aggregation_method,
-                           sent_encoding_method=hp.model,
-                           hidden_sizes=hidden_sizes,
-                           use_cuda=CUDA,
-                           pooling_method=hp.pooling_method,
-                           batch_first=True,
-                           dropout=hp.dropout,
-                           sent_enc_dropout=hp.sent_enc_dropout,
-                           sent_enc_layers=hp.sent_enc_layers)
+    else:
+        # Define some specific parameters for the model
+        num_classes = len(corpus.label2id)
+        batch_size = corpus.train_batches.batch_size
+        hidden_sizes = hp.lstm_hidden_size
+        model = IESTClassifier(num_classes, batch_size,
+                               embedding_matrix=embedding_matrix,
+                               char_embedding_matrix=char_embedding_matrix,
+                               word_encoding_method=hp.word_encoding_method,
+                               word_char_aggregation_method=hp.word_char_aggregation_method,
+                               sent_encoding_method=hp.model,
+                               hidden_sizes=hidden_sizes,
+                               use_cuda=CUDA,
+                               pooling_method=hp.pooling_method,
+                               batch_first=True,
+                               dropout=hp.dropout,
+                               sent_enc_dropout=hp.sent_enc_dropout,
+                               sent_enc_layers=hp.sent_enc_layers)
 
     if CUDA:
         model.cuda()
@@ -223,7 +224,9 @@ def main():
     trainer = Trainer(model, optimizer, loss_function, num_epochs=hp.epochs,
                       use_cuda=CUDA, log_interval=hp.log_interval)
 
-    writer = SummaryWriter(logger.run_savepath)
+    writer = None
+    if hp.write_mode != 'NONE':
+        writer = SummaryWriter(logger.run_savepath)
     try:
         best_accuracy = None
         for epoch in tqdm(range(hp.epochs), desc='Epoch'):
