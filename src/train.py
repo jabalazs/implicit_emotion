@@ -68,6 +68,16 @@ class Trainer(object):
 
     def evaluate(self, dev_batches, epoch=None, writer=None):
         self.model.eval()
+
+        try:
+            #  FIXME: Hacky way of setting elmo in eval mode
+            # <2018-06-29 16:41:27, Jorge Balazs>
+            self.model.word_encoding_layer.word_encoding_layer._embedder.eval()
+        except AttributeError:
+            # We can safely ignore the previous line if the model does not use
+            # Elmo
+            pass
+
         num_batches = dev_batches.num_batches
         outputs = []
         true_labels = []
