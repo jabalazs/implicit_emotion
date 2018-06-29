@@ -18,7 +18,8 @@ import numpy as np
 import colored_traceback
 colored_traceback.add_hook(always=True)
 
-from ..optim.optim import NoamOpt
+from ..optim.optim import ScheduledOptim
+from ..optim.schedulers import TransformerScheduler
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -499,8 +500,9 @@ def get_std_opt(model):
     warmup = 4000
     optimizer = torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98),
                                  eps=1e-9)
+    scheduler = TransformerScheduler(model_size, factor, warmup_steps=warmup)
 
-    return NoamOpt(model_size, factor, warmup, optimizer)
+    return ScheduledOptim(optimizer, scheduler)
 
 
 def predict_synthetic_data():
