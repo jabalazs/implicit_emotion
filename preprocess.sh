@@ -34,6 +34,12 @@ cat $TRAIN_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $0}}' \
 
 cat $TRAIN_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $TRAIN_LABELS_PATH
 
+echo "Getting POS tags for $TRAIN_DATA_PATH with TwiboParser"
+
+./utils/run_twibo_parser.sh $CLEAN_TRAIN_DATA_PATH
+
+python ./utils/parse_twibo_output.py $CLEAN_TRAIN_DATA_PATH.tagged
+
 echo "Created $CLEAN_TRAIN_DATA_PATH and $TRAIN_LABELS_PATH"
 
 echo
@@ -53,16 +59,23 @@ cat tmp.csv | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $0}}' \
 
 cat tmp.csv | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $DEV_LABELS_PATH
 rm tmp.csv
+
+echo "Getting POS tags for $CLEAN_DEV_DATA_PATH with TwiboParser"
+
+./utils/run_twibo_parser.sh $CLEAN_DEV_DATA_PATH
+
+python ./utils/parse_twibo_output.py $CLEAN_DEV_DATA_PATH.tagged
+
 echo "Created $CLEAN_DEV_DATA_PATH and $DEV_LABELS_PATH"
 
 echo
 
-echo "Removing emojis from train"
-cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
-echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
-
-echo
-
-echo "Removing emojis from dev"
-cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
-echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
+#echo "Removing emojis from train"
+#cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
+#echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
+#
+#echo
+#
+#echo "Removing emojis from dev"
+#cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
+#echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
