@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from .. import config
 from ..seq_utils.pad import Padder
 
@@ -56,6 +58,8 @@ class IESTBatch(BaseNLPBatch):
         padded_sequences, sent_lengths, masks = self._pad1d(sequences)
 
         self['raw_sequences'] = [example['raw_sequence'] for example in self.examples]
+        self['raw_sequence_lengths'] = np.array([len(example['raw_sequence'])
+                                                 for example in self.examples])
         self['sequences'] = padded_sequences
         self['sent_lengths'] = sent_lengths
         self['masks'] = masks

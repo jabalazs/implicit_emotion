@@ -465,10 +465,7 @@ class IESTClassifier(nn.Module):
             if self.word_encoding_method == 'elmo':
                 embedded, elmo_masks = embedded
                 elmo_masks = elmo_masks.float()
-                # We only need the masks returned by elmo if we're using the
-                # transformer
-                if self.sent_encoding_method in ['transformer', 'none']:
-                    masks = elmo_masks
+                masks = elmo_masks
 
         else:
             embedded = batch
@@ -486,6 +483,8 @@ class IESTClassifier(nn.Module):
         sequences = batch['sequences']
         raw_sequences = batch['raw_sequences']
         sent_lengths = batch['sent_lengths']
+        if self.word_encoding_method == 'elmo':
+            sent_lengths = batch['raw_sequence_lengths']
         masks = batch['masks']
 
         # TODO: to_var is going to happen for every batch every epoch which

@@ -32,7 +32,6 @@ DEV_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
 TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
 DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
-# FIXME: CHANGE THIS WHEN WE HAVE THE REAL TEST DATA
 TEST = os.path.join(PREPROCESSED_DATA_PATH, 'test_no_emojis.csv')
 TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv')
 TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'test_labels_fake.csv')
