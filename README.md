@@ -29,6 +29,15 @@ pip install -r requirements.txt
 conda install matplotlib scikit-learn
 ```
 
+* Install TwiboParser to get postags (and potentially more features), in its default location (`$HOME`)
+
+```
+cd ~
+git clone https://github.com/ikekonglp/TweeboParser.git
+cd TweeboParser
+./install.sh
+```
+
 ## AllenNLP
 To use Elmo embeddings we need to install AllenNLP. Specific instructions can be found at https://github.com/allenai/allennlp
 We recommend using the following method: Within a conda environment with python 3.6 run the following commands:
@@ -48,6 +57,7 @@ INSTALL_TEST_REQUIREMENTS=false scripts/install_requirements.sh
 ```
 ./preprocess.sh
 ```
+
 
 ## External Data
 TODO: create script to automate this process.
