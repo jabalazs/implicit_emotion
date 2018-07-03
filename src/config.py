@@ -33,9 +33,9 @@ TRAIN_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'train_labels.csv')
 DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
 # FIXME: CHANGE THIS WHEN WE HAVE THE REAL TEST DATA
-TEST = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_emojis.csv')
-TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv')
-TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
+TEST = os.path.join(PREPROCESSED_DATA_PATH, 'test_no_emojis.csv')
+TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv')
+TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'test_labels_fake.csv')
 
 
 # MAPPINGS
@@ -48,13 +48,14 @@ embedding_dict = {
      'glove_twitter_25': GLOVE_TWITTER_25_EMB_PATH,
 }
 
-corpora_dict = {'iest': {'train': TRAIN,
-                         'dev': DEV,
-                         'test': TEST},
-                'iest_emoji': {'train': TRAIN_EMOJI,
-                               'dev': DEV_EMOJI,
-                               'test': TEST_EMOJI},
-                }
+corpora_dict = {
+    'iest': {'train': TRAIN,
+             'dev': DEV,
+             'test': TEST},
+    'iest_emoji': {'train': TRAIN_EMOJI,
+                   'dev': DEV_EMOJI,
+                   'test': TEST_EMOJI},
+}
 
 LABEL_PATHS = {'train': TRAIN_LABELS,
                'dev': DEV_LABELS,
