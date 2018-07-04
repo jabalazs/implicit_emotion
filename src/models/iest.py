@@ -465,8 +465,15 @@ class IESTClassifier(nn.Module):
             if self.word_encoding_method == 'elmo':
                 embedded, elmo_masks = embedded
                 elmo_masks = elmo_masks.float()
-                masks = elmo_masks
 
+                # elmo_masks are needed when masking the output from the ELMo
+                # layer. When using the BiLSTM after ELMo we use the sentence
+                # lengths (obtained from the id sequences) to pack the
+                # sequences. This makes the output of the BiLSTM compatible with
+                # the masks generated from the id sequences. When trying to mix
+                # both we get dimension mismatch errors.
+
+                masks = elmo_masks
         else:
             embedded = batch
 
@@ -483,8 +490,13 @@ class IESTClassifier(nn.Module):
         sequences = batch['sequences']
         raw_sequences = batch['raw_sequences']
         sent_lengths = batch['sent_lengths']
+
+        # when using raw_sequence_lengths (that consider periods within
+        # sentences) we also need to use the elmo masks
+
         if self.word_encoding_method == 'elmo':
             sent_lengths = batch['raw_sequence_lengths']
+
         masks = batch['masks']
 
         # TODO: to_var is going to happen for every batch every epoch which

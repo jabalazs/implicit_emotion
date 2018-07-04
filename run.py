@@ -98,6 +98,11 @@ arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
 arg_parser.add_argument("--test", action="store_true",
                         help="Run this script in test mode")
 
+arg_parser.add_argument(
+    "--max_lr", "-mlr", default=1e-3, type=float,
+    help="Max learning rate to be use with Ruder's slanted triangular learning "
+         "rate schedule")
+
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
@@ -199,27 +204,27 @@ def main():
         )
         optimizer = ScheduledOptim(core_optimizer, transformer_scheduler)
     else:
-        optimizer = OptimWithDecay(model.parameters(),
-                                   method=hp.optim,
-                                   initial_lr=hp.learning_rate,
-                                   max_grad_norm=hp.grad_clipping,
-                                   lr_decay=hp.learning_rate_decay,
-                                   start_decay_at=hp.start_decay_at,
-                                   decay_every=hp.decay_every)
+        # optimizer = OptimWithDecay(model.parameters(),
+        #                            method=hp.optim,
+        #                            initial_lr=hp.learning_rate,
+        #                            max_grad_norm=hp.grad_clipping,
+        #                            lr_decay=hp.learning_rate_decay,
+        #                            start_decay_at=hp.start_decay_at,
+        #                            decay_every=hp.decay_every)
 
-        # core_optimizer = torch.optim.Adam(
-        #     model.parameters(),
-        #     lr=0,
-        # )
+        core_optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=0,
+        )
 
-        # max_iter = corpus.train_batches.num_batches * hp.epochs
-        # slanted_triangular_scheduler = SlantedTriangularScheduler(
-        #     max_iter,
-        #     max_lr=0.005,
-        #     cut_fraction=0.1,
-        #     ratio=32
-        # )
-        # optimizer = ScheduledOptim(core_optimizer, slanted_triangular_scheduler)
+        max_iter = corpus.train_batches.num_batches * hp.epochs
+        slanted_triangular_scheduler = SlantedTriangularScheduler(
+            max_iter,
+            max_lr=hp.max_lr,
+            cut_fraction=0.1,
+            ratio=32
+        )
+        optimizer = ScheduledOptim(core_optimizer, slanted_triangular_scheduler)
 
     loss_function = torch.nn.CrossEntropyLoss()
 
@@ -236,6 +241,7 @@ def main():
 
         print(f'Testing model {model_path}')
         eval_dict = trainer.evaluate(corpus.test_batches)
+
         probs = np_softmax(eval_dict['output'])
         probs_filepath = os.path.join(ext_experiment_path,
                                       'test_probs.csv')
