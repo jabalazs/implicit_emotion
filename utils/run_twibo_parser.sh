@@ -18,11 +18,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with TweeboParser 1.0.  If not, see <http://www.gnu.org/licenses/>.
 
-
-# This script runs the whole pipeline of TweeboParser. It reads from a raw text input
-# and produce the CoNLL format dependency parses as its output (It calls all necessary
-# component, such as POS tagger, along the way).
-
 # Get the path of the components of TweeboParser
 #ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -40,19 +35,22 @@ if [ "$#" -ne 1 ]; then
     echo "Usage: ./run.sh [path_to_raw_input_file_one_sentence_a_line]"
 else
 
-mkdir -p working_dir
+mkdir -p $WORKING_DIR
 
 # Starting point:
 # -- Raw text tweets, one line per tweet.
 INPUT_FILE=$1
 
-# --> Run Twitter POS tagger on top of it. (Tokenization and Converting to CoNLL format along the way.)
-${SCRIPT_DIR}/tokenize_and_tag.sh ${ROOT_DIR} ${TAGGER_DIR} ${WORKING_DIR} ${MODEL_DIR} ${SCRIPT_DIR} ${INPUT_FILE}
+echo "Obtaining POS tags"
+set -eu
+java -XX:ParallelGCThreads=2 -Xmx2048m -jar $TAGGER_DIR/ark-tweet-nlp-0.3.2.jar\
+    --model ${MODEL_DIR}/tagging_model --output-format conll ${INPUT_FILE}\
+    > ${WORKING_DIR}/tagger_output.txt
 
-# --> Append Brown Clusters on the end of each word.
-/usr/bin/python2 ${SCRIPT_DIR}/AugumentBrownClusteringFeature46.py ${MODEL_DIR}/twitter_brown_clustering_full ${WORKING_DIR}/tagger.out N > ${WORKING_DIR}/tag.br.out
-
-cat ${WORKING_DIR}/tagger.out | awk '{print $2" "$5}' > ${1}.tagged
+# Write only 1st and 2nd columns when line is different to newline, otherwise just print a newline
+OUTPUT_FILE="$1.tagged"
+cat ${WORKING_DIR}/tagger_output.txt | awk '{if ($0 !~ /^$/) print $1" "$2; else print;}' > $OUTPUT_FILE
+echo "Created $OUTPUT_FILE."
 
 fi
 

@@ -50,6 +50,8 @@ cat $TRAIN_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $0}}' \
 
 cat $TRAIN_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $TRAIN_LABELS_PATH
 
+echo "Created $CLEAN_TRAIN_DATA_PATH and $TRAIN_LABELS_PATH"
+
 echo "Getting POS tags for $TRAIN_DATA_PATH with TwiboParser"
 
 # this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
@@ -58,9 +60,7 @@ echo "Getting POS tags for $TRAIN_DATA_PATH with TwiboParser"
 # this script will generate two files:
 # - $CLEAN_TRAIN_DATA_PATH.tagged.tokens
 # - $CLEAN_TRAIN_DATA_PATH.tagged.pos
-python ./utils/parse_twibo_output.py $CLEAN_TRAIN_DATA_PATH.tagged
-
-echo "Created $CLEAN_TRAIN_DATA_PATH and $TRAIN_LABELS_PATH"
+./utils/parse_twibo_output.py $CLEAN_TRAIN_DATA_PATH.tagged
 
 echo
 
@@ -82,6 +82,17 @@ rm tmp.csv
 
 echo "Created $CLEAN_DEV_DATA_PATH and $DEV_LABELS_PATH"
 echo
+echo "Getting POS tags for $CLEAN_DEV_DATA_PATH with TwiboParser"
+
+# this script will generate the file $CLEAN_DEV_DATA_PATH.tagged
+./utils/run_twibo_parser.sh $CLEAN_DEV_DATA_PATH
+
+# this script will generate two files:
+# - $CLEAN_DEV_DATA_PATH.tagged.tokens
+# - $CLEAN_DEV_DATA_PATH.tagged.pos
+python ./utils/parse_twibo_output.py $CLEAN_DEV_DATA_PATH.tagged
+
+echo
 echo "Preprocessing $TEST_DATA_PATH"
 
 cat $TEST_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $0}}' \
@@ -93,19 +104,14 @@ cat $TEST_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $0}}' \
 
 cat $TEST_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $TEST_LABELS_PATH
 echo "Created $CLEAN_TEST_DATA_PATH and $TEST_LABELS_PATH"
-
-echo "Getting POS tags for $CLEAN_DEV_DATA_PATH with TwiboParser"
-
-# this script will generate the file $CLEAN_DEV_DATA_PATH.tagged
-./utils/run_twibo_parser.sh $CLEAN_DEV_DATA_PATH
+echo
+# this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
+./utils/run_twibo_parser.sh $CLEAN_TEST_DATA_PATH
 
 # this script will generate two files:
-# - $CLEAN_DEV_DATA_PATH.tagged.tokens
-# - $CLEAN_DEV_DATA_PATH.tagged.pos
-python ./utils/parse_twibo_output.py $CLEAN_DEV_DATA_PATH.tagged
-
-echo "Created $CLEAN_DEV_DATA_PATH and $DEV_LABELS_PATH"
-
+# - $CLEAN_TEST_DATA_PATH.tagged.tokens
+# - $CLEAN_TEST_DATA_PATH.tagged.pos
+./utils/parse_twibo_output.py $CLEAN_TEST_DATA_PATH.tagged
 echo
 
 echo "Removing emojis from train"

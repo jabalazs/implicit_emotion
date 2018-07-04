@@ -1,6 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/env python3
 
 import argparse
 
@@ -16,7 +14,7 @@ tokens = []
 pos_tags = []
 
 for line in lines:
-    if line.startswith(' \n'):
+    if line.startswith('\n'):
         tagged_sentences.append((tokens, pos_tags))
         tokens = []
         pos_tags = []
@@ -32,10 +30,11 @@ tokens_file_path = args.parsed_file + '.tokens'
 pos_file_path = args.parsed_file + '.pos'
 
 with open(tokens_file_path, 'w') as tokens_file:
-    with  open(pos_file_path, 'w') as pos_file:
+    with open(pos_file_path, 'w') as pos_file:
         for tokens, pos_tags in tagged_sentences:
             txt_tokens = ' '.join(tokens)
-            txt_pos =  ' '.join(pos_tags)
+            txt_pos = ' '.join(pos_tags)
             tokens_file.write('{}\n'.format(txt_tokens))
             pos_file.write('{}\n'.format(txt_pos))
 
+print('Created {} and {}.'.format(tokens_file_path, pos_file_path))
