@@ -1,18 +1,6 @@
 import math
 
 
-# def slanted_triangular_lr(step, max_step, max_lr=0.01, cut_fraction=0.1, ratio=32):
-
-#     cut = math.floor(max_step * cut_fraction)
-#     if step < cut:
-#         p = step / cut
-#     else:
-#         p = 1 - ((step - cut) / (cut * (1 / cut_fraction - 1)))
-#     learning_rate = max_lr * (1 + p * (ratio - 1)) / ratio
-
-#     return learning_rate
-
-
 class SlantedTriangularScheduler(object):
 
     """Scheduler producing a slanted triangular learning rate schedule
@@ -74,7 +62,7 @@ class TransformerScheduler(object):
     https://arxiv.org/abs/1706.03762"""
 
     def __init__(self, model_size, factor, warmup_steps):
-        """TODO: Docstring for __init__.
+        """
 
         Parameters
         ----------
