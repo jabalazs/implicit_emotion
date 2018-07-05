@@ -98,6 +98,10 @@ arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
 arg_parser.add_argument("--test", action="store_true",
                         help="Run this script in test mode")
 
+arg_parser.add_argument("--pos_emb_dim", "-pem", default=None, type=int,
+                        help="The dimension to use for the POS embeddings. "
+                             "If None, POS tags will not be used")
+
 arg_parser.add_argument(
     "--max_lr", "-mlr", default=1e-3, type=float,
     help="Max learning rate to be use with Ruder's slanted triangular learning "
@@ -129,13 +133,17 @@ def main():
     if torch.cuda.is_available() and not hp.no_cuda:
         CUDA = True
 
+    USE_POS = False
+    if hp.pos_emb_dim is not None:
+        USE_POS = True
+
     corpus = IESTCorpus(config.corpora_dict, hp.corpus,
                         force_reload=hp.force_reload,
                         train_data_proportion=hp.train_data_proportion,
                         dev_data_proportion=hp.dev_data_proportion,
                         batch_size=hp.batch_size,
                         lowercase=hp.lowercase,
-                        use_pos=True)
+                        use_pos=USE_POS)
 
     # Load pre-trained embeddings
     embeddings = Embeddings(config.embedding_dict[hp.embeddings],
@@ -156,6 +164,14 @@ def main():
                                               size=(char_vocab_size,
                                                     hp.char_emb_dim))
 
+    pos_embedding_matrix = None
+    if USE_POS:
+            # Initialize pos embedding matrix randomly
+        pos_vocab_size = len(corpus.pos_lang.token2id)
+        pos_embedding_matrix = np.random.uniform(-0.05, 0.05,
+                                                 size=(pos_vocab_size,
+                                                       hp.pos_emb_dim))
+
     if hp.model_hash:
         experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
         ext_experiment_path = glob(experiment_path)
@@ -172,6 +188,7 @@ def main():
         model = IESTClassifier(num_classes, batch_size,
                                embedding_matrix=embedding_matrix,
                                char_embedding_matrix=char_embedding_matrix,
+                               pos_embedding_matrix=pos_embedding_matrix,
                                word_encoding_method=hp.word_encoding_method,
                                word_char_aggregation_method=hp.word_char_aggregation_method,
                                sent_encoding_method=hp.model,

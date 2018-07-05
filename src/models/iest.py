@@ -362,22 +362,24 @@ class IESTClassifier(nn.Module):
     ----------
     num_classes: int
     batch_size : int
-    embedding_matrix: numpy.ndarray
-    char_embedding_matrix: numpy.ndarray
-    word_encoding_method: str
-    word_char_aggregation_method: str
-    sent_encoding_method: str
-    hidden_sizes:
-    sent_enc_layers: int
-    pooling_method: str
-    batch_first: bool
-    dropout: float
-    sent_enc_dropout: float
-    use_cuda: bool
+    embedding_matrix : numpy.ndarray
+    char_embedding_matrix : numpy.ndarray
+    pos_embedding_matrix : numpy.ndarray
+    word_encoding_method : str
+    word_char_aggregation_method : str
+    sent_encoding_method : str
+    hidden_sizes :
+    sent_enc_layers : int
+    pooling_method : str
+    batch_first : bool
+    dropout : float
+    sent_enc_dropout : float
+    use_cuda : bool
         """
     def __init__(self, num_classes, batch_size,
                  embedding_matrix=None,
                  char_embedding_matrix=None,
+                 pos_embedding_matrix=None,
                  word_encoding_method='embed',
                  word_char_aggregation_method=None,
                  sent_encoding_method='bilstm',
@@ -409,6 +411,10 @@ class IESTClassifier(nn.Module):
         if char_embedding_matrix is not None:
             self.char_embeddings = to_torch_embedding(char_embedding_matrix)
 
+        self.pos_embeddings = None
+        if pos_embedding_matrix is not None:
+            self.pos_embeddings = to_torch_embedding(pos_embedding_matrix)
+
         torch_embeddings = to_torch_embedding(embedding_matrix)
 
         self.word_encoding_layer = WordEncodingLayer(
@@ -431,8 +437,12 @@ class IESTClassifier(nn.Module):
             dropout=self.sent_enc_dropout
         )
 
+        sent_encoding_dim = self.sent_encoding_layer.out_dim
+        if self.pos_embeddings is not None:
+            sent_encoding_dim += self.pos_embeddings.embedding_dim
+
         self.pooling_layer = PoolingLayer(self.pooling_method,
-                                          self.sent_encoding_layer.out_dim)
+                                          sent_encoding_dim)
 
         self.dense_layer = nn.Sequential(
             nn.Linear(self.pooling_layer.out_dim, 512),
@@ -441,7 +451,7 @@ class IESTClassifier(nn.Module):
             nn.Linear(512, self.num_classes)
         )
 
-    def encode(self, batch, char_batch,
+    def encode(self, batch, char_batch, pos_batch,
                sent_lengths, word_lengths,
                masks=None, char_masks=None, embed_words=True,
                raw_sequences=None):
@@ -480,6 +490,10 @@ class IESTClassifier(nn.Module):
         sent_embedding = self.sent_encoding_layer(embedded,
                                                   lengths=sent_lengths,
                                                   masks=masks)
+        if pos_batch is not None:
+            emb_pos_batch = self.pos_embeddings(pos_batch)
+            sent_embedding = torch.cat([sent_embedding, emb_pos_batch], dim=2)
+
         agg_sent_embedding = self.pooling_layer(sent_embedding,
                                                 lengths=sent_lengths,
                                                 masks=masks)
@@ -511,6 +525,13 @@ class IESTClassifier(nn.Module):
                        self.use_cuda,
                        requires_grad=False)
 
+        pos_sequences = None
+        if self.pos_embeddings:
+            pos_sequences = batch['pos_sequences']
+            pos_sequences = to_var(torch.LongTensor(pos_sequences),
+                                   self.use_cuda,
+                                   requires_grad=False)
+
         if self.char_embeddings:
             char_sequences = batch['char_sequences']
             word_lengths = batch['word_lengths']
@@ -526,6 +547,7 @@ class IESTClassifier(nn.Module):
 
         sent_vec = self.encode(sequences,
                                char_batch=char_sequences,
+                               pos_batch=pos_sequences,
                                sent_lengths=sent_lengths,
                                word_lengths=word_lengths,
                                masks=masks,
