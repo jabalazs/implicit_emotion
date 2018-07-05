@@ -41,21 +41,20 @@ Also remember to set the path for the AllenNLP directory (`ALLENNLP_PATH`) in
 [`config.py`](src/config.py).
 
 ## TweeboParser
-TweeboParser provides postags (and potentially more features).
-We recommend installing it in its default location (`$HOME`).
+We are using a forked version of [`ark-tweet-nlp`](https://github.com/jabalazs/ark-tweet-nlp/tree/7e37f5badcc28d1b5ad595d26721db3832fd1dde)
+for obtaining POS tags without using its built-in tokenization feature. This
+repo already comes with the resulting jar (`ark-tweet-nlp-0.3.2.jar`) in
+[`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
 
-```
-cd ~
-git clone https://github.com/ikekonglp/TweeboParser.git
-cd TweeboParser
-bash install.sh
-```
-
-Note that TweeboParser needs java to work. You can easily install it within your
+This needs java to work. You can easily install it within your
 conda environment with
 ```
 conda install -c cyclus java-jdk
 ```
+
+You can change the pre-trained POS tagging model by modifying the
+`PRETRAINED_MODEL_NAME` variable in [`utils/run_postagger.sh`](utils/run_postagger.sh)
+with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
 
 ## Data
 * Get the data by running the following command and typing your password when prompted
