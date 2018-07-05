@@ -36,6 +36,10 @@ TEST = os.path.join(PREPROCESSED_DATA_PATH, 'test_no_emojis.csv')
 TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv')
 TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'test_labels_fake.csv')
 
+TRAIN_POS = os.path.join(PREPROCESSED_DATA_PATH, 'train.csv.tagged.pos')
+DEV_POS = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv.tagged.pos')
+TEST_POS = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv.tagged.pos')
+
 
 # MAPPINGS
 embedding_dict = {
@@ -48,12 +52,24 @@ embedding_dict = {
 }
 
 corpora_dict = {
-    'iest': {'train': TRAIN,
-             'dev': DEV,
-             'test': TEST},
-    'iest_emoji': {'train': TRAIN_EMOJI,
-                   'dev': DEV_EMOJI,
-                   'test': TEST_EMOJI},
+    'iest': {
+        'train': TRAIN,
+        'dev': DEV,
+        'test': TEST
+    },
+    'iest_emoji': {
+        'train': TRAIN_EMOJI,
+        'dev': DEV_EMOJI,
+        'test': TEST_EMOJI
+    },
+}
+
+pos_corpora_dict = {
+    'iest_emoji': {
+        'train': TRAIN_POS,
+        'dev': DEV_POS,
+        'test': TEST_POS
+    }
 }
 
 LABEL_PATHS = {'train': TRAIN_LABELS,

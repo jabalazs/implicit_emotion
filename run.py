@@ -129,12 +129,13 @@ def main():
     if torch.cuda.is_available() and not hp.no_cuda:
         CUDA = True
 
-    corpus = IESTCorpus(hp.corpus,
+    corpus = IESTCorpus(config.corpora_dict, hp.corpus,
                         force_reload=hp.force_reload,
                         train_data_proportion=hp.train_data_proportion,
                         dev_data_proportion=hp.dev_data_proportion,
                         batch_size=hp.batch_size,
-                        lowercase=hp.lowercase)
+                        lowercase=hp.lowercase,
+                        use_pos=True)
 
     # Load pre-trained embeddings
     embeddings = Embeddings(config.embedding_dict[hp.embeddings],

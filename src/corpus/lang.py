@@ -25,6 +25,14 @@ class Lang(object):
         self.char2id, self.char_freqs = self._build_char_dict()
 
     def _build_token_dict(self, sents):
+        #  FIXME: Hardcoding the usage of the SPECIAL_TOKENS global here makes
+        # it difficult to use this class for purposes other than processing NLP
+        # sentences. For example I'm using this for parsing POS tags that come
+        # arranged in the same format as the input data, and the special tokens
+        # are being preprended to the the token_dict even though they make
+        # no sense there. The solution would be to pass the special tokens and
+        # special chars to the class constructor and work with those
+        # <2018-07-05 12:06:53, Jorge Balazs>
         token_dict = {key: value for key, value in config.SPECIAL_TOKENS.items()}
         curr_token_id = len(token_dict)
         token_freqs = defaultdict(int)

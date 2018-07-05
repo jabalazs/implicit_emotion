@@ -15,6 +15,7 @@ class BaseNLPBatch(dict):
         self.batch_first = kwargs.pop('batch_first')
         self.batch_size = kwargs.pop('batch_size')
         self.padder = Padder(config.PAD_ID)
+        self.use_pos = kwargs.pop('use_pos')
 
     def _pad1d(self, sequences, *args, **kwargs):
         """sequences: a list of lists"""
@@ -69,6 +70,10 @@ class IESTBatch(BaseNLPBatch):
 
         self['ids'] = ids
 
+        if self.use_pos:
+            pos_sequences = [example['pos_id_sequence'] for example in self.examples]
+            self['pos_sequences'], _, _ = self._pad1d(pos_sequences)
+
         if self.use_chars:
             char_sequences = [example['char_sequence']
                               for example in self.examples]
@@ -101,7 +106,8 @@ class IESTBatch(BaseNLPBatch):
 class BatchIterator(object):
 
     def __init__(self, examples, batch_size, data_proportion=1.0,
-                 shuffle=False, batch_first=False, use_chars=False):
+                 shuffle=False, batch_first=False, use_chars=False,
+                 use_pos=False):
 
         """Create batches of length batch_size from the examples
         Args:
@@ -119,6 +125,7 @@ class BatchIterator(object):
         self.batch_first = batch_first
 
         self.use_chars = use_chars
+        self.use_pos = use_pos
 
         if shuffle:
             random.shuffle(self.examples)
@@ -151,7 +158,8 @@ class BatchIterator(object):
         return IESTBatch(examples_slice,
                          batch_size=self.batch_size,
                          batch_first=self.batch_first,
-                         use_chars=self.use_chars)
+                         use_chars=self.use_chars,
+                         use_pos=self.use_pos)
 
     def __len__(self):
         return self.num_batches
