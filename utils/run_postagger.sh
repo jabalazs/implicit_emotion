@@ -41,7 +41,7 @@ java -XX:ParallelGCThreads=2 -Xmx2048m -jar $ROOT_DIR/ark-tweet-nlp-0.3.2.jar\
     > tagger_output.txt
 
 # Write only 1st and 2nd columns when line is different to newline, otherwise just print a newline
-OUTPUT_FILE="$1.tagged"
+OUTPUT_FILE="$1.tagged.pre"
 cat tagger_output.txt | awk '{if ($0 !~ /^$/) print $1" "$2; else print;}' > $OUTPUT_FILE
 echo "Created $OUTPUT_FILE."
 

@@ -57,7 +57,8 @@ echo "Getting POS tags for $TRAIN_DATA_PATH with TwiboParser"
 # this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_TRAIN_DATA_PATH
 
-cat $CLEAN_TRAIN_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_TRAIN_DATA_PATH.tagged
+cat $CLEAN_TRAIN_DATA_PATH.tagged.pre | ./utils/postprocess_postag_file.py > $CLEAN_TRAIN_DATA_PATH.tagged
+rm $CLEAN_TRAIN_DATA_PATH.tagged.pre
 
 # this script will generate two files:
 # - $CLEAN_TRAIN_DATA_PATH.tagged.tokens
@@ -89,7 +90,8 @@ echo "Getting POS tags for $CLEAN_DEV_DATA_PATH with TwiboParser"
 # this script will generate the file $CLEAN_DEV_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_DEV_DATA_PATH
 
-cat $CLEAN_DEV_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_DEV_DATA_PATH.tagged
+cat $CLEAN_DEV_DATA_PATH.tagged.pre | ./utils/postprocess_postag_file.py > $CLEAN_DEV_DATA_PATH.tagged
+rm $CLEAN_DEV_DATA_PATH.tagged.pre
 
 # this script will generate two files:
 # - $CLEAN_DEV_DATA_PATH.tagged.tokens
@@ -112,7 +114,8 @@ echo
 # this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_TEST_DATA_PATH
 
-cat $CLEAN_TEST_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_TEST_DATA_PATH.tagged
+cat $CLEAN_TEST_DATA_PATH.tagged.pre | ./utils/postprocess_postag_file.py > $CLEAN_TEST_DATA_PATH.tagged
+rm $CLEAN_TEST_DATA_PATH.tagged.pre
 
 # this script will generate two files:
 # - $CLEAN_TEST_DATA_PATH.tagged.tokens
@@ -120,19 +123,19 @@ cat $CLEAN_TEST_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_T
 ./utils/parse_twibo_output.py $CLEAN_TEST_DATA_PATH.tagged
 echo
 
-echo "Removing emojis from train"
-cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
-echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
+# echo "Removing emojis from train"
+# cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
+# echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
 
-echo
+# echo
 
-echo "Removing emojis from dev"
-cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
-echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
+# echo "Removing emojis from dev"
+# cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
+# echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
 
-echo
+# echo
 
-echo "Removing emojis from test"
-cat $CLEAN_TEST_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TEST_NO_EMOJIS_DATA_PATH
-echo "Created $CLEAN_TEST_NO_EMOJIS_DATA_PATH"
+# echo "Removing emojis from test"
+# cat $CLEAN_TEST_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TEST_NO_EMOJIS_DATA_PATH
+# echo "Created $CLEAN_TEST_NO_EMOJIS_DATA_PATH"
 
