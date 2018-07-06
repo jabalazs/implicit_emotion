@@ -57,6 +57,8 @@ echo "Getting POS tags for $TRAIN_DATA_PATH with TwiboParser"
 # this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_TRAIN_DATA_PATH
 
+cat $CLEAN_TRAIN_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_TRAIN_DATA_PATH.tagged
+
 # this script will generate two files:
 # - $CLEAN_TRAIN_DATA_PATH.tagged.tokens
 # - $CLEAN_TRAIN_DATA_PATH.tagged.pos
@@ -87,6 +89,8 @@ echo "Getting POS tags for $CLEAN_DEV_DATA_PATH with TwiboParser"
 # this script will generate the file $CLEAN_DEV_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_DEV_DATA_PATH
 
+cat $CLEAN_DEV_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_DEV_DATA_PATH.tagged
+
 # this script will generate two files:
 # - $CLEAN_DEV_DATA_PATH.tagged.tokens
 # - $CLEAN_DEV_DATA_PATH.tagged.pos
@@ -107,6 +111,8 @@ echo "Created $CLEAN_TEST_DATA_PATH and $TEST_LABELS_PATH"
 echo
 # this script will generate the file $CLEAN_TRAIN_DATA_PATH.tagged
 ./utils/run_postagger.sh $CLEAN_TEST_DATA_PATH
+
+cat $CLEAN_TEST_DATA_PATH.tagged | ./utils/postprocess_postag_file.py > $CLEAN_TEST_DATA_PATH.tagged
 
 # this script will generate two files:
 # - $CLEAN_TEST_DATA_PATH.tagged.tokens
