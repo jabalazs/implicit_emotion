@@ -360,7 +360,7 @@ class IESTClassifier(nn.Module):
 
     Parameters
     ----------
-    num_classes: int
+    num_classes : int
     batch_size : int
     embedding_matrix : numpy.ndarray
     char_embedding_matrix : numpy.ndarray
@@ -368,7 +368,7 @@ class IESTClassifier(nn.Module):
     word_encoding_method : str
     word_char_aggregation_method : str
     sent_encoding_method : str
-    hidden_sizes :
+    hidden_sizes : list
     sent_enc_layers : int
     pooling_method : str
     batch_first : bool
@@ -507,7 +507,6 @@ class IESTClassifier(nn.Module):
 
         # when using raw_sequence_lengths (that consider periods within
         # sentences) we also need to use the elmo masks
-
         if self.word_encoding_method == 'elmo':
             sent_lengths = batch['raw_sequence_lengths']
 

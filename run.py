@@ -107,6 +107,9 @@ arg_parser.add_argument(
     help="Max learning rate to be use with Ruder's slanted triangular learning "
          "rate schedule")
 
+arg_parser.add_argument("--spreadsheet", "-ss", action='store_true',
+                        help="Save results in google spreadsheet")
+
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
@@ -136,6 +139,10 @@ def main():
     USE_POS = False
     if hp.pos_emb_dim is not None:
         USE_POS = True
+
+    SAVE_IN_SPREADSHEET = False
+    if hp.spreadsheet:
+        SAVE_IN_SPREADSHEET = True
 
     corpus = IESTCorpus(config.corpora_dict, hp.corpus,
                         force_reload=hp.force_reload,
@@ -330,9 +337,11 @@ def main():
                                            model,
                                            progress_bar=tqdm)
 
-        # logger.insert_in_googlesheets()
+        if SAVE_IN_SPREADSHEET:
+            logger.insert_in_googlesheets()
     except KeyboardInterrupt:
-        # logger.insert_in_googlesheets()
+        if SAVE_IN_SPREADSHEET:
+            logger.insert_in_googlesheets()
         pass
 
 

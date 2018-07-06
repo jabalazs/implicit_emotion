@@ -26,7 +26,7 @@ class GsheetsClient(object):
         credentials = ServiceAccountCredentials.from_json_keyfile_name(config.JSON_KEYFILE_PATH,
                                                                        scope)
         gc = gspread.authorize(credentials)
-        self.client = gc.open("server_experiments")
+        self.client = gc.open(config.SPREADSHEET_NAME)
 
     def worksheet(self, worksheet_name):
         gspread_wks = self.client.worksheet(worksheet_name)

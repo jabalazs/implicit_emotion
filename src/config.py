@@ -135,5 +135,11 @@ DATABASE_CONNECTION_STRING = 'sqlite:///' + os.path.join(RESULTS_PATH,
                                                          _DB_NAME)
 
 
-JSON_KEYFILE_PATH = 'experiments database-a61b695b86f4.json'
-# SERVER_NAME = open('server_name', 'r').read().strip()
+JSON_KEYFILE_PATH = 'experiments-database-8ee4da525610.json'
+
+try:
+    SERVER_NAME = open('server_name', 'r').read().strip()
+except FileNotFoundError:
+    pass
+
+SPREADSHEET_NAME = 'iest_experiments'

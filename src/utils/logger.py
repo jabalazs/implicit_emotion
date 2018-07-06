@@ -4,6 +4,8 @@ import hashlib
 import json
 import subprocess
 
+from datetime import datetime
+
 # shouldn't do this!! the point is for this not to be library specific
 import torch
 
@@ -12,11 +14,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from .io import (write_output)
+from .. import config
+
 from .gsheets import GsheetsClient
 
-from datetime import datetime
-
-from .. import config
 
 try:
     import dataset as dt
