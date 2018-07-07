@@ -427,6 +427,8 @@ class IESTClassifier(nn.Module):
             use_cuda=self.use_cuda
         )
 
+        self.word_dropout = nn.Dropout(self.dropout)
+
         self.sent_encoding_layer = SentenceEncodingLayer(
             self.sent_encoding_method,
             self.word_encoding_layer.embedding_dim,
@@ -436,6 +438,8 @@ class IESTClassifier(nn.Module):
             use_cuda=self.use_cuda,
             dropout=self.sent_enc_dropout
         )
+
+        self.sent_dropout = nn.Dropout(self.sent_enc_dropout)
 
         sent_encoding_dim = self.sent_encoding_layer.out_dim
         if self.pos_embeddings is not None:
@@ -487,12 +491,16 @@ class IESTClassifier(nn.Module):
         else:
             embedded = batch
 
+        embedded = self.word_dropout(embedded)
+
         sent_embedding = self.sent_encoding_layer(embedded,
                                                   lengths=sent_lengths,
                                                   masks=masks)
         if pos_batch is not None:
             emb_pos_batch = self.pos_embeddings(pos_batch)
             sent_embedding = torch.cat([sent_embedding, emb_pos_batch], dim=2)
+
+        sent_embedding = self.sent_dropout(sent_embedding)
 
         agg_sent_embedding = self.pooling_layer(sent_embedding,
                                                 lengths=sent_lengths,

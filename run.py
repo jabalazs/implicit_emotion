@@ -67,10 +67,10 @@ arg_parser.add_argument('--pooling_method', type=str, default='max',
 
 arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.0,
                         help='Dropout between sentence encoding lstm layers. '
-                             '0 means no dropout.')
+                             'and after the sent enc lstm. 0 means no dropout.')
 
 arg_parser.add_argument('--dropout', type=float, default=0.1,
-                        help='Dropout applied to layers. 0 means no dropout.')
+                        help='Dropout applied to layers and final MLP. 0 means no dropout.')
 
 arg_parser.add_argument('--model_hash', type=str, default=None,
                         help='Hash of the model to load, can be a partial hash')
