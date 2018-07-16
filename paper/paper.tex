@@ -1,0 +1,159 @@
+%
+% File naaclhlt2018.tex
+%
+%% Based on the style files for NAACL-HLT 2018, which were
+%% Based on the style files for ACL-2015, with some improvements
+%%  taken from the NAACL-2016 style
+%% Based on the style files for ACL-2014, which were, in turn,
+%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
+%% EACL-2009, IJCNLP-2008...
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[hyperref]{emnlp2018}
+% \usepackage[showframe=true]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{lipsum}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage[hang,flushmargin]{footmisc} % remove indentation from footnotes
+% \hypersetup{draft}
+
+%\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
+
+%\setlength\titlebox{5cm}
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+\newcommand\BibTeX{B{\sc ib}\TeX}
+\newcommand\confname{EMNLP 2018}
+\newcommand\conforg{SIGDAT}
+\newcommand{\colrule}{\noindent\rule{8cm}{0.4pt}}
+\newcommand{\colruleend}{\noindent\rule{8cm}{2.0pt}}
+
+% Avoid breaking inline equations ALWAYS (might break layout)
+% https://tex.stackexchange.com/questions/14241/how-can-i-prevent-latex-from-breaking-inline-formulas-globally
+\relpenalty=10000
+\binoppenalty=10000
+
+
+\title{IIIDYT at IEST 2018: Implicit Emotion Classification With Deep
+Contextualized Word Representations}
+
+\author{First Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\
+  \And{}
+  Second Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+no sea takimata sanctus est. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+sanctus est Lorem ipsum dolor sit amet.
+
+\end{abstract}
+
+\section{Introduction}
+\begin{itemize}
+    \item High level description of the task~\cite{klinger2018iest} and its \textit{raison d'être}
+        (Francés para Edison)
+    \item High level description of the model used and results obtained
+\end{itemize}
+
+\section{Related Work}
+\begin{itemize}
+    \item briefly describe previous Wassa papers~\cite{baziotis2018ntua,
+        duppada2018seernet, abdou2018affecthor} (Should we do this despite not
+        having based our work in any of them?)
+    \item Talk about elmo~\cite{peters2018deep}
+\end{itemize}
+
+\section{Proposed Model}
+\subsection{Preprocessing}
+\begin{itemize}
+    \item Replaced \texttt{\footnotesize[\#TRIGGERWORD\#]}, \texttt{\footnotesize@USERNAME},
+        \texttt{\footnotesize[NEWLINE]}, and \texttt{\footnotesize http://url.removed}, by
+        \texttt{\footnotesize\_\_TRIGGERWORD\_\_}, \texttt{\footnotesize\_\_USERNAME\_\_},
+        \texttt{\footnotesize\_\_NEWLINE\_\_}, and \texttt{\footnotesize\_\_URL\_\_} respectively.
+    \item Tokenized by using an emoji-aware modified version of the
+        \texttt{twokenize.py}\footnote{\tiny\url{https://github.com/myleott/ark-twokenize-py}}
+        script. To incorporate emoji knowledge we used an emoji
+        database\footnote{\tiny\url{https://github.com/carpedm20/emoji/blob/e7bff32/emoji/unicode_codes.py}}
+        which we also modified for avoiding conflict with emoji sharing unicode
+        codes with common glyphs used in twitter such as the hashtag symbol.
+        (Link to appendix for specifics; mention \texttt{keycaps})
+\end{itemize}
+
+
+\subsection{Model Architecture}
+
+\begin{itemize}
+    \item Elmo~\cite{peters2018deep} as word representations
+    \item BiLSTM~\cite{graves2005framewise, graves2013speech} as context fine-tuner (?)
+    \item max-pooling as word aggregation method
+    \item slanted triangular learning rate schedule with mostly default params
+        (just set the $\eta_{max}$ parameter to $0.001$.)
+        as lr schedule~\cite{howard2018universal}
+    \item 0.5 dropout after word layer, 0.1 after sentence layer~\cite{srivastava2014dropout}
+    \item Only external feature is the elmo pre-trained language model
+\end{itemize}
+
+\subsection{Ensembling}
+
+We trained several models with the previously-mentioned architecture, but
+different initial parameters (by changing the random seed). We fed them the test
+data, and averaged the predicted output probabilities. We tried all the possible
+combinations of averaging $2$ to $10$ models, and found out that a specific
+combination of $6$ models yielded the best results (show bar graph). This
+provides evidence for the fact that having the same number of independent
+classifiers as class labels provides the best results~\cite{bonab2016theoretical}.
+
+
+\section{(Failed) experiments}
+\begin{itemize}
+    \item scalar gates, vector gates and elmo
+    \item dropouts?
+    \item POS tags
+    \item combined pooling
+    \item different learning rate schedules
+    \item emoji vs no emoji
+    \item sentence encoding lstm hidden size
+    \item transformer architecture
+    \item show different accuracies when using different training sizes?
+\end{itemize}
+
+\section{Conclusions and Future Work}
+
+
+\bibliography{bibliography}
+\bibliographystyle{acl_natbib_nourl}
+
+
+\end{document}
