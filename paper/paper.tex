@@ -24,6 +24,7 @@
 \usepackage{amssymb}
 \usepackage{bm}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usepackage[hang,flushmargin]{footmisc} % remove indentation from footnotes
 % \hypersetup{draft}
 
@@ -82,7 +83,8 @@ sanctus est Lorem ipsum dolor sit amet.
 
 \section{Introduction}
 \begin{itemize}
-    \item High level description of the task~\cite{klinger2018iest} and its \textit{raison d'être}
+    \item High level description of the task~\cite{klinger2018iest} and
+          its \textit{raison d'être}
         (Francés para Edison)
     \item High level description of the model used and results obtained
 \end{itemize}
@@ -101,7 +103,8 @@ sanctus est Lorem ipsum dolor sit amet.
     \item Replaced \texttt{\footnotesize[\#TRIGGERWORD\#]}, \texttt{\footnotesize@USERNAME},
         \texttt{\footnotesize[NEWLINE]}, and \texttt{\footnotesize http://url.removed}, by
         \texttt{\footnotesize\_\_TRIGGERWORD\_\_}, \texttt{\footnotesize\_\_USERNAME\_\_},
-        \texttt{\footnotesize\_\_NEWLINE\_\_}, and \texttt{\footnotesize\_\_URL\_\_} respectively.
+        \texttt{\footnotesize\_\_NEWLINE\_\_}, and
+        \texttt{\footnotesize\_\_URL\_\_} respectively.
     \item Tokenized by using an emoji-aware modified version of the
         \texttt{twokenize.py}\footnote{\tiny\url{https://github.com/myleott/ark-twokenize-py}}
         script. To incorporate emoji knowledge we used an emoji
@@ -135,6 +138,23 @@ combination of $6$ models yielded the best results (show bar graph). This
 provides evidence for the fact that having the same number of independent
 classifiers as class labels provides the best results~\cite{bonab2016theoretical}.
 
+\begin{figure}
+    \centering
+    % \includegraphics[scale=0.4]{images/RNN_aqg.pdf}
+    % \includegraphics[scale=0.3]{images/best_ensembles.eps}
+    \includegraphics[width=\columnwidth]{images/best_ensembles.eps}
+\caption{Best Macro F1 vs. Number of Ensembled Models}
+\label{fig:}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{images/average_ensembles.eps}
+\caption{Best Macro F1 vs. Number of Ensembled Models}
+\label{fig:}
+\end{figure}
+
+
 
 \section{(Failed) experiments}
 \begin{itemize}
@@ -148,6 +168,36 @@ classifiers as class labels provides the best results~\cite{bonab2016theoretical
     \item transformer architecture
     \item show different accuracies when using different training sizes?
 \end{itemize}
+
+\begin{table}[!h]
+    \centering
+    \footnotesize
+
+    \begin{tabular}{lcc}
+
+        \textbf{Variation} & \textbf{Accuracy (\%)} & $\bf{\Delta}$\textbf{\%} \\
+        \hline
+        \hline
+        Submitted          & \textbf{69.23}         & -               \\
+        \hline
+        No emoji           & 68.36                  & - 0.87          \\
+        \hline
+        No ELMo            & 65.52                  & - 3.71          \\
+        \hline
+        Concat Pooling     & 68.47                  & - 0.76          \\
+        \hline
+        LSTM hidden=4096   & 69.10                  & - 0.13          \\
+        LSTM hidden=1024   & 68.93                  & - 0.30          \\
+        LSTM hidden=512    & 68.43                  & - 0.80          \\
+        \hline
+        POS emb dim=100    & 68.99                  & - 0.24          \\
+        POS emb dim=75     & 68.61                  & - 0.62          \\
+        POS emb dim=50     & 69.33                  & + 0.10          \\
+        POS emb dim=25     & 69.21                  & - 0.02          \\
+
+    \end{tabular}
+
+\end{table}
 
 \section{Conclusions and Future Work}
 

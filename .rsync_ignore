@@ -11,3 +11,11 @@ paper
 server_name
 data/*
 .cache
+.DS_Store
+ensembles
+scripts
+misc
+.ipynb_checkpoints
+*.pdf
+*.txt
+utils
