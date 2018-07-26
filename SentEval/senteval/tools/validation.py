@@ -183,6 +183,8 @@ class KFoldClassifier(object):
         yhat = clf.predict(self.test['X'])
 
         testaccuracy = clf.score(self.test['X'], self.test['y'])
+        if isinstance(testaccuracy, torch.Tensor):
+            testaccuracy = testaccuracy.item()
         testaccuracy = round(100*testaccuracy, 2)
 
         return devaccuracy, testaccuracy, yhat
@@ -226,8 +228,12 @@ class SplitClassifier(object):
             else:
                 clf = LogisticRegression(C=reg, random_state=self.seed)
                 clf.fit(self.X['train'], self.y['train'])
-            scores.append(round(100*clf.score(self.X['valid'],
-                                self.y['valid']), 2))
+
+            score = 100*clf.score(self.X['valid'], self.y['valid'])
+            if isinstance(score, torch.Tensor):
+                score = score.item()
+            scores.append(round(score, 2))
+
         logging.info([('reg:'+str(regs[idx]), scores[idx])
                       for idx in range(len(scores))])
         optreg = regs[np.argmax(scores)]
@@ -249,5 +255,7 @@ class SplitClassifier(object):
             clf.fit(self.X['train'], self.y['train'])
 
         testaccuracy = clf.score(self.X['test'], self.y['test'])
+        if isinstance(testaccuracy, torch.Tensor):
+            testaccuracy = testaccuracy.item()
         testaccuracy = round(100*testaccuracy, 2)
         return devaccuracy, testaccuracy
