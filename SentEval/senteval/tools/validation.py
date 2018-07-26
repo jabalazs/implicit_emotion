@@ -18,6 +18,8 @@ import logging
 import numpy as np
 from senteval.tools.classifier import MLP
 
+import torch
+
 import sklearn
 assert(sklearn.__version__ >= "0.18.0"), \
     "need to update sklearn to version >= 0.18.0"
@@ -100,7 +102,12 @@ class InnerKFoldClassifier(object):
                 clf = LogisticRegression(C=optreg, random_state=self.seed)
                 clf.fit(X_train, y_train)
 
-            self.testresults.append(round(100*clf.score(X_test, y_test), 2))
+            test_result = 100*clf.score(X_test, y_test)
+            if isinstance(test_result, torch.Tensor):
+                test_result = test_result.item()
+
+            test_result = round(test_result, 2)
+            self.testresults.append(test_result)
 
         devaccuracy = round(np.mean(self.devresults), 2)
         testaccuracy = round(np.mean(self.testresults), 2)
