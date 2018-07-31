@@ -563,6 +563,7 @@ class IESTClassifier(nn.Module):
 
         logits = self.dense_layer(sent_vec)
 
-        ret_dict = {'logits': logits}
+        ret_dict = {'logits': logits,
+                    'sent_reprs': sent_vec}
 
         return ret_dict

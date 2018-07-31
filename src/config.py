@@ -34,7 +34,7 @@ DEV_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'dev_labels.csv')
 
 TEST = os.path.join(PREPROCESSED_DATA_PATH, 'test_no_emojis.csv')
 TEST_EMOJI = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv')
-TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'test_labels_fake.csv')
+TEST_LABELS = os.path.join(PREPROCESSED_DATA_PATH, 'test_labels.csv')
 
 TRAIN_POS = os.path.join(PREPROCESSED_DATA_PATH, 'train.csv.tagged.pos')
 DEV_POS = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv.tagged.pos')

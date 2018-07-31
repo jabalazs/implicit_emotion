@@ -98,6 +98,11 @@ arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
 arg_parser.add_argument("--test", action="store_true",
                         help="Run this script in test mode")
 
+arg_parser.add_argument("--save_sent_reprs", "-ssr", action="store_true",
+                        default=False,
+                        help='Save sentence representations in the experiment '
+                        'directory. This is intended to be used with the --test flag')
+
 arg_parser.add_argument("--pos_emb_dim", "-pem", default=None, type=int,
                         help="The dimension to use for the POS embeddings. "
                              "If None, POS tags will not be used")
@@ -280,6 +285,16 @@ def main():
         with open(labels_filepath, 'w', encoding='utf-8') as f:
             f.writelines(labels)
         print(f'Saved prediction file in {labels_filepath}')
+
+        representations_filepath = os.path.join(
+            ext_experiment_path,
+            'sentence_representations.txt'
+        )
+
+        if hp.save_sent_reprs:
+            with open(representations_filepath, 'w', encoding='utf-8') as f:
+                np.savetxt(representations_filepath, eval_dict['sent_reprs'],
+                           delimiter=' ', fmt='%.8f')
         exit()
 
     writer = None

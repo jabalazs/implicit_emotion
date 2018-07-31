@@ -81,15 +81,18 @@ class Trainer(object):
         num_batches = dev_batches.num_batches
         outputs = []
         true_labels = []
+        sent_reprs = []
         tqdm.write("Evaluating...")
         for batch_index in range(num_batches):
             batch = dev_batches[batch_index]
             out = self.model(batch)
-            # FIXME: Shouldn't call data()
+
             outputs.append(out['logits'].cpu().data.numpy())
+            sent_reprs.append(out['sent_reprs'].cpu().data.numpy())
             true_labels.extend(batch['labels'])
 
         output = np.vstack(outputs)
+        sent_reprs = np.vstack(sent_reprs)
         pred_labels = output.argmax(axis=1)
         true_labels = np.array(true_labels)
         tqdm.write(classification_report(true_labels, pred_labels,
@@ -106,5 +109,6 @@ class Trainer(object):
         pred_labels = [config.ID2LABEL[label] for label in pred_labels]
         ret_dict = {'accuracy': accuracy,
                     'labels': pred_labels,
-                    'output': output}
+                    'output': output,
+                    'sent_reprs': sent_reprs}
         return ret_dict
