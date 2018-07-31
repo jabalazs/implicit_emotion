@@ -22,7 +22,7 @@ CLEAN_DEV_DATA_PATH="$PREPROCESSED_DATA_DIR/dev.csv"
 DEV_LABELS_PATH="$PREPROCESSED_DATA_DIR/dev_labels.csv"
 
 CLEAN_TEST_DATA_PATH="$PREPROCESSED_DATA_DIR/test.csv"
-TEST_LABELS_PATH="$PREPROCESSED_DATA_DIR/test_labels_fake.csv"
+TEST_LABELS_PATH="$PREPROCESSED_DATA_DIR/test_labels.csv"
 
 #######################################################################
 #                            No-emoji data                            #
