@@ -12,6 +12,7 @@
 %% and that of ACL 08 by Joakim Nivre and Noah Smith
 
 \documentclass[11pt,a4paper]{article}
+\pdfoutput=1
 \usepackage[hyperref]{emnlp2018}
 % \usepackage[showframe=true]{geometry}
 \usepackage[utf8]{inputenc}
@@ -56,7 +57,7 @@ Contextualized Word Representations}
 \author{Jorge A. Balazs, Edison Marrese-Taylor \and Yutaka Matsuo \\
   Graduate School of Engineering\\
   The University of Tokyo\\
-  {jorge, emarrese, matsuo@weblab.t.u-tokyo.ac.jp} \\
+  \{jorge, emarrese, matsuo\}@weblab.t.u-tokyo.ac.jp \\
 }
 
 \date{}
@@ -222,7 +223,7 @@ We can observe that the architectural choice that had the greatest impact on our
 
 We can further see that emoji also contributed significantly to the model's performance. In Section \ref{sub:effect_of_emoji_and_hashtags} we give some pointers to understanding why this is so.  
 
-Additionally, we tried using the concatenation of the max-pooled, average-pooled and last hidden states of the BiLSTM as the sentence representation, following \citet{howard2018universal}, but found out that this impacted performance negatively. We hypothesize this is due to tweets being too short for needing such a rich representation. Also, the size of the concatenated vector was $4096\times3=12,288$, which probably could not be properly exploited by the 512-dimensional fully-connected layer.
+Additionally, we tried using the concatenation of the max-pooled, average-pooled and last hidden states of the BiLSTM as the sentence representation, following \citet{howard2018universal}, but found out that this impacted performance negatively. We hypothesize this is due to tweets being too short for needing such a rich representation. Also, the size of the concatenated vector was $4096\times3=12,288$, which probably could not be properly exploited by the $512$-dimensional fully-connected layer.
 
 Using a greater BiLSTM hidden size did not help the model, probably because of the reason mentioned early; the fully-connected layer was not big or deep enough to exploit the additional information. Similarly, using a smaller hidden size neither helped.
 
@@ -258,7 +259,7 @@ Finally, Figure \ref{fig:dropouts} shows the effect of using different dropout p
 
     \caption{Number of tweets on the test set with and without emoji and
     hashtags. The number between parentheses is the proportion of tweets
-    correctly classified.}
+    classified correctly.}
 
     \label{table:emoji_and_hashtags}
 
