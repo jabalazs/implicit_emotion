@@ -12,6 +12,7 @@ server_name
 data/*
 .cache
 .DS_Store
+.mypy*
 ensembles
 scripts
 misc
@@ -19,3 +20,4 @@ misc
 *.pdf
 *.txt
 utils
+doc

@@ -27,6 +27,8 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{siunitx}
+\usepackage{caption}
+\usepackage{blindtext}
 \usepackage[hang,flushmargin]{footmisc} % remove indentation from footnotes
 % \hypersetup{draft}
 
@@ -166,7 +168,7 @@ Once we found the best-performing configuration we trained 10 models using diffe
 \begin{figure}[!h]
     \centering
     \includegraphics[width=\columnwidth]{images/best_ensembles.eps}
-\caption{Best Macro F1 vs. Number of Ensembled Models.}
+\caption{Effect of the number of ensembled models on validation performance.}
 \label{fig:best_ensembles}
 \end{figure}
 
@@ -211,13 +213,27 @@ We performed an ablation study on a single model having obtained 69.23\% accurac
         SGD optim lr=0.001 & 30.49                  & - 38.74                  \\
 
     \end{tabular}
+
     \caption{Ablation study results.}
+    \vspace{-0.4cm}
+    \caption*{
+        \footnotesize Accuracies were obtained from the
+        validation dataset. Each model was trained with the same random seed and
+        hyperparameters, save for the one listed. ``No emoji'' is the same model
+        trained on the training dataset with no emoji, ``No ELMo'' corresponds
+        to having switched the ELMo word encoding layer with a simple
+        pre-trained GloVe embedding lookup table, and ``Concat Pooling''
+        obtained sentence representations by using the pooling method described
+        by \citet{howard2018universal}. ``LSTM hidden'' corresponds to the the
+        hidden dimension of the BiLSTM, ``POS emb dim'' to the dimension of the
+        part-of-speech embeddings, and ``SGD optim lr'' to the learning rate
+        used while optimizing with the schedule described by \citet{conneau2017supervised}.}
+
     \label{table:ablation}
 
 \end{table}
 
-Accuracies were obtained from the
-validation dataset. Each model was trained with the same random seed and hyperparameters, save for the one listed. ``No emoji'' is the same model trained on the training dataset with no emoji, ``No ELMo'' corresponds to having switched the ELMo word encoding layer with a simple pre-trained GloVe embedding lookup, and ``Concat Pooling'' obtained sentence representations by using the pooling method described by \citet{howard2018universal}. ``LSTM hidden'' corresponds to the the hidden dimension of the BiLSTM, ``POS emb dim'' to the dimension of the part-of-speech embeddings, and ``SGD optim lr'' to the learning rate used while optimizing with the schedule described by \citet{conneau2017supervised}.
+
 
 We can observe that the architectural choice that had the greatest impact on our model was the ELMo layer, providing a $3.71\%$ boost in performance as compared to using GloVe pre-trained word embeddings.
 
@@ -231,12 +247,25 @@ We found that using 50-dim part-of-speech embeddings slightly improved results, 
 
 Regarding optimization strategies, we also tried using SGD with different learning rates and a step-wise learning rate schedule as described by \citet{conneau2018}, but we found that doing this did not improve performance. 
 
-Finally, Figure \ref{fig:dropouts} shows the effect of using different dropout probabilities. We can see that having higher dropout after the word-representation layer and the fully-connected network's hidden layer, while having a low dropout after the sentence encoding layer yielded better results overall. 
+Finally, Figure \ref{fig:dropouts} shows the effect of using different dropout
+probabilities. We can see that having higher dropout after the
+word-representation layer and the fully-connected network's hidden layer, while
+having a low dropout after the sentence encoding layer yielded better results
+overall. 
 
 \begin{figure}[!h]
     \centering
     \includegraphics[width=\columnwidth]{images/dropout_table.pdf}
-\caption{Dropout Variations. Rows correspond to the dropout applied both after the ELMo layer (word encoding layer) and after the fully-connected network's hidden layer, while columns correspond to the dropout applied after the max-pooling operation (sentence encoding layer.}
+
+    \caption{Dropout Ablation. }
+    \vspace{-0.4cm}
+
+    \caption*{
+        \footnotesize Rows correspond to the dropout applied both after
+        the ELMo layer (word encoding layer) and after the fully-connected network's
+        hidden layer, while columns correspond to the dropout applied after the
+        max-pooling operation (sentence encoding layer.)}
+
 \label{fig:dropouts}
 \end{figure}
 
@@ -301,7 +330,14 @@ Table \ref{table:emoji_fine_grained} shows the effect specific emoji have on cla
         \end{tabular}
 
 
-    \caption{Fine grained performance on tweets containing emoji, and the effect of removing them. \textbf{N} is the total number of tweets containing the listed emoji, \textbf{\#} and \textbf{\%} the number and percentage of correctly-classified tweets respectively, and $\bf{\Delta}$\textbf{\%} the variation of test accuracy when removing the emoji from the tweets.}
+    \caption{Fine grained performance on tweets containing emoji, and the effect
+of removing them.} 
+    \vspace{-0.4cm}
+    \caption*{
+        \footnotesize \textbf{N} is the total number of tweets containing the listed emoji,
+        \textbf{\#} and \textbf{\%} the number and percentage of correctly-classified
+        tweets respectively, and $\bf{\Delta}$\textbf{\%} the variation of test accuracy
+        when removing the emoji from the tweets.}
 
     \label{table:emoji_fine_grained}
 
