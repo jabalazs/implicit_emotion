@@ -18,6 +18,6 @@ scripts
 misc
 .ipynb_checkpoints
 *.pdf
-*.txt
-utils
 doc
+predictions.txt
+test_file.txt

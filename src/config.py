@@ -1,7 +1,7 @@
 import os
 
 HOME_DIR = os.environ['HOME']
-ALLENNLP_PATH = os.path.join(HOME_DIR, 'repos/allennlp')
+ALLENNLP_PATH = 'allennlp/'
 
 DATA_PATH = 'data/'
 CACHE_PATH = '.cache'

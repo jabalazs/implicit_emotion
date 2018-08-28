@@ -3,3 +3,4 @@ tqdm
 dataset
 gspread
 oauth2client
+tensorboardX

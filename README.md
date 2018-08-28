@@ -2,59 +2,56 @@
 
 [Competition website](https://competitions.codalab.org/competitions/19214)
 
-# Requirements
-* Python 3
-* Pytorch 0.4.0
-
 # Installation
-## Code
 
-* Clone this repo.
-```
-git clone --recurse-submodules https://github.com/jabalazs/implicit_emotion.git
-cd implicit_emotion
-```
+1. Clone this repo.
+   ```
+   git clone --recurse-submodules https://github.com/jabalazs/implicit_emotion.git
+   cd implicit_emotion
+   ```
 
-**We recommend doing all the steps below within a conda environment**
+2. Create a conda environment
+   
+   If you don't have conda installed, we recommend using [miniconda](https://conda.io/miniconda.html).
+   
+   You can then easily create and activate a new conda environment with Python 3.6
+   by executing 
+   
+   ```
+   conda create -n iest python=3.6
+   source activate iest
+   ```
+   
+   Where you can replace `iest` by any environment name you like.
 
-* Make sure you already have python 3 and pytorch installed
+3. Run `./install.sh`
 
-* Install the other dependencies
-```
-pip install -r requirements.txt
-```
+   This will install pytorch, a few dependencies for our code, AllenNLP (ELMo) and
+   all of its dependencies. See https://github.com/allenai/allennlp for more ways
+   to install AllenNLP. Also note that for replicability purposes we will install
+   the same version we used for development: [`ac2e0b9b6`](https://github.com/allenai/allennlp/tree/ac2e0b9b6e4668984ebd8c05578d9f4894e94bee).
 
-* Install Matplotlib and Scikit learn
-```
-conda install matplotlib scikit-learn
-```
+   > By default, AllenNLP will be cloned in this repo. If you want to install it
+     somewhere else please modify the install script
+     [scripts/install.sh](scripts/install.sh), and change the `ALLENNLP_PATH`
+     variable in [src/config.py](src/config.py) accordingly.
 
-## AllenNLP (ELMo)
-To use Elmo embeddings we need to install AllenNLP. Specific instructions can be found at https://github.com/allenai/allennlp
-We recommend using the following method: Within a conda environment with python 3.6 run the following commands:
-```
-git clone https://github.com/allenai/allennlp.git
-cd allennlp
-INSTALL_TEST_REQUIREMENTS=false scripts/install_requirements.sh
-```
-Also remember to set the path for the AllenNLP directory (`ALLENNLP_PATH`) in
-[`config.py`](src/config.py).
+4. (Optional) Install java
 
-## TweeboParser
-We are using a forked version of [`ark-tweet-nlp`](https://github.com/jabalazs/ark-tweet-nlp/tree/7e37f5badcc28d1b5ad595d26721db3832fd1dde)
-for obtaining POS tags without using its built-in tokenization feature. This
-repo already comes with the resulting jar (`ark-tweet-nlp-0.3.2.jar`) in
-[`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
-
-This needs java to work. You can easily install it within your
-conda environment with
-```
-conda install -c cyclus java-jdk
-```
-
-You can change the pre-trained POS tagging model by modifying the
-`PRETRAINED_MODEL_NAME` variable in [`utils/run_postagger.sh`](utils/run_postagger.sh)
-with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
+   We used a forked version of [`ark-tweet-nlp`](https://github.com/jabalazs/ark-tweet-nlp/tree/7e37f5badcc28d1b5ad595d26721db3832fd1dde)
+   for obtaining POS tags without using its built-in tokenization feature. This
+   repo already comes with the resulting jar (`ark-tweet-nlp-0.3.2.jar`) in
+   [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
+   
+   If you want to use this feature you need java. You can easily install it
+   within your conda environment with
+   ```
+   conda install -c cyclus java-jdk
+   ```
+   
+   > You can also change the pre-trained POS tagging model by modifying the
+     `PRETRAINED_MODEL_NAME` variable in [`utils/run_postagger.sh`](utils/run_postagger.sh)
+     with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
 
 ## Data
 * Get the data by running the following command and typing your password when prompted
