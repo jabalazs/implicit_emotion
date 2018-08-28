@@ -12,8 +12,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn
 
 import colored_traceback
 colored_traceback.add_hook(always=True)

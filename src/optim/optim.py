@@ -113,14 +113,3 @@ class OptimWithDecay(object):
 
         self._makeOptimizer()
         return updated, self.lr
-
-
-if __name__ == "__main__":
-
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    max_step = 2000
-    plt.plot(np.arange(1, max_step), [slanted_triangular_lr(step, max_step) for step in range(1, max_step)])
-    plt.show()
-

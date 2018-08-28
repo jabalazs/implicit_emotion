@@ -9,10 +9,6 @@ from datetime import datetime
 # shouldn't do this!! the point is for this not to be library specific
 import torch
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 from .io import (write_output)
 from .. import config
 
@@ -204,13 +200,6 @@ class Logger(object):
         torch.save(obj, savepath)
         if progress_bar:
             progress_bar.write(f'File saved in {savepath}')
-        return
-
-    def save_image(self, numpy_matrix, filename='image', path_override=None):
-        plt.imshow(numpy_matrix)
-        savepath = os.path.join(self.run_savepath, filename + '.png')
-        savepath = path_override if path_override else savepath
-        plt.savefig(savepath)
         return
 
     def write_output_details(self, corpus, pred_label_ids,
