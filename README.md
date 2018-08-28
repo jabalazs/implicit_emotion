@@ -33,7 +33,7 @@
 
    > By default, AllenNLP will be cloned in this repo. If you want to install it
      somewhere else please modify the install script
-     [scripts/install.sh](scripts/install.sh), and change the `ALLENNLP_PATH`
+     [install.sh](install.sh), and change the `ALLENNLP_PATH`
      variable in [src/config.py](src/config.py) accordingly.
 
 4. (Optional) Install java
