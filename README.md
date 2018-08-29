@@ -36,7 +36,7 @@
      [install.sh](install.sh), and change the `ALLENNLP_PATH`
      variable in [src/config.py](src/config.py) accordingly.
 
-4. (Optional) Install java
+4. (Optional) Install java for obtaining POS tags
 
    We used a forked version of [`ark-tweet-nlp`](https://github.com/jabalazs/ark-tweet-nlp/tree/7e37f5badcc28d1b5ad595d26721db3832fd1dde)
    for obtaining POS tags without using its built-in tokenization feature. This
@@ -54,19 +54,23 @@
      with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
 
 ## Data
-* Get the data by running the following command and typing your password when prompted
-```
-./get_data.sh <USERNAME>
-```
 
-* Run the preprocessing script
-```
-./preprocess.sh
-```
+1. Get the data by running the following command and typing your password when prompted
+   ```
+   ./get_data.sh <USERNAME>
+   ```
+
+2. Run the preprocessing script
+   ```
+   ./preprocess.sh
+   ```
+
+3. (Optional) If you installed java and want to obtain the pos tags, execute:
+   ```
+   ./get_pos.sh
+   ```
 
 
-## External Data
-TODO: create script to automate this process.
 
 ### Pre-trained Embeddings
 The code expects a directory named `word_embeddings` in `data`

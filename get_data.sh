@@ -14,6 +14,5 @@ gunzip train-v3.csv.gz
 gunzip trial-v3.csv.gz
 gunzip trial-v3.labels.gz
 gunzip test.csv.gz
-gunzip test.labels.gz
 
 cd ..
