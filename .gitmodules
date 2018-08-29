@@ -1,3 +1,0 @@
-[submodule "src/seq_utils"]
-	path = src/seq_utils
-	url = https://github.com/jabalazs/seq_utils

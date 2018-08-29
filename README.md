@@ -6,7 +6,7 @@
 
 1. Clone this repo.
    ```
-   git clone --recurse-submodules https://github.com/jabalazs/implicit_emotion.git
+   git clone https://github.com/jabalazs/implicit_emotion.git
    cd implicit_emotion
    ```
 
