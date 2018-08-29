@@ -134,7 +134,7 @@ def main():
     if hp.write_mode != 'NONE':
         logger.write_hyperparams()
 
-    print(f'Running experiment {logger.model_mash}. Hyperparameters and '
+    print(f'Running experiment {logger.model_hash}. Hyperparameters and '
           f'checkpoints will be saved in {logger.run_savepath}')
 
     torch.manual_seed(hp.seed)
