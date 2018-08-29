@@ -1,7 +1,7 @@
 #!/bin/bash
 
 conda install -y pytorch=0.4.0 cuda80 -c pytorch
-conda install -y scikit-learn
+conda install -y scikit-learn unzip
 pip install -r requirements.txt
 
 git clone https://github.com/allenai/allennlp.git

@@ -130,9 +130,7 @@ cat $TEST_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $TEST_LAB
 echo "Created $CLEAN_TEST_DATA_PATH and $TEST_LABELS_PATH"
 echo
 
-echo
-
-echo "Removing emojis from test"
+echo "Creating Test dataset with no emoji"
 cat $CLEAN_TEST_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TEST_NO_EMOJIS_DATA_PATH
 echo "Created $CLEAN_TEST_NO_EMOJIS_DATA_PATH"
 

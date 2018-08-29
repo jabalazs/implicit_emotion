@@ -105,7 +105,6 @@ class Logger(object):
         self.args['commit'] = get_commit_hash()
 
         if not experiment_hash:
-            # For hash based instead of datetime based monitoring
             hashargs = {arg: val for arg, val in self.args.items()
                         if arg not in ['datetime', 'auto_submission',
                                        'no_tensorboard', 'write_mode',
@@ -128,7 +127,7 @@ class Logger(object):
             hyperparam_file = os.path.join(self.run_savepath,
                                            'hyperparams.json')
             with open(hyperparam_file, 'w') as f:
-                f.write(json.dumps(self.args))
+                f.write(json.dumps(self.args, indent=2, separators=(',', ': ')))
 
         if write_mode == 'DATABASE' or write_mode == 'BOTH':
             db = dt.connect(config.DATABASE_CONNECTION_STRING)

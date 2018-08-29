@@ -134,6 +134,9 @@ def main():
     if hp.write_mode != 'NONE':
         logger.write_hyperparams()
 
+    print(f'Running experiment {logger.model_mash}. Hyperparameters and '
+          f'checkpoints will be saved in {logger.run_savepath}')
+
     torch.manual_seed(hp.seed)
     torch.cuda.manual_seed_all(hp.seed)  # silently ignored if there are no GPUs
 
@@ -309,21 +312,17 @@ def main():
             corpus.train_batches.shuffle_examples()
             eval_dict = trainer.evaluate(corpus.dev_batches, epoch, writer)
 
-            if hp.update_learning_rate:
-                if hp.model != 'transformer':
-                    optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
-                    lr_threshold = 1e-5
-                    if new_lr < lr_threshold:
-                        tqdm.write(f'Learning rate smaller than {lr_threshold}, '
-                                   f'stopping.')
-                        break
-                    if optim_updated:
-                        tqdm.write(f'Learning rate decayed to {new_lr}')
+            if hp.update_learning_rate and hp.model != 'transformer':
+                optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
 
-            # elif hp.update_learning_rate_nie:
-            #     optim_updated, new_lr = trainer.optimizer.update_learning_rate_nie(epoch)
-            #     if optim_updated:
-            #         tqdm.write(f'Learning rate decayed to {new_lr}')
+                #  TODO: lr_threshold shouldn't be hardcoded
+                lr_threshold = 1e-5
+                if new_lr < lr_threshold:
+                    tqdm.write(f'Learning rate smaller than {lr_threshold}, '
+                               f'stopping.')
+                    break
+                if optim_updated:
+                    tqdm.write(f'Learning rate decayed to {new_lr}')
 
             accuracy = eval_dict['accuracy']
             if not best_accuracy or accuracy > best_accuracy:
@@ -334,12 +333,12 @@ def main():
                 if hp.write_mode != 'NONE':
                     probs = np_softmax(eval_dict['output'])
                     probs_filepath = os.path.join(logger.run_savepath,
-                                                  'best_eval_probs.csv')
+                                                  'best_dev_probabilities.csv')
                     np.savetxt(probs_filepath, probs,
                                delimiter=',', fmt='%.8f')
 
                     labels_filepath = os.path.join(logger.run_savepath,
-                                                   'predictions_dev.txt')
+                                                   'best_dev_predictions.txt')
                     labels = [label + '\n' for label in eval_dict['labels']]
                     with open(labels_filepath, 'w', encoding='utf-8') as f:
                         f.writelines(labels)
@@ -351,13 +350,11 @@ def main():
                     logger.torch_save_file('best_model.pth',
                                            model,
                                            progress_bar=tqdm)
-
-        if SAVE_IN_SPREADSHEET:
-            logger.insert_in_googlesheets()
     except KeyboardInterrupt:
+        pass
+    finally:
         if SAVE_IN_SPREADSHEET:
             logger.insert_in_googlesheets()
-        pass
 
 
 if __name__ == '__main__':
