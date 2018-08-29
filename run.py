@@ -75,8 +75,6 @@ arg_parser.add_argument('--dropout', type=float, default=0.1,
 arg_parser.add_argument('--model_hash', type=str, default=None,
                         help='Hash of the model to load, can be a partial hash')
 
-arg_parser.add_argument('--update_learning_rate_nie', '-ulrn', action='store_true')
-
 arg_parser.add_argument('--word_encoding_method', '-wem', type=str, default="embed",
                         choices=WordEncodingLayer.WORD_ENCODING_METHODS,
                         help='How to obtain word representations')
@@ -118,7 +116,6 @@ arg_parser.add_argument("--spreadsheet", "-ss", action='store_true',
 
 def validate_args(hp):
     """hp: argparser parsed arguments. type: Namespace"""
-    assert not (hp.update_learning_rate and hp.update_learning_rate_nie)
 
     if hp.word_encoding_method == 'char_lstm' and not hp.word_char_aggregation_method:
         raise ValueError(f'Need to pass a word_char_aggregation_method when '
