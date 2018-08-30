@@ -332,4 +332,7 @@ tags
 data/*.csv
 data/results/
 data/
-scripts/*
+scripts/pushto*
+scripts/*tensorboard*
+misc/*
+doc/

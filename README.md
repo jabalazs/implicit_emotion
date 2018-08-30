@@ -28,7 +28,7 @@ This code was developed during the WASSA 2018 Implicit Emotion Shared Task
    
    Where you can replace `iest` by any environment name you like.
 
-3. Run `./install.sh`
+3. Run `scripts/install.sh`
 
    This will install pytorch, a few dependencies for our code, AllenNLP (ELMo) and
    all of its dependencies. See https://github.com/allenai/allennlp for more ways
@@ -37,7 +37,7 @@ This code was developed during the WASSA 2018 Implicit Emotion Shared Task
 
    > By default, AllenNLP will be cloned in this repo. If you want to install it
    > somewhere else please modify the install script
-   > [install.sh](install.sh), and change the `ALLENNLP_PATH`
+   > [scripts/install.sh](scripts/install.sh), and change the `ALLENNLP_PATH`
    > variable in [src/config.py](src/config.py) accordingly.
 
    > The installation script will install Pytorch 0.4.0 with CUDA 8.0 by
@@ -84,7 +84,7 @@ This code was developed during the WASSA 2018 Implicit Emotion Shared Task
    following command, and typing your password when prompted:
 
    ```
-   ./get_data.sh USERNAME
+   scripts/get_data.sh USERNAME
    ```
 
    This script will download the following:
@@ -99,17 +99,19 @@ This code was developed during the WASSA 2018 Implicit Emotion Shared Task
    > original embeddings file).
 
    > If you want to save the data in a different directory, you can do so as
-   > long as you modify the paths in the `preprocess.sh` and `get_pos.sh`
-   > preprocessing scripts, and in [`src/config.py`](src/config.py).
+   > long as you modify the paths in the
+   > [`scripts/preprocess.sh`](scripts/preprocess.sh) and
+   > [`scripts/get_pos.sh`](scripts/get_pos.sh) preprocessing scripts, and in
+   > [`src/config.py`](src/config.py).
 
 3. Run the preprocessing script
    ```
-   ./preprocess.sh
+   scripts/preprocess.sh
    ```
 
 4. (Optional) If you installed java and want to obtain the pos tags, execute:
    ```
-   ./get_pos.sh
+   scripts/get_pos.sh
    ```
 
 ---
