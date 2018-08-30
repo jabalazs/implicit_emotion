@@ -395,6 +395,7 @@ class IESTClassifier(nn.Module):
                  pooling_method='max',
                  batch_first=True,
                  dropout=0.0,
+                 lstm_layer_dropout=0.0,
                  sent_enc_dropout=0.0,
                  use_cuda=True):
 
@@ -403,6 +404,7 @@ class IESTClassifier(nn.Module):
         self.batch_size = batch_size
         self.batch_first = batch_first
         self.dropout = dropout
+        self.lstm_layer_dropout = lstm_layer_dropout
         self.sent_enc_dropout = sent_enc_dropout
 
         self.use_cuda = use_cuda
@@ -443,7 +445,7 @@ class IESTClassifier(nn.Module):
             num_layers=self.sent_enc_layers,
             batch_first=self.batch_first,
             use_cuda=self.use_cuda,
-            dropout=self.sent_enc_dropout
+            dropout=self.lstm_layer_dropout
         )
 
         self.sent_dropout = nn.Dropout(self.sent_enc_dropout)

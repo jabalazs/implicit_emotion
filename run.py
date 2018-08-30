@@ -66,13 +66,17 @@ arg_parser.add_argument('--pooling_method', type=str, default='max',
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
 
-arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.1,
-                        help='Dropout between sentence encoding lstm layers. '
-                             'and after the sent enc lstm. 0 means no dropout.')
-
 arg_parser.add_argument('--dropout', type=float, default=0.5,
                         help='Dropout applied to words representations and '
                         'final MLP. 0 means no dropout.')
+
+arg_parser.add_argument('--lstm_layer_dropout', type=float, default=0.0,
+                        help='Dropout between sentence encoding lstm layers. '
+                             '0 means no dropout.')
+
+arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.1,
+                        help='Dropout after the sentence encoding lstm. '
+                        '0 means no dropout.')
 
 arg_parser.add_argument('--model_hash', type=str, default=None,
                         help='Hash of the model to load, can be a partial hash')
@@ -215,6 +219,7 @@ def main():
             pooling_method=hp.pooling_method,
             batch_first=True,
             dropout=hp.dropout,
+            lstm_layer_dropout=hp.lstm_layer_dropout,
             sent_enc_dropout=hp.sent_enc_dropout,
             sent_enc_layers=hp.sent_enc_layers
         )
