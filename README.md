@@ -1,8 +1,12 @@
 # [Implicit Emotion Shared Task](http://implicitemotions.wassa2018.com/)
 
+This code was developed during the WASSA 2018 Implicit Emotion Shared Task
+
+[Official Website](http://implicitemotions.wassa2018.com/)
+
 [Competition website](https://competitions.codalab.org/competitions/19214)
 
-# Installation
+# Recommended Installation
 
 1. Clone this repo.
    ```
@@ -29,12 +33,12 @@
    This will install pytorch, a few dependencies for our code, AllenNLP (ELMo) and
    all of its dependencies. See https://github.com/allenai/allennlp for more ways
    to install AllenNLP. Also note that for replicability purposes we will install
-   the same version we used for development: [`ac2e0b9b6`](https://github.com/allenai/allennlp/tree/ac2e0b9b6e4668984ebd8c05578d9f4894e94bee).
+   the same ELMo version we used for development: [`ac2e0b9b6`](https://github.com/allenai/allennlp/tree/ac2e0b9b6e4668984ebd8c05578d9f4894e94bee).
 
    > By default, AllenNLP will be cloned in this repo. If you want to install it
-     somewhere else please modify the install script
-     [install.sh](install.sh), and change the `ALLENNLP_PATH`
-     variable in [src/config.py](src/config.py) accordingly.
+   > somewhere else please modify the install script
+   > [install.sh](install.sh), and change the `ALLENNLP_PATH`
+   > variable in [src/config.py](src/config.py) accordingly.
 
    > The installation script will install Pytorch 0.4.0 with CUDA 8.0 by
    > default. Please make sure that you have compatible GPU drivers, or change
@@ -47,7 +51,7 @@
 
    We used a forked version of [`ark-tweet-nlp`](https://github.com/jabalazs/ark-tweet-nlp/tree/7e37f5badcc28d1b5ad595d26721db3832fd1dde)
    for obtaining POS tags without using its built-in tokenization feature. This
-   repo already comes with the resulting jar (`ark-tweet-nlp-0.3.2.jar`) in
+   repo already comes with the compiled jar (`ark-tweet-nlp-0.3.2.jar`) in
    [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
    
    If you want to use this feature you need java. You can easily install it
@@ -57,19 +61,37 @@
    ```
    
    > You can also change the pre-trained POS tagging model by modifying the
-     `PRETRAINED_MODEL_NAME` variable in [`utils/run_postagger.sh`](utils/run_postagger.sh)
-     with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
+   > `PRETRAINED_MODEL_NAME` variable in [`utils/run_postagger.sh`](utils/run_postagger.sh)
+   > with one of the models provided in [`utils/ark-tweet-nlp`](utils/ark-tweet-nlp).
 
 ## Data
 
-1. Get the data by running the following command and typing your password when prompted
+1. To get the data you need some credentials provided by the organizers of the
+   shared task. Please contact them at iest@wassa2018.com, or at the email
+   addresses listed in the offical shared task
+   [website](http://implicitemotions.wassa2018.com/organizers/), to get the
+   credentials for downloading the data.
+
+   > Alternatively, you could download the tweets according to their IDs,
+   > already published in the official
+   > [website](http://implicitemotions.wassa2018.com/data/), and not requiring
+   > any credentials. However, the organizers haven't published the code they
+   > used for replacing username mentions, newlines, urls, and trigger-words, so
+   > you might not end up with the same dataset that was used during the
+   > shared task.
+
+2. Once you have your `USERNAME` and `PASSWORD`, get the data by running the
+   following command, and typing your password when prompted:
+
    ```
-   ./get_data.sh <USERNAME>
+   ./get_data.sh USERNAME
    ```
 
-   This script will get the train \ dev \ test splits (~23 MB unzipped),
-   pre-trained GloVe embeddings (~2.2 GB zipped, ~5.6 GB unzipped), and
-   pre-trained ELMo weights (~360 MB).
+   This script will download the following:
+   - train \ dev \ test splits (~23 MB unzipped) into `data/`
+   - pre-trained GloVe embeddings (~2.2 GB zipped, ~5.6 GB unzipped) into
+     `data/word_embeddings`
+   - pre-trained ELMo weights (~360 MB) into `data/word_embeddings`  
 
    > If you already downloaded the GloVe embeddings for another project, we
    > recommend commenting the line where they are dowloaded in the `get_data.sh`
@@ -80,12 +102,12 @@
    > long as you modify the paths in the `preprocess.sh` and `get_pos.sh`
    > preprocessing scripts, and in [`src/config.py`](src/config.py).
 
-2. Run the preprocessing script
+3. Run the preprocessing script
    ```
    ./preprocess.sh
    ```
 
-3. (Optional) If you installed java and want to obtain the pos tags, execute:
+4. (Optional) If you installed java and want to obtain the pos tags, execute:
    ```
    ./get_pos.sh
    ```
@@ -101,7 +123,7 @@ if something failed during the installation process.
 To train a best-performing model, run:
 
 ```
-python run.py --corpus=iest_emoji --log_interval=50  --lstm_hidden_size=2048 --word_encoding_method=elmo --seed=43 --epochs=10 --dropout=0.5 --sent_enc_dropout=0.2 --write_mode=BOTH --save_model
+python run.py --write_mode=BOTH --save_model
 ```
 
 This will run for 10 epochs and will save the best checkpoint according to
@@ -115,8 +137,10 @@ Checkpoints and other output files are saved in a directory named after the
 > `dropout`, would produce different hashes, whereas changing `write_mode`, or
 > `save_model` or similars, would not.
 
-So after running one epoch with the previous command you should have the
-following structure:
+# Experiment Results Directory Structure
+
+After the validation phase of the first epoch you should have the following
+structure:
 
 ```
 data/results/<hash>
