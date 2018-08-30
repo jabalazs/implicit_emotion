@@ -18,6 +18,9 @@ class ElmoWordEncodingLayer(object):
         self._embedder = Elmo(config.ELMO_OPTIONS, config.ELMO_WEIGHTS,
                               num_output_representations=1, **kwargs)
         self._embedder = self._embedder.cuda()
+        # We know the output of ELMo with pre-trained weigths is of size 1024.
+        # This would likely be different if we initialized `Elmo` with a custom
+        # `module`, but we didn't test this, so for now it will be hardcoded.
         self.embedding_dim = 1024
 
     def __call__(self, *args):
@@ -25,7 +28,9 @@ class ElmoWordEncodingLayer(object):
 
         # -1 is the raw_sequences element passed in the encode function of the
         # IESTClassifier
+        # TODO: make this less hacky
         sents = args[-1]
+
         char_ids = batch_to_ids(sents)
         char_ids = to_var(char_ids,
                           use_cuda=True,

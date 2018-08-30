@@ -95,9 +95,9 @@ misc_args.add_argument('--no_cuda', action='store_true',
                        help='Force the use of the cpu even if a gpu is '
                             'available')
 
-misc_args.add_argument('--log_interval', type=int, default=200, metavar='',
+misc_args.add_argument('--log_interval', type=int, default=50, metavar='',
                        help='Number of iterations between training loss '
                             'loggings')
 
-misc_args.add_argument('--seed', type=int, default=42, metavar='',
+misc_args.add_argument('--seed', type=int, default=43, metavar='',
                        help='Random seed to be used by torch initializations')

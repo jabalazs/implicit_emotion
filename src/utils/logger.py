@@ -48,6 +48,9 @@ def get_server_name():
 
 def get_commit_hash():
     try:
+        # We pipe stderr because when the directory is not part of a git repo
+        # it prints a fatal error, which we handle here. We don't want to print
+        # that.
         output = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                          stderr=subprocess.PIPE).strip()
         return output.decode()
