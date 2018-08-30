@@ -48,7 +48,8 @@ def get_server_name():
 
 def get_commit_hash():
     try:
-        output = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+        output = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
+                                         stderr=subprocess.PIPE).strip()
         return output.decode()
     except subprocess.CalledProcessError:
         print('Current project is not a git repo, omitting commit hash.')
