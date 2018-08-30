@@ -66,7 +66,7 @@ arg_parser.add_argument('--pooling_method', type=str, default='max',
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
 
-arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.2,
+arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.1,
                         help='Dropout between sentence encoding lstm layers. '
                              'and after the sent enc lstm. 0 means no dropout.')
 
