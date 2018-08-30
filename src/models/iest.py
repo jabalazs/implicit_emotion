@@ -283,11 +283,18 @@ class BLSTMEncoder(nn.Module):
                  use_cuda=True):
         super(BLSTMEncoder, self).__init__()
         self.embedding_dim = embedding_dim
-        self.hidden_size = hidden_sizes  # sizes in plural for compatibility
+
+        # hidden_sizes in plural for compatibility with StackedShortcutLSTM
+        self.hidden_size = hidden_sizes
+
         self.num_layers = num_layers
         self.bidirectional = bidirectional
         self.num_dirs = 2 if bidirectional else 1
-        self.dropout = dropout
+
+        # FIXME: Layer dropouts fixed at 0 for now
+        # self.dropout = dropout
+        self.dropout = 0.0
+
         self.batch_first = batch_first
         self.out_dim = self.hidden_size * self.num_dirs
 
@@ -296,7 +303,7 @@ class BLSTMEncoder(nn.Module):
                                 dropout=self.dropout)
 
     def is_cuda(self):
-        # FIXME: Avoid calls to data()
+        # FIXME: Avoid calls to data() as of pytorch 0.4.0
         # either all weights are on cpu or they are on gpu
         return 'cuda' in str(type(self.enc_lstm.bias_hh_l0.data))
 
@@ -455,9 +462,9 @@ class IESTClassifier(nn.Module):
             nn.Linear(512, self.num_classes)
         )
 
-    def encode(self, batch, char_batch, pos_batch,
+    def encode(self, batch, char_batch,
                sent_lengths, word_lengths,
-               masks=None, char_masks=None, embed_words=True,
+               pos_batch=None, masks=None, char_masks=None, embed_words=True,
                raw_sequences=None):
         """ Encode a batch of ids into a sentence representation.
 
@@ -552,18 +559,18 @@ class IESTClassifier(nn.Module):
                                 self.use_cuda,
                                 requires_grad=False)
 
-        sent_vec = self.encode(sequences,
-                               char_batch=char_sequences,
-                               pos_batch=pos_sequences,
-                               sent_lengths=sent_lengths,
-                               word_lengths=word_lengths,
-                               masks=masks,
-                               char_masks=char_masks,
-                               raw_sequences=raw_sequences)
+        self.sent_vec = self.encode(sequences,
+                                    char_batch=char_sequences,
+                                    pos_batch=pos_sequences,
+                                    sent_lengths=sent_lengths,
+                                    word_lengths=word_lengths,
+                                    masks=masks,
+                                    char_masks=char_masks,
+                                    raw_sequences=raw_sequences)
 
-        logits = self.dense_layer(sent_vec)
+        logits = self.dense_layer(self.sent_vec)
 
         ret_dict = {'logits': logits,
-                    'sent_reprs': sent_vec}
+                    'sent_reprs': self.sent_vec}
 
         return ret_dict
