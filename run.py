@@ -33,15 +33,14 @@ from base_args import base_parser, CustomArgumentParser
 colored_traceback.add_hook(always=True)
 
 
-base_parser.description = 'PyTorch MultiNLI Inner Attention Classifier'
 arg_parser = CustomArgumentParser(parents=[base_parser],
-                                  description='PyTorch MultiNLI')
+                                  description='Implicit Emotion Classifier')
 
 arg_parser.add_argument('--model', type=str, default="bilstm",
                         choices=SentenceEncodingLayer.SENTENCE_ENCODING_METHODS,
                         help='Model to use')
 
-arg_parser.add_argument('--corpus', type=str, default="iest",
+arg_parser.add_argument('--corpus', type=str, default="iest_emoji",
                         choices=list(config.corpora_dict.keys()),
                         help='Name of the corpus to use.')
 
@@ -58,24 +57,27 @@ arg_parser.add_argument('--sent_enc_layers', type=int, default=1,
 arg_parser.add_argument('--force_reload', action='store_true',
                         help='Whether to reload pickles or not (makes the '
                         'process slower, but ensures data coherence)')
-arg_parser.add_argument('--char_emb_dim', '-ced', type=int, default=50,
+
+arg_parser.add_argument('--char_emb_dim', '-ced', type=int, default=200,
                         help='Char embedding dimension')
+
 arg_parser.add_argument('--pooling_method', type=str, default='max',
                         choices=PoolingLayer.POOLING_METHODS,
                         help='Pooling scheme to use as raw sentence '
                              'representation method.')
 
-arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.0,
+arg_parser.add_argument('--sent_enc_dropout', type=float, default=0.2,
                         help='Dropout between sentence encoding lstm layers. '
                              'and after the sent enc lstm. 0 means no dropout.')
 
-arg_parser.add_argument('--dropout', type=float, default=0.1,
-                        help='Dropout applied to layers and final MLP. 0 means no dropout.')
+arg_parser.add_argument('--dropout', type=float, default=0.5,
+                        help='Dropout applied to words representations and '
+                        'final MLP. 0 means no dropout.')
 
 arg_parser.add_argument('--model_hash', type=str, default=None,
                         help='Hash of the model to load, can be a partial hash')
 
-arg_parser.add_argument('--word_encoding_method', '-wem', type=str, default="embed",
+arg_parser.add_argument('--word_encoding_method', '-wem', type=str, default="elmo",
                         choices=WordEncodingLayer.WORD_ENCODING_METHODS,
                         help='How to obtain word representations')
 
@@ -91,7 +93,8 @@ arg_parser.add_argument('--lowercase', '-lc', action='store_true',
                              '--force_reload or deleting .cache')
 
 arg_parser.add_argument("--warmup_iters", "-wup", default=4000, type=int,
-                        help="During how many iterations to increase the learning rate")
+                        help="During how many iterations to increase the "
+                        "learning rate. To be used with TransformerScheduler")
 
 arg_parser.add_argument("--test", action="store_true",
                         help="Run this script in test mode")
@@ -99,16 +102,16 @@ arg_parser.add_argument("--test", action="store_true",
 arg_parser.add_argument("--save_sent_reprs", "-ssr", action="store_true",
                         default=False,
                         help='Save sentence representations in the experiment '
-                        'directory. This is intended to be used with the --test flag')
+                        'directory. This is intended to be used with the '
+                        '--test flag')
 
 arg_parser.add_argument("--pos_emb_dim", "-pem", default=None, type=int,
                         help="The dimension to use for the POS embeddings. "
                              "If None, POS tags will not be used")
 
-arg_parser.add_argument(
-    "--max_lr", "-mlr", default=1e-3, type=float,
-    help="Max learning rate to be use with Ruder's slanted triangular learning "
-         "rate schedule")
+arg_parser.add_argument("--max_lr", "-mlr", default=1e-3, type=float,
+                        help="Max learning rate to be use with Ruder's "
+                             "slanted triangular learning rate schedule")
 
 arg_parser.add_argument("--spreadsheet", "-ss", action='store_true',
                         help="Save results in google spreadsheet")
@@ -185,6 +188,8 @@ def main():
                                                        hp.pos_emb_dim))
 
     if hp.model_hash:
+        # WARNING: This feature should be used only when testing. We
+        # haven't implemented a proper way to resume training yet.
         experiment_path = os.path.join(config.RESULTS_PATH, hp.model_hash + '*')
         ext_experiment_path = glob(experiment_path)
         assert len(ext_experiment_path) == 1, 'Try provinding a longer model hash'
@@ -193,24 +198,26 @@ def main():
         model = torch.load(model_path)
 
     else:
-        # Define some specific parameters for the model
         num_classes = len(corpus.label2id)
         batch_size = corpus.train_batches.batch_size
         hidden_sizes = hp.lstm_hidden_size
-        model = IESTClassifier(num_classes, batch_size,
-                               embedding_matrix=embedding_matrix,
-                               char_embedding_matrix=char_embedding_matrix,
-                               pos_embedding_matrix=pos_embedding_matrix,
-                               word_encoding_method=hp.word_encoding_method,
-                               word_char_aggregation_method=hp.word_char_aggregation_method,
-                               sent_encoding_method=hp.model,
-                               hidden_sizes=hidden_sizes,
-                               use_cuda=CUDA,
-                               pooling_method=hp.pooling_method,
-                               batch_first=True,
-                               dropout=hp.dropout,
-                               sent_enc_dropout=hp.sent_enc_dropout,
-                               sent_enc_layers=hp.sent_enc_layers)
+        model = IESTClassifier(
+            num_classes,
+            batch_size,
+            embedding_matrix=embedding_matrix,
+            char_embedding_matrix=char_embedding_matrix,
+            pos_embedding_matrix=pos_embedding_matrix,
+            word_encoding_method=hp.word_encoding_method,
+            word_char_aggregation_method=hp.word_char_aggregation_method,
+            sent_encoding_method=hp.model,
+            hidden_sizes=hidden_sizes,
+            use_cuda=CUDA,
+            pooling_method=hp.pooling_method,
+            batch_first=True,
+            dropout=hp.dropout,
+            sent_enc_dropout=hp.sent_enc_dropout,
+            sent_enc_layers=hp.sent_enc_layers
+        )
 
     if CUDA:
         model.cuda()
@@ -297,6 +304,7 @@ def main():
                            delimiter=' ', fmt='%.8f')
         exit()
 
+    # Main Training Loop
     writer = None
     if hp.write_mode != 'NONE':
         writer = SummaryWriter(logger.run_savepath)
@@ -310,6 +318,8 @@ def main():
             eval_dict = trainer.evaluate(corpus.dev_batches, epoch, writer)
 
             if hp.update_learning_rate and hp.model != 'transformer':
+                # hp.update_learning_rate is not supposed to be used with
+                # scheduled learning rates
                 optim_updated, new_lr = trainer.optimizer.updt_lr_accuracy(epoch, eval_dict['accuracy'])
 
                 #  TODO: lr_threshold shouldn't be hardcoded
