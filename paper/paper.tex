@@ -71,20 +71,68 @@ Contextualized Word Representations}
 \begin{document}
 \maketitle
 \begin{abstract}
-In this paper we describe our system designed for the WASSA 2018 Implicit Emotion Shared Task (IEST), which obtained 2$^{\text{nd}}$ place out of 26 teams with a test macro F1 score of $0.710$. The system is composed of a single pre-trained ELMo layer for encoding words, a Bidirectional Long-Short Memory Network BiLSTM for enriching word representations with context, a max-pooling operation for creating sentence representations from said word vectors, and a Dense Layer for projecting the sentence representations into label space. Our official submission was obtained by ensembling 6 of these models initialized with different random seeds.
+
+In this paper we describe our system designed for the WASSA 2018 Implicit
+Emotion Shared Task (IEST), which obtained 2$^{\text{nd}}$ place out of 30 teams
+with a test macro F1 score of $0.710$. The system is composed of a single
+pre-trained ELMo layer for encoding words, a Bidirectional Long-Short Memory
+Network BiLSTM for enriching word representations with context, a max-pooling
+operation for creating sentence representations from them, and a
+Dense Layer for projecting the sentence representations into label space. Our
+official submission was obtained by ensembling 6 of these models initialized
+with different random seeds.
+
 \end{abstract}
 
 \section{Introduction}
 
-Although the definition of emotion is still debated among the scientific community, the automatic identification and understanding of human emotions by machines has long been of interest in computer science. It has usually been assumed that emotions are triggered by the interpretation of a stimulus event according to its meaning. 
+Although the definition of emotion is still debated among the scientific
+community, the automatic identification and understanding of human emotions by
+machines has long been of interest in computer science. It has usually been
+assumed that emotions are triggered by the interpretation of a stimulus event
+according to its meaning. 
 
-As language usually reflects the emotional state of an individual, it is natural to study human emotions by understanding how they are reflected in text. We see that many words indeed have affect as a core part of their meaning, for example, \textit{dejected} and \textit{wistful} denote some amount of sadness, and are thus associated with sadness. On the other hand, some words are associated with affect even though they do not denote affect. For example, \textit{failure} and \textit{death} describe concepts that are usually accompanied by sadness and thus they denote some amount of sadness. In this context, the task of automatically recognizing emotions from text has recently attracted the attention of researchers in Natural Language Processing. This task is usually formalized as the classification of words, phrases, or documents into predefined discrete emotion categories or dimensions. Some approaches have aimed at also predicting the degree to which an emotion is expressed in text \cite{wassa_emoint_2017}.
+As language usually reflects the emotional state of an individual, it is natural
+to study human emotions by understanding how they are reflected in text. We see
+that many words indeed have affect as a core part of their meaning, for example,
+\textit{dejected} and \textit{wistful} denote some amount of sadness, and are
+thus associated with sadness. On the other hand, some words are associated with
+affect even though they do not denote affect. For example, \textit{failure} and
+\textit{death} describe concepts that are usually accompanied by sadness and
+thus they denote some amount of sadness. In this context, the task of
+automatically recognizing emotions from text has recently attracted the
+attention of researchers in Natural Language Processing. This task is usually
+formalized as the classification of words, phrases, or documents into predefined
+discrete emotion categories or dimensions. Some approaches have aimed at also
+predicting the degree to which an emotion is expressed in text
+\cite{wassa_emoint_2017}.
 
-In light of this, the \Acronym{WASSA} 2018 Implicit Emotion Shared Task (\Acronym{IEST}) \cite{klinger2018iest} was proposed to help find ways to automatically learn the link between situations and the emotion they trigger. The task consisted in predicting the emotion of a word excluded from a tweet. Removed words, or \textit{trigger-words}, included the terms ``sad'', ``happy'', ``disgusted'', ``surprised'', ``angry'', ``afraid'' and their synonyms, and the task was to predict the emotion they conveyed, specifically sadness, joy, disgust, surprise, anger and fear.
+In light of this, the \Acronym{WASSA} 2018 Implicit Emotion Shared Task
+(\Acronym{IEST}) \cite{klinger2018iest} was proposed to help find ways to
+automatically learn the link between situations and the emotion they trigger.
+The task consisted in predicting the emotion of a word excluded from a tweet.
+Removed words, or \textit{trigger-words}, included the terms ``sad'', ``happy'',
+``disgusted'', ``surprised'', ``angry'', ``afraid'' and their synonyms, and the
+task was to predict the emotion they conveyed, specifically sadness, joy,
+disgust, surprise, anger and fear.
 
-From a machine learning perspective, this problem can be seen as sentence classification, in which the goal is to classify a sentence, or in particular a tweet, into one of several categories. In the case of \Acronym{IEST}, the problem is specially challenging since tweets contain informal language, the heavy usage of emoji, hashtags and username mentions.
+From a machine learning perspective, this problem can be seen as sentence
+classification, in which the goal is to classify a sentence, or in particular a
+tweet, into one of several categories. In the case of \Acronym{IEST}, the
+problem is specially challenging since tweets contain informal language, the
+heavy usage of emoji, hashtags and username mentions.
 
-In this paper we describe our system designed for \Acronym{IEST}, which obtained the second place out of 26 teams. Our system did not require manual feature engineering and only minimal use of external data. Concretely, our approach is composed of a single pre-trained \Acronym{ELMo} layer for encoding words \cite{peters2018deep}, a Bidirectional Long-Short Memory Network (\Acronym{BiLSTM}) \cite{graves2005framewise, graves2013speech}, for enriching word representations with context, a max-pooling operation for creating sentence representations from said word vectors, and finally a Dense Layer for projecting the sentence representations into label space. To the best of our knowledge, our system, which we plan to release, is the first to utilize ELMo for emotion recognition. 
+In this paper we describe our system designed for \Acronym{IEST}, which obtained
+the second place out of 26 teams. Our system did not require manual feature
+engineering and only minimal use of external data. Concretely, our approach is
+composed of a single pre-trained \Acronym{ELMo} layer for encoding words
+\cite{peters2018deep}, a Bidirectional Long-Short Memory Network
+(\Acronym{BiLSTM}) \cite{graves2005framewise, graves2013speech}, for enriching
+word representations with context, a max-pooling operation for creating sentence
+representations from said word vectors, and finally a Dense Layer for projecting
+the sentence representations into label space. To the best of our knowledge, our
+system, which we plan to release, is the first to utilize ELMo for emotion
+recognition. 
 
 
 %  \item Code will be made available
@@ -105,7 +153,9 @@ In this paper we describe our system designed for \Acronym{IEST}, which obtained
 
 \subsection{Preprocessing}
 
-As our model is purely character-based, we performed little data preprocessing. Table \ref{table:substitutions} shows the special tokens found in the datasets, and how we substituted them. 
+As our model is purely character-based, we performed little data preprocessing.
+Table \ref{table:substitutions} shows the special tokens found in the datasets,
+and how we substituted them. 
 
 \begin{table}[!h]
     \centering
@@ -126,7 +176,18 @@ As our model is purely character-based, we performed little data preprocessing. 
     \label{table:substitutions}
 \end{table}
 
-    Furthermore, we tokenized the text using a variation of the \texttt{twokenize.py}\footnote{\tiny\url{https://github.com/myleott/ark-twokenize-py}} script, a Python port of the original \texttt{Twokenize.java} \cite{gimpel-EtAl:2011:ACL-HLT2011}. Concretely, we created an emoji-aware version of it by incorporating knowledge from an emoji database,\footnote{\tiny\url{https://github.com/carpedm20/emoji/blob/e7bff32/emoji/unicode_codes.py}} which we slightly modified for avoiding conflict with emoji sharing unicode codes with common glyphs used in Twitter,\footnote{For example, the hashtag emoji is composed by the unicode code points \texttt{U+23 U+FE0F U+20E3}, which include \texttt{U+23}, the same code point for the \texttt{\#} glyph.} and for making it compatible with Python 3.
+    Furthermore, we tokenized the text using a variation of the
+    \texttt{twokenize.py}\footnote{\tiny\url{https://github.com/myleott/ark-twokenize-py}}
+    script, a Python port of the original \texttt{Twokenize.java}
+    \cite{gimpel-EtAl:2011:ACL-HLT2011}. Concretely, we created an emoji-aware
+    version of it by incorporating knowledge from an emoji
+    database,\footnote{\tiny\url{https://github.com/carpedm20/emoji/blob/e7bff32/emoji/unicode_codes.py}}
+    which we slightly modified for avoiding conflict with emoji sharing unicode
+    codes with common glyphs used in Twitter,\footnote{For example, the hashtag
+    emoji is composed by the unicode code points \texttt{U+23 U+FE0F U+20E3},
+which include \texttt{U+23}, the same code point for the \texttt{\#} glyph.} and
+for making it compatible with Python 3.
+
 % \begin{itemize}
 %     \item briefly describe previous Semeval papers~\cite{baziotis2018ntua,
 %         duppada2018seernet, abdou2018affecthor} (Should we do this despite not
@@ -139,30 +200,80 @@ As our model is purely character-based, we performed little data preprocessing. 
 
 \subsection{Architecture}
 
-Figure \ref{fig:architecture} summarizes our proposed architecture. Our input is based on Embeddings from Language Models (ELMo) by \citet{peters2018deep}. These are character-based word representations allowing the model to avoid the ``unknown token'' problem. ELMo uses a set of convolutional neural networks to extract features from character embeddings, and builds word vectors from them. These are then fed to a multi-layer Bidirectional Language Model (BiLM) which returns context-sensitive vectors for each input word. 
+Figure \ref{fig:architecture} summarizes our proposed architecture. Our input is
+based on Embeddings from Language Models (ELMo) by \citet{peters2018deep}. These
+are character-based word representations allowing the model to avoid the
+``unknown token'' problem. ELMo uses a set of convolutional neural networks to
+extract features from character embeddings, and builds word vectors from them.
+These are then fed to a multi-layer Bidirectional Language Model (BiLM) which
+returns context-sensitive vectors for each input word. 
 
-We used a single-layer BiLSTM as context fine-tuner \cite{graves2005framewise, graves2013speech}, on top of the ELMo embeddings, and then aggregated the hidden states it returned by using max-pooling, which has been shown to perform well on sentence classification tasks \cite{conneau2017supervised}.
+We used a single-layer BiLSTM as context fine-tuner \cite{graves2005framewise,
+graves2013speech}, on top of the ELMo embeddings, and then aggregated the hidden
+states it returned by using max-pooling, which has been shown to perform well on
+sentence classification tasks \cite{conneau2017supervised}.
 
-Finally, we used a single-layer fully-connected network for projecting the pooled BiLSTM output into a vector corresponding to the label logits for each predicted class.
+Finally, we used a single-layer fully-connected network for projecting the
+pooled BiLSTM output into a vector corresponding to the label logits for each
+predicted class.
 
 \subsection{Implementation Details and Hyperparameters}
 
-\hspace{\parindent} \textbf{ELMo Layer}: We used the official AllenNLP implementation of the ELMo model\footnote{\tiny\url{https://allenai.github.io/allennlp-docs/api/allennlp.modules.elmo.html}}, with the official weights pre-trained on the 1 Billion Word Language Model Benchmark, which contains about 800M tokens of news crawl data from WMT 2011 \cite{Chelba2014}.
+\hspace{\parindent} \textbf{ELMo Layer}: We used the official AllenNLP
+implementation of the ELMo
+model\footnote{\tiny\url{https://allenai.github.io/allennlp-docs/api/allennlp.modules.elmo.html}},
+with the official weights pre-trained on the 1 Billion Word Language Model
+Benchmark, which contains about 800M tokens of news crawl data from WMT 2011
+\cite{Chelba2014}.
 
-\textbf{Dimensionalities}: By default the ELMo layer outputs a 2048-dim vector, which we then feed to a BiLSTM resulting in a 4096-dim vector for each word of the sequence\footnote{A BiLSTM is composed of two separate LSTMs that read the input in opposite directions and whose outputs are concatenated at the sequence dimension. This results in a vector double the dimension of the input for each time step.}. After max-pooling the BiLSTM output over the sequence dimension we have a single 4096-dim vector corresponding to the tweet representation. This representation is finally fed to a single-layer fully-connected network with input size 4096, 512 hidden units, output size 6, and ReLU nonlinearities after the input and hidden layers. The output of the dense layer is a 6-dim logit vector for each example.
+\textbf{Dimensionalities}: By default the ELMo layer outputs a 1024-dim vector,
+which we then feed to a BiLSTM with output size 2048, resulting in a 4096-dim
+vector when concatenating forward and backward directions for each word
+of the sequence\footnote{A BiLSTM is composed of two separate LSTMs that read
+the input in opposite directions and whose outputs are concatenated at the
+hidden dimension. This results in a vector double the dimension of the input
+for each time step.}. After max-pooling the BiLSTM output over the sequence
+dimension, we obtain a single 4096-dim vector corresponding to the tweet
+representation. This representation is finally fed to a single-layer
+fully-connected network with input size 4096, 512 hidden units, output size 6,
+and a ReLU nonlinearity after the hidden layer. The output of the
+dense layer is a 6-dim logit vector for each input example.
 
-\textbf{Loss Function}: As this corresponds to a multiclass classification problem (predicting a single class for each example, with more than 2 classes to choose from), we used the Cross-Entropy Loss as implemented in PyTorch \cite{paszke2017automatic}.
+\textbf{Loss Function}: As this corresponds to a multiclass classification
+problem (predicting a single class for each example, with more than 2 classes to
+choose from), we used the Cross-Entropy Loss as implemented in PyTorch
+\cite{paszke2017automatic}.
 
-\textbf{Optimization}: We optimized the model with Adam \cite{DBLP:journals/corr/KingmaB14}, using a slanted triangular learning rate schedule \cite{howard2018universal}, with default hyperparameters ($cut\_frac=0.1$, $ratio=32$), and a maximum learning rate $\eta_{max}=0.001$, over $T=23,970$ iterations\footnote{This number is obtained by multiplying the number of epochs ($10$) times the total number of batches, which for the training dataset corresponds to $2396$ batches of $64$ elements, and $1$ batch of $39$ elements, hence $2397\times10=23,970$.}.
+\textbf{Optimization}: We optimized the model with Adam
+\cite{DBLP:journals/corr/KingmaB14}, using default hyperparameters
+($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$), following a slanted
+triangular learning rate schedule \cite{howard2018universal}, also with default
+hyperparameters ($cut\_frac=0.1$, $ratio=32$), and a maximum learning rate
+$\eta_{max}=0.001$, over $T=23,970$ iterations\footnote{This number is obtained
+    by multiplying the number of epochs ($10$) times the total number of
+    batches, which for the training dataset corresponds to $2396$ batches of
+$64$ elements, and $1$ batch of $39$ elements, hence $2397\times10=23,970$.}.
 
-\textbf{Regularization}: we used a dropout layer \cite{srivastava2014dropout}, with probability of 0.5 after both the ELMo and the hidden fully-connected layer, and another one with probability of 0.1 after the max-pooling aggregation layer. We also reshuffled the training examples between epochs, resulting in a different batch for each iteration. 
+\textbf{Regularization}: we used a dropout layer \cite{srivastava2014dropout},
+with probability of 0.5 after both the ELMo and the hidden fully-connected
+layer, and another one with probability of 0.1 after the max-pooling aggregation
+layer. We also reshuffled the training examples between epochs, resulting in a
+different batch for each iteration. 
 
-\textbf{Model Selection}: To choose the best hyperparameter configuration we measured the classification accuracy on the validation set (trial set). 
+\textbf{Model Selection}: To choose the best hyperparameter configuration we
+measured the classification accuracy on the validation (trial) set. 
 
 
 \subsection{Ensembles}
  
-Once we found the best-performing configuration we trained 10 models using different random seeds, and tried averaging the output probabilities of all their possible $\sum_{k=1}^{10}{\binom{10}{k}}=1023$ combinations. As Figure \ref{fig:best_ensembles} shows, we empirically found that a specific combination of $6$ models yielded the best results ($70.52\%$), providing evidence for the fact that using a number of independent classifiers equal to the number of class labels provides the best results when doing average ensembling \cite{bonab2016theoretical}.
+Once we found the best-performing configuration we trained 10 models using
+different random seeds, and tried averaging the output probabilities of all
+their possible $\sum_{k=1}^{10}{\binom{10}{k}}=1023$ combinations. As Figure
+\ref{fig:best_ensembles} shows, we empirically found that a specific combination
+of $6$ models yielded the best results ($70.52\%$), providing evidence for the
+fact that using a number of independent classifiers equal to the number of class
+labels provides the best results when doing average ensembling
+\cite{bonab2016theoretical}.
 
 
 \begin{figure}[!h]
@@ -174,12 +285,20 @@ Once we found the best-performing configuration we trained 10 models using diffe
 
 \section{Experiments and Analyses}
 
-We performed several experiments to gain insights on how the proposed model's performance interacts with the shared task's data. We performed an ablation study to see how some of the main hyperparameters affect performance, and an analysis of tweets containing hashtags and emoji to understand how these two types of tokens help the model predict the trigger-word's emotion. We also observed the effects of varying the amount of data used for training the model to evaluate whether it would be worthwhile to gather more training data.
+We performed several experiments to gain insights on how the proposed model's
+performance interacts with the shared task's data. We performed an ablation
+study to see how some of the main hyperparameters affect performance, and an
+analysis of tweets containing hashtags and emoji to understand how these two
+types of tokens help the model predict the trigger-word's emotion. We also
+observed the effects of varying the amount of data used for training the model
+to evaluate whether it would be worthwhile to gather more training data.
 
 \subsection{Ablation Study}%
 \label{sub:ablation_study}
 
-We performed an ablation study on a single model having obtained 69.23\% accuracy on the validation set. Results are summarized in Table \ref{table:ablation}.
+We performed an ablation study on a single model having obtained 69.23\%
+accuracy on the validation set. Results are summarized in Table
+\ref{table:ablation}.
 
 \begin{table}[!h]
     \centering
@@ -224,7 +343,7 @@ We performed an ablation study on a single model having obtained 69.23\% accurac
         to having switched the ELMo word encoding layer with a simple
         pre-trained GloVe embedding lookup table, and ``Concat Pooling''
         obtained sentence representations by using the pooling method described
-        by \citet{howard2018universal}. ``LSTM hidden'' corresponds to the the
+        by \citet{howard2018universal}. ``LSTM hidden'' corresponds to the
         hidden dimension of the BiLSTM, ``POS emb dim'' to the dimension of the
         part-of-speech embeddings, and ``SGD optim lr'' to the learning rate
         used while optimizing with the schedule described by \citet{conneau2017supervised}.}
@@ -235,17 +354,34 @@ We performed an ablation study on a single model having obtained 69.23\% accurac
 
 
 
-We can observe that the architectural choice that had the greatest impact on our model was the ELMo layer, providing a $3.71\%$ boost in performance as compared to using GloVe pre-trained word embeddings.
+We can observe that the architectural choice that had the greatest impact on our
+model was the ELMo layer, providing a $3.71\%$ boost in performance as compared
+to using GloVe pre-trained word embeddings.
 
-We can further see that emoji also contributed significantly to the model's performance. In Section \ref{sub:effect_of_emoji_and_hashtags} we give some pointers to understanding why this is so.  
+We can further see that emoji also contributed significantly to the model's
+performance. In Section \ref{sub:effect_of_emoji_and_hashtags} we give some
+pointers to understanding why this is so.  
 
-Additionally, we tried using the concatenation of the max-pooled, average-pooled and last hidden states of the BiLSTM as the sentence representation, following \citet{howard2018universal}, but found out that this impacted performance negatively. We hypothesize this is due to tweets being too short for needing such a rich representation. Also, the size of the concatenated vector was $4096\times3=12,288$, which probably could not be properly exploited by the $512$-dimensional fully-connected layer.
+Additionally, we tried using the concatenation of the max-pooled, average-pooled
+and last hidden states of the BiLSTM as the sentence representation, following
+\citet{howard2018universal}, but found out that this impacted performance
+negatively. We hypothesize this is due to tweets being too short for needing
+such a rich representation. Also, the size of the concatenated vector was
+$4096\times3=12,288$, which probably could not be properly exploited by the
+$512$-dimensional fully-connected layer.
 
-Using a greater BiLSTM hidden size did not help the model, probably because of the reason mentioned early; the fully-connected layer was not big or deep enough to exploit the additional information. Similarly, using a smaller hidden size neither helped.
+Using a greater BiLSTM hidden size did not help the model, probably because of
+the reason mentioned early; the fully-connected layer was not big or deep enough
+to exploit the additional information. Similarly, using a smaller hidden size
+neither helped.
 
-We found that using 50-dim part-of-speech embeddings slightly improved results, which implies that better fine-tuning this hyperparameter, or using a better POS tagger could yield an even better performance.
+We found that using 50-dim part-of-speech embeddings slightly improved results,
+which implies that better fine-tuning this hyperparameter, or using a better POS
+tagger could yield an even better performance.
 
-Regarding optimization strategies, we also tried using SGD with different learning rates and a step-wise learning rate schedule as described by \citet{conneau2018}, but we found that doing this did not improve performance. 
+Regarding optimization strategies, we also tried using SGD with different
+learning rates and a step-wise learning rate schedule as described by
+\citet{conneau2018}, but we found that doing this did not improve performance. 
 
 Finally, Figure \ref{fig:dropouts} shows the effect of using different dropout
 probabilities. We can see that having higher dropout after the
@@ -297,11 +433,13 @@ overall.
 Table \ref{table:emoji_and_hashtags} shows the overall effect of hashtags and
 emoji on classification performance. Tweets containing emoji seem to be easier
 for the model to classify than those without. Hashtags also have a positive
-effect on classification performance, however it is less significant. This implies that emoji, and hashtags in a smaller degree, provide
-tweets with a context richer in sentiment information, allowing the model to
-better guess the emotion of the \textit{trigger-word}.
+effect on classification performance, however it is less significant. This
+implies that emoji, and hashtags in a smaller degree, provide tweets with a
+context richer in sentiment information, allowing the model to better guess the
+emotion of the \textit{trigger-word}.
 
-Table \ref{table:emoji_fine_grained} shows the effect specific emoji have on classification performance. 
+Table \ref{table:emoji_fine_grained} shows the effect specific emoji have on
+classification performance. 
 
 \begin{table}[!h]
     \centering
@@ -343,18 +481,37 @@ of removing them.}
 
 \end{table}
 
-It is clear some emoji strongly contribute to improving prediction quality. The most interesting ones are \texttt{mask}, \texttt{rage}, and \texttt{cry}, which significantly increase accuracy. Further, contrary to intuition, the \texttt{sob} emoji contributes less than \texttt{cry}, despite representing a stronger emotion. This is probably due to \texttt{sob} being used for depicting a wider spectrum of emotions.
+It is clear some emoji strongly contribute to improving prediction quality. The
+most interesting ones are \texttt{mask}, \texttt{rage}, and \texttt{cry}, which
+significantly increase accuracy. Further, contrary to intuition, the
+\texttt{sob} emoji contributes less than \texttt{cry}, despite representing a
+stronger emotion. This is probably due to \texttt{sob} being used for depicting
+a wider spectrum of emotions.
 
-Finally, not all emoji are beneficial for this task. When removing \texttt{sweat\_smile} and \texttt{confused} accuracy increased, probably because they represent emotions other than the ones being predicted.
-%From observing Table \ref{table:emoji_label} it seems likely that tweets containing \texttt{mask} would be highly predictive of the \texttt{disgust} class, since more than $92\%$ of the tweets containing such emoji belong to that class, however it less clear why \texttt{rage}, and \texttt{cry} contribute similarly, despite being more evenly distributed among classes.
+Finally, not all emoji are beneficial for this task. When removing
+\texttt{sweat\_smile} and \texttt{confused} accuracy increased, probably because
+they represent emotions other than the ones being predicted.
 
-%This means that they are highly representative of the the class the tweet belongs to, and would be good choices for discriminating new tweets in case we wanted to expand the dataset.
+%From observing Table \ref{table:emoji_label} it seems likely that tweets
+%containing \texttt{mask} would be highly predictive of the \texttt{disgust}
+%class, since more than $92\%$ of the tweets containing such emoji belong to
+%that class, however it less clear why \texttt{rage}, and \texttt{cry}
+%contribute similarly, despite being more evenly distributed among classes.
 
-%For example, by observing Table \ref{table:emoji_label} we can infer that  \texttt{mask}, \texttt{rage}, and \texttt{cry}   \texttt{disgust}, \texttt{rage}, and \texttt{sad} classes respectively.
+%This means that they are highly representative of the the class the tweet
+%belongs to, and would be good choices for discriminating new tweets in case we
+%wanted to expand the dataset.
+
+%For example, by observing Table \ref{table:emoji_label} we can infer that
+%\texttt{mask}, \texttt{rage}, and \texttt{cry}   \texttt{disgust},
+%\texttt{rage}, and \texttt{sad} classes respectively.
 
 \subsection{Effect of the Amount of Training Data}
 
-As Figure \ref{fig:data_amt_vs_acc} shows, increasing the amount of data in which our model was trained consistently increased validation accuracy and validation macro F1 score. The trend shows that having more training data would likely further increase the model's performance.
+As Figure \ref{fig:data_amt_vs_acc} shows, increasing the amount of data in
+which our model was trained consistently increased validation accuracy and
+validation macro F1 score. The trend shows that having more training data would
+likely further increase the model's performance.
 
 \begin{figure}[!h]
     \centering
@@ -365,11 +522,31 @@ As Figure \ref{fig:data_amt_vs_acc} shows, increasing the amount of data in whic
 
 \section{Conclusions and Future Work}
 
-We described the model that got second place in the WASSA 2018 Implicit Emotion Shared Task. Despite its simplicity, and low amount of dependencies on libraries and external features, it performed almost as well as the system that obtained the first place.
+We described the model that got second place in the WASSA 2018 Implicit Emotion
+Shared Task. Despite its simplicity, and low amount of dependencies on libraries
+and external features, it performed almost as well as the system that obtained
+the first place.
 
-Our ablation study revealed that our hyperparameters were indeed quite well-tuned for the task, which agrees with the good results obtained in the official submission. However, the ablation study also showed that increased performance can be obtained by incorporating POS embeddings as additional inputs. Further experiments are required to accurately measure the impact that this additional input may have on the results. We also think the performance can be boosted by making the architecture more complex, concretely, by using a BiLSTM with multiple layers and skip connections in a way akin to \cite{peters2018deep}, or by making the fully-connected network bigger and deeper.
+Our ablation study revealed that our hyperparameters were indeed quite
+well-tuned for the task, which agrees with the good results obtained in the
+official submission. However, the ablation study also showed that increased
+performance can be obtained by incorporating POS embeddings as additional
+inputs. Further experiments are required to accurately measure the impact that
+this additional input may have on the results. We also think the performance can
+be boosted by making the architecture more complex, concretely, by using a
+BiLSTM with multiple layers and skip connections in a way akin to
+\cite{peters2018deep}, or by making the fully-connected network bigger and
+deeper.
 
-Finally, our studies regarding the importance of hashtags and emoji in the classification showed that both of them seem to contribute significantly to the performance, although in different measures. 
+Finally, our studies regarding the importance of hashtags and emoji in the
+classification showed that both of them seem to contribute significantly to the
+performance, although in different measures. 
+
+\section{Acknowledgements}%
+\label{sec:acknowledgements}
+
+We thank the anonymous reviewers for their reviews and suggestions. The first
+author is partially supported by the Japanese Government MEXT Scholarship.
 
 \bibliography{bibliography}
 \bibliographystyle{acl_natbib_nourl}
