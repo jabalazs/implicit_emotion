@@ -78,10 +78,11 @@ Emotion Shared Task (IEST), which obtained 2$^{\text{nd}}$ place out of 30 teams
 with a test macro F1 score of $0.710$. The system is composed of a single
 pre-trained ELMo layer for encoding words, a Bidirectional Long-Short Memory
 Network BiLSTM for enriching word representations with context, a max-pooling
-operation for creating sentence representations from them, and a
-Dense Layer for projecting the sentence representations into label space. Our
-official submission was obtained by ensembling 6 of these models initialized
-with different random seeds.
+operation for creating sentence representations from them, and a Dense Layer for
+projecting the sentence representations into label space. Our official
+submission was obtained by ensembling 6 of these models initialized with
+different random seeds. The code for replicating this paper is available at
+\url{https://github.com/jabalazs/implicit_emotion}.
 
 \end{abstract}
 
@@ -251,7 +252,7 @@ choose from), we used the Cross-Entropy Loss as implemented in PyTorch
 triangular learning rate schedule \cite{howard2018universal}, also with default
 hyperparameters ($cut\_frac=0.1$, $ratio=32$), and a maximum learning rate
 $\eta_{max}=0.001$, over $T=23,970$ iterations\footnote{This number is obtained
-    by multiplying the number of epochs ($10$) times the total number of
+    by multiplying the number of epochs ($10$), times the total number of
     batches, which for the training dataset corresponds to $2396$ batches of
 $64$ elements, and $1$ batch of $39$ elements, hence $2397\times10=23,970$.}.
 
@@ -268,8 +269,8 @@ measured the classification accuracy on the validation (trial) set.
 \subsection{Ensembles}
  
 Once we found the best-performing configuration we trained 10 models using
-different random seeds, and tried averaging the output probabilities of all
-their possible $\sum_{k=1}^{10}{\binom{10}{k}}=1023$ combinations. As Figure
+different random seeds, and tried averaging the output class probabilities of
+all their possible $\sum_{k=1}^{9}{\binom{9}{k}}=511$ combinations. As Figure
 \ref{fig:best_ensembles} shows, we empirically found that a specific combination
 of $6$ models yielded the best results ($70.52\%$), providing evidence for the
 fact that using a number of independent classifiers equal to the number of class
@@ -409,9 +410,34 @@ overall.
 
 \subsection{Error Analysis}
 
-Figure~\ref{fig:confusion_matrix} shows the confusion matrix of the model
+Figure~\ref{fig:confusion_matrix} shows the confusion matrix of a single model
 evaluated on the test set, and Table~\ref{table:classification_report} the
-corresponding classification report.
+corresponding classification report. In general, we confirm what
+\newcite{klinger2018iest} report: \texttt{anger} was the most difficult class to
+predict, followed by \texttt{surprise}, whereas \texttt{joy}, \texttt{fear}, and
+\texttt{disgust} are the better performing ones.
+
+To observe whether any particular pattern arose from the sentence
+representations encoded by our model, we projected them into 3d space through
+Principal Component Analysis (PCA), and were surprised to find that 2 clearly
+defined clusters emerged (see Figure \ref{fig:pca}), one containing the majority
+of datapoints, and another containing \texttt{joy} tweets exclusively. Upon
+further exploration we also found that the smaller cluster was composed only by
+tweets containing the pattern \texttt{un~\_\_TRIGGERWORD\_\_}, and further,
+that all of them were correctly classified.
+
+It is also worth mentioning that there are 5827 tweets in the training set with
+this pattern. Of these, 5822 (99.9\%) correspond to the label \texttt{joy}. We
+observe a similar trend on the test set; 1115 of the 1116 tweets having the
+\texttt{un~\_\_TRIGGERWORD\_\_} pattern correspond to \texttt{joy} tweets. We
+hypothesize this is the reason why the model learned this pattern as a strong
+discriminating feature.
+
+Finally, the only tweet in the test set that contained this pattern and did not
+belong to the \texttt{joy} class, originally had \textit{unsurprised} as its
+triggerword\footnote{We manually searched for the original tweet.}, and
+unsurprisingly, was misclassified. 
+
 
 \begin{figure}[!h]
     \centering
@@ -454,6 +480,20 @@ corresponding classification report.
 \label{table:classification_report}
 \end{table}
 
+\subsection{Effect of the Amount of Training Data}
+
+As Figure \ref{fig:data_amt_vs_acc} shows, increasing the amount of data with
+which our model was trained consistently increased validation accuracy and
+validation macro F1 score. The trend suggests that the proposed model is
+expressive enough to learn from more data, and is not overfitting the training
+set. 
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\columnwidth]{images/acc_vs_tdp_variation.eps}
+    \caption{Effect of the amount of training data on classification performance.}
+    \label{fig:data_amt_vs_acc}
+\end{figure}
 
 \subsection{Effect of Emoji and Hashtags}%
 \label{sub:effect_of_emoji_and_hashtags}
@@ -560,18 +600,12 @@ they represent emotions other than the ones being predicted.
 %\texttt{mask}, \texttt{rage}, and \texttt{cry}   \texttt{disgust},
 %\texttt{rage}, and \texttt{sad} classes respectively.
 
-\subsection{Effect of the Amount of Training Data}
-
-As Figure \ref{fig:data_amt_vs_acc} shows, increasing the amount of data in
-which our model was trained consistently increased validation accuracy and
-validation macro F1 score. The trend shows that having more training data would
-likely further increase the model's performance.
-
 \begin{figure}[!h]
     \centering
-    \includegraphics[width=\columnwidth]{images/acc_vs_tdp_variation.eps}
-    \caption{Effect of the amount of training data on classification performance.}
-    \label{fig:data_amt_vs_acc}
+    \includegraphics[width=\columnwidth]{images/pca.pdf}
+
+    \caption{3d Projection of the Test Sentence Representations.}
+    \label{fig:pca}
 \end{figure}
 
 \section{Conclusions and Future Work}
@@ -591,6 +625,20 @@ be boosted by making the architecture more complex, concretely, by using a
 BiLSTM with multiple layers and skip connections in a way akin to
 \cite{peters2018deep}, or by making the fully-connected network bigger and
 deeper.
+
+We also showed that, what was probably an annotation artifact, the
+\texttt{un~\_\_TRIGGERWORD\_\_} pattern, resulted in increased performance for
+the \texttt{joy} label. This pattern was probably originated by a heuristic
+naïvely replacing the ocurrence of \textit{happy} by the trigger-word indicator.
+We think the dataset could be improved by replacing the word \textit{unhappy},
+in the original examples, by \texttt{\_\_TRIGGERWORD\_\_} instead of
+\texttt{un~\_\_TRIGGERWORD\_\_}, and labeling it as \texttt{sad}, or
+\texttt{angry}, instead of \texttt{joy}.
+
+% To prevent future models from mistakenly learning this
+% feature as a strong indicator for such label, it would be wise to add more
+% examples from other classes cotaining the same pattern, or removing them
+% entirely and rebalancing the dataset.
 
 Finally, our studies regarding the importance of hashtags and emoji in the
 classification showed that both of them seem to contribute significantly to the
