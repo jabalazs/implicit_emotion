@@ -29,6 +29,7 @@
 \usepackage{siunitx}
 \usepackage{caption}
 \usepackage{blindtext}
+\usepackage{booktabs}
 \usepackage[hang,flushmargin]{footmisc} % remove indentation from footnotes
 % \hypersetup{draft}
 
@@ -162,14 +163,14 @@ and how we substituted them.
     \footnotesize
 
     \begin{tabular}{ll}
-
+        \toprule
         \textbf{Original} & \textbf{Replacement} \\
-        \hline
-        \hline
+        \midrule
         \texttt{\footnotesize[\#TRIGGERWORD\#]} & \texttt{\footnotesize\_\_TRIGGERWORD\_\_} \\
         \texttt{\footnotesize@USERNAME} & \texttt{\footnotesize\_\_USERNAME\_\_} \\
         \texttt{\footnotesize[NEWLINE]} & \texttt{\footnotesize\_\_NEWLINE\_\_} \\
         \texttt{\footnotesize http://url.removed} & \texttt{\footnotesize\_\_URL\_\_} \\
+        \bottomrule
 
     \end{tabular}
     \caption{Preprocessing substitutions.}
@@ -226,18 +227,18 @@ with the official weights pre-trained on the 1 Billion Word Language Model
 Benchmark, which contains about 800M tokens of news crawl data from WMT 2011
 \cite{Chelba2014}.
 
-\textbf{Dimensionalities}: By default the ELMo layer outputs a 1024-dim vector,
-which we then feed to a BiLSTM with output size 2048, resulting in a 4096-dim
-vector when concatenating forward and backward directions for each word
-of the sequence\footnote{A BiLSTM is composed of two separate LSTMs that read
-the input in opposite directions and whose outputs are concatenated at the
-hidden dimension. This results in a vector double the dimension of the input
+\textbf{Dimensionalities}: By default the ELMo layer outputs a 1024-dimensional
+vector, which we then feed to a BiLSTM with output size 2048, resulting in a
+4096-dimensional vector when concatenating forward and backward directions for
+each word of the sequence\footnote{A BiLSTM is composed of two separate LSTMs
+that read the input in opposite directions and whose outputs are concatenated at
+the hidden dimension. This results in a vector double the dimension of the input
 for each time step.}. After max-pooling the BiLSTM output over the sequence
-dimension, we obtain a single 4096-dim vector corresponding to the tweet
+dimension, we obtain a single 4096-dimensional vector corresponding to the tweet
 representation. This representation is finally fed to a single-layer
 fully-connected network with input size 4096, 512 hidden units, output size 6,
-and a ReLU nonlinearity after the hidden layer. The output of the
-dense layer is a 6-dim logit vector for each input example.
+and a ReLU nonlinearity after the hidden layer. The output of the dense layer is
+a 6-dimensional logit vector for each input example.
 
 \textbf{Loss Function}: As this corresponds to a multiclass classification
 problem (predicting a single class for each example, with more than 2 classes to
@@ -306,30 +307,31 @@ accuracy on the validation set. Results are summarized in Table
 
     \begin{tabular}{lcc}
 
+        \toprule
         \textbf{Variation} & \textbf{Accuracy (\%)} & $\bf{\Delta}$\textbf{\%} \\
-        \hline
-        \hline
+        \midrule[0.08em]
         Submitted          & \textbf{69.23}         & -                        \\
-        \hline
+        \midrule[0.05em]
         No emoji           & 68.36                  & - 0.87                   \\
-        \hline
+        \midrule[0.05em]
         No ELMo            & 65.52                  & - 3.71                   \\
-        \hline
+        \midrule[0.05em]
         Concat Pooling     & 68.47                  & - 0.76                   \\
-        \hline
+        \midrule[0.05em]
         LSTM hidden=4096   & 69.10                  & - 0.13                   \\
         LSTM hidden=1024   & 68.93                  & - 0.30                   \\
         LSTM hidden=512    & 68.43                  & - 0.80                   \\
-        \hline
+        \midrule[0.05em]
         POS emb dim=100    & 68.99                  & - 0.24                   \\
         POS emb dim=75     & 68.61                  & - 0.62                   \\
         POS emb dim=50     & 69.33                  & + 0.10                   \\
         POS emb dim=25     & 69.21                  & - 0.02                   \\
-        \hline
+        \midrule[0.05em]
         SGD optim lr=1     & 64.33                  & - 4.90                   \\
         SGD optim lr=0.1   & 66.11                  & - 3.12                   \\
         SGD optim lr=0.01  & 60.72                  & - 8.51                   \\
         SGD optim lr=0.001 & 30.49                  & - 38.74                  \\
+        \bottomrule
 
     \end{tabular}
 
@@ -371,11 +373,11 @@ $4096\times3=12,288$, which probably could not be properly exploited by the
 $512$-dimensional fully-connected layer.
 
 Using a greater BiLSTM hidden size did not help the model, probably because of
-the reason mentioned early; the fully-connected layer was not big or deep enough
+the reason mentioned earlier; the fully-connected layer was not big or deep enough
 to exploit the additional information. Similarly, using a smaller hidden size
 neither helped.
 
-We found that using 50-dim part-of-speech embeddings slightly improved results,
+We found that using 50-dimensional part-of-speech embeddings slightly improved results,
 which implies that better fine-tuning this hyperparameter, or using a better POS
 tagger could yield an even better performance.
 
@@ -393,7 +395,7 @@ overall.
     \centering
     \includegraphics[width=\columnwidth]{images/dropout_table.pdf}
 
-    \caption{Dropout Ablation. }
+    \caption{Dropout Ablation.}
     \vspace{-0.4cm}
 
     \caption*{
@@ -405,6 +407,54 @@ overall.
 \label{fig:dropouts}
 \end{figure}
 
+\subsection{Error Analysis}
+
+Figure~\ref{fig:confusion_matrix} shows the confusion matrix of the model
+evaluated on the test set, and Table~\ref{table:classification_report} the
+corresponding classification report.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\columnwidth]{images/confusion_matrix.pdf}
+
+    \caption{Confusion Matrix (Test Set).}
+    % \vspace{-0.4cm}
+
+    % \caption*{
+    %     \footnotesize Rows correspond to the dropout applied both after
+    %     the ELMo layer (word encoding layer) and after the fully-connected network's
+    %     hidden layer, while columns correspond to the dropout applied after the
+    %     max-pooling operation (sentence encoding layer.)}
+
+    \label{fig:confusion_matrix}
+\end{figure}
+
+\begin{table}[htpb]
+    \centering
+    \footnotesize
+    
+    \begin{tabular}{cccc}
+
+        \toprule
+                          & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} \\
+        \midrule
+        \texttt{anger}    & 0.643     & 0.601  & 0.621    \\
+        \texttt{disgust}  & 0.703     & 0.661  & 0.682    \\
+        \texttt{fear}     & 0.742     & 0.721  & 0.732    \\
+        \texttt{joy}      & 0.762     & 0.805  & 0.783    \\
+        \texttt{sad}      & 0.685     & 0.661  & 0.673    \\
+        \texttt{surprise} & 0.627     & 0.705  & 0.663    \\
+        \midrule
+        Average           & 0.695     & 0.695  & 0.694    \\
+        \bottomrule
+    \end{tabular}
+
+    \caption{Classification Report (Test Set).}
+
+\label{table:classification_report}
+\end{table}
+
+
 \subsection{Effect of Emoji and Hashtags}%
 \label{sub:effect_of_emoji_and_hashtags}
 
@@ -414,11 +464,12 @@ overall.
 
     \begin{tabular}{lcc}
 
+        \toprule
         \textbf{} & \textbf{Present} & \textbf{Not Present} \\
-        \hline
-        \hline
+        \midrule
         Emoji     & 4805 (76.6\%)    & 23952 (68.0\%)       \\
         Hashtags  & 2122 (70.5\%)    & 26635 (69.4\%)       \\
+        \bottomrule
 
     \end{tabular}
 
@@ -438,32 +489,34 @@ implies that emoji, and hashtags in a smaller degree, provide tweets with a
 context richer in sentiment information, allowing the model to better guess the
 emotion of the \textit{trigger-word}.
 
-Table \ref{table:emoji_fine_grained} shows the effect specific emoji have on
-classification performance. 
 
 \begin{table}[!h]
     \centering
     \scriptsize
-        \begin{tabular}{lr|rc|rc|r}
+        \begin{tabular}{lrrcrcr}
 
-           \multirow{2}{*}{\textbf{Emoji alias}} & \multirow{2}{*}{\textbf{N}} & \multicolumn{2}{c|}{\textbf{emoji}} & \multicolumn{2}{c|}{\textbf{no-emoji}} &
+            \toprule
+           \multirow{2}{*}{\textbf{Emoji alias}} & \multirow{2}{*}{\textbf{N}\hspace{0.1cm}} & \multicolumn{2}{c}{\textbf{emoji}} & \multicolumn{2}{c}{\textbf{no-emoji}} &
             \multirow{2}{*}{$\bf{\Delta}$\textbf{\%}} \\
-            \cline{3-6}
+            \cmidrule(lr){3-4}
+            \cmidrule(lr){5-6}
                                 &     & \#   & \% & \# & \% & \\
-          \hline
-          \hline
-          \texttt{mask}         & 163 & 154 & 94.48 & 134 & 82.21 & - 12.27 \\
-          \texttt{two\_hearts}  & 87  & 81  & 93.10 & 77  & 88.51 & - 4.59  \\
-          \texttt{heart\_eyes}  & 122 & 109 & 89.34 & 103 & 84.43 & - 4.91  \\
-          \texttt{heart}        & 267 & 237 & 88.76 & 235 & 88.01 & - 0.75  \\
-          \texttt{rage}         & 92  & 78  & 84.78 & 66  & 71.74 & - 13.04 \\
-          \texttt{cry}          & 116 & 97  & 83.62 & 83  & 71.55 & - 12.07 \\
-          \texttt{sob}          & 490 & 363 & 74.08 & 345 & 70.41 & - 3.67  \\
-          \texttt{unamused}     & 167 & 121 & 72.46 & 116 & 69.46 & - 3.00  \\
-          \texttt{weary}        & 204 & 140 & 68.63 & 139 & 68.14 & - 0.49  \\
-          \texttt{joy}          & 978 & 649 & 66.36 & 629 & 64.31 & - 2.05  \\
-          \texttt{sweat\_smile} & 111 & 73  & 65.77 & 75  & 67.57 & 1.80 \\
-          \texttt{confused}     & 77  & 46  & 59.74 & 48  & 62.34 & 2.60 \\
+            \midrule[0.08em]
+            \texttt{mask}       & 163   \hspace{0.1cm} & 154 & 94.48 \hspace{0.1cm} & 134 & 82.21 & - 12.27 \\
+          \texttt{two\_hearts}  & 87    \hspace{0.1cm} & 81  & 93.10 \hspace{0.1cm} & 77  & 88.51 & - 4.59  \\
+          \texttt{heart\_eyes}  & 122   \hspace{0.1cm} & 109 & 89.34 \hspace{0.1cm} & 103 & 84.43 & - 4.91  \\
+          \texttt{heart}        & 267   \hspace{0.1cm} & 237 & 88.76 \hspace{0.1cm} & 235 & 88.01 & - 0.75  \\
+          \midrule[0.001em]
+          \texttt{rage}         & 92    \hspace{0.1cm} & 78  & 84.78 \hspace{0.1cm} & 66  & 71.74 & - 13.04 \\
+          \texttt{cry}          & 116   \hspace{0.1cm} & 97  & 83.62 \hspace{0.1cm} & 83  & 71.55 & - 12.07 \\
+          \texttt{sob}          & 490   \hspace{0.1cm} & 363 & 74.08 \hspace{0.1cm} & 345 & 70.41 & - 3.67  \\
+          \texttt{unamused}     & 167   \hspace{0.1cm} & 121 & 72.46 \hspace{0.1cm} & 116 & 69.46 & - 3.00  \\
+          \midrule[0.001em]
+          \texttt{weary}        & 204   \hspace{0.1cm} & 140 & 68.63 \hspace{0.1cm} & 139 & 68.14 & - 0.49  \\
+          \texttt{joy}          & 978   \hspace{0.1cm} & 649 & 66.36 \hspace{0.1cm} & 629 & 64.31 & - 2.05  \\
+          \texttt{sweat\_smile} & 111   \hspace{0.1cm} & 73  & 65.77 \hspace{0.1cm} & 75  & 67.57 & 1.80 \\
+          \texttt{confused}     & 77    \hspace{0.1cm} & 46  & 59.74 \hspace{0.1cm} & 48  & 62.34 & 2.60 \\
+          \bottomrule
 
         \end{tabular}
 
@@ -481,7 +534,8 @@ of removing them.}
 
 \end{table}
 
-It is clear some emoji strongly contribute to improving prediction quality. The
+Table \ref{table:emoji_fine_grained} shows the effect specific emoji have on
+classification performance. It is clear some emoji strongly contribute to improving prediction quality. The
 most interesting ones are \texttt{mask}, \texttt{rage}, and \texttt{cry}, which
 significantly increase accuracy. Further, contrary to intuition, the
 \texttt{sob} emoji contributes less than \texttt{cry}, despite representing a
@@ -516,7 +570,7 @@ likely further increase the model's performance.
 \begin{figure}[!h]
     \centering
     \includegraphics[width=\columnwidth]{images/acc_vs_tdp_variation.eps}
-    \caption{Validation accuracy and macro F1 score vs. proportion of the training data.}
+    \caption{Effect of the amount of training data on classification performance.}
     \label{fig:data_amt_vs_acc}
 \end{figure}
 
