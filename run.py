@@ -287,13 +287,13 @@ def main():
 
         probs = np_softmax(eval_dict['output'])
         probs_filepath = os.path.join(ext_experiment_path,
-                                      'test_probs.csv')
+                                      'test_probabilities.csv')
         np.savetxt(probs_filepath, probs,
                    delimiter=',', fmt='%.8f')
         print(f'Saved prediction probs in {probs_filepath}')
 
         labels_filepath = os.path.join(ext_experiment_path,
-                                       'predictions.txt')
+                                       'test_predictions.txt')
         labels = [label + '\n' for label in eval_dict['labels']]
         with open(labels_filepath, 'w', encoding='utf-8') as f:
             f.writelines(labels)
