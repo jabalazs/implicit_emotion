@@ -1,10 +1,31 @@
 # [Implicit Emotion Shared Task](http://implicitemotions.wassa2018.com/)
 
-This code was developed during the WASSA 2018 Implicit Emotion Shared Task
+This code was developed during the WASSA 2018 Implicit Emotion Shared Task by
+the team IIIDYT. You can read our paper
+[here](https://arxiv.org/abs/1808.08672).
 
-[Official Website](http://implicitemotions.wassa2018.com/)
+You can read more details about the shared task in the official IEST
+[website](http://implicitemotions.wassa2018.com/), and in the competition
+[website](https://competitions.codalab.org/competitions/19214).
 
-[Competition website](https://competitions.codalab.org/competitions/19214)
+If you find this code useful please consider citing our paper:
+
+```
+@InProceedings{balazs2018iiidyt,
+  author       = {Balazs, Jorge A. and 
+                  Marrese-Taylor, Edison and
+                  Matsuo, Yutaka},
+  title        = {{IIIDYT at IEST 2018: Implicit Emotion Classification
+                  with Deep Contextualized Word Representations}},
+  booktitle    = {Proceedings of the 9th Workshop on Computational
+                 Approaches to Subjectivity, Sentiment and Social
+                 Media Analysis},
+  year         = {2018},
+  address      = {Brussels, Belgium},
+  month        = {November},
+  organization = {Association for Computational Linguistics}
+}
+```
 
 # Recommended Installation
 
