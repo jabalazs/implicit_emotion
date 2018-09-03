@@ -40,6 +40,10 @@ TRAIN_POS = os.path.join(PREPROCESSED_DATA_PATH, 'train.csv.tagged.pos')
 DEV_POS = os.path.join(PREPROCESSED_DATA_PATH, 'dev.csv.tagged.pos')
 TEST_POS = os.path.join(PREPROCESSED_DATA_PATH, 'test.csv.tagged.pos')
 
+TRAIN_NO_TRIGGERWORD = os.path.join(PREPROCESSED_DATA_PATH, 'train_no_triggerword.csv')
+DEV_NO_TRIGGERWORD = os.path.join(PREPROCESSED_DATA_PATH, 'dev_no_triggerword.csv')
+TEST_NO_TRIGGERWORD = os.path.join(PREPROCESSED_DATA_PATH, 'test_no_triggerword.csv')
+
 
 # MAPPINGS
 embedding_dict = {
@@ -62,6 +66,11 @@ corpora_dict = {
         'dev': DEV_EMOJI,
         'test': TEST_EMOJI
     },
+    'iest_no_triggerword': {
+        'train': TRAIN_NO_TRIGGERWORD,
+        'dev': DEV_NO_TRIGGERWORD,
+        'test': TEST_NO_TRIGGERWORD
+    }
 }
 
 pos_corpora_dict = {
