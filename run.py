@@ -44,8 +44,8 @@ arg_parser.add_argument('--corpus', type=str, default="iest_emoji",
                         choices=list(config.corpora_dict.keys()),
                         help='Name of the corpus to use.')
 
-arg_parser.add_argument('--embeddings', type=str, default="glove",
-                        choices=list(config.embedding_dict.keys()),
+arg_parser.add_argument('--embeddings', type=str, default="random",
+                        choices=list(config.embedding_dict.keys()) + ["random"],
                         help='Name of the embeddings to use.')
 
 arg_parser.add_argument('--lstm_hidden_size', type=int, default=2048,
@@ -135,12 +135,14 @@ def main():
     validate_args(hp)
 
     logger = Logger(hp, model_name='Baseline', write_mode=hp.write_mode)
-    if hp.write_mode != 'NONE':
-        logger.write_hyperparams()
-
     if not hp.test:
-        print(f'Running experiment {logger.model_hash}. Hyperparameters and '
-              f'checkpoints will be saved in {logger.run_savepath}')
+        print(f"Running experiment {logger.model_hash}.")
+        if hp.write_mode != 'NONE':
+            logger.write_hyperparams()
+            print(
+                f"Hyperparameters and checkpoints will be saved in "
+                f"{logger.run_savepath}"
+            )
 
     torch.manual_seed(hp.seed)
     torch.cuda.manual_seed_all(hp.seed)  # silently ignored if there are no GPUs
@@ -165,15 +167,25 @@ def main():
                         lowercase=hp.lowercase,
                         use_pos=USE_POS)
 
-    # Load pre-trained embeddings
-    embeddings = Embeddings(config.embedding_dict[hp.embeddings],
-                            k_most_frequent=None,
-                            force_reload=hp.force_reload)
+    if hp.embeddings != "random":
+        # Load pre-trained embeddings
+        embeddings = Embeddings(
+            config.embedding_dict[hp.embeddings],
+            k_most_frequent=None,
+            force_reload=hp.force_reload,
+        )
 
-    # Get subset of embeddings corresponding to our vocabulary
-    embedding_matrix = embeddings.generate_embedding_matrix(corpus.lang.token2id)
-    print(f'{len(embeddings.unknown_tokens)} words from vocabulary not found '
-          f'in {hp.embeddings} embeddings. ')
+        # Get subset of embeddings corresponding to our vocabulary
+        embedding_matrix = embeddings.generate_embedding_matrix(corpus.lang.token2id)
+        print(
+            f"{len(embeddings.unknown_tokens)} words from vocabulary not found "
+            f"in {hp.embeddings} embeddings. "
+        )
+    else:
+        word_vocab_size = len(corpus.lang.token2id)
+        embedding_matrix = np.random.uniform(
+            -0.05, 0.05, size=(word_vocab_size, 300)
+        )
 
     # Repeat process for character embeddings with the difference that they are
     # not pretrained

@@ -116,14 +116,7 @@ If you find this code useful please consider citing our paper:
    This script will download the following:
 
    - train \ dev \ test splits (~23 MB unzipped) into `data/`
-   - pre-trained GloVe embeddings (~2.2 GB zipped, ~5.6 GB unzipped) into
-     `data/word_embeddings`
    - pre-trained ELMo weights (~360 MB) into `data/word_embeddings`  
-
-   > If you already downloaded the GloVe embeddings for another project, we
-   > recommend commenting the line where they are dowloaded in the `get_data.sh`
-   > script, and creating a symbolic link instead (our code will not modify the
-   > original embeddings file).
 
    > If you want to save the data in a different directory, you can do so as
    > long as you modify the paths in the

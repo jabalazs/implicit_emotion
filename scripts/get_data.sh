@@ -24,13 +24,13 @@ cd word_embeddings
 ################################################################################
 #                         Pre-trained GloVe embeddings                         #
 ################################################################################
-wget http://nlp.stanford.edu/data/glove.840B.300d.zip
-unzip glove.840B.300d.zip
+
+# Uncomment these lines if you want to get GloVe embeddings
+# wget http://nlp.stanford.edu/data/glove.840B.300d.zip
+# unzip glove.840B.300d.zip
 
 ################################################################################
 #                           Pre-trained ELMo Weights                           #
 ################################################################################
 wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
 wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
-
-cd ../..
