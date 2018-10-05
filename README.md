@@ -10,16 +10,16 @@ You can also read more details about the shared task in the official IEST
 
 If you find this code useful please consider citing our paper:
 
-```
+```bibtex
 @InProceedings{balazs2018iiidyt,
   author       = {Balazs, Jorge A. and 
                   Marrese-Taylor, Edison and
                   Matsuo, Yutaka},
   title        = {{IIIDYT at IEST 2018: Implicit Emotion Classification
-                  with Deep Contextualized Word Representations}},
+                   with Deep Contextualized Word Representations}},
   booktitle    = {Proceedings of the 9th Workshop on Computational
-                 Approaches to Subjectivity, Sentiment and Social
-                 Media Analysis},
+                  Approaches to Subjectivity, Sentiment and Social
+                  Media Analysis},
   year         = {2018},
   address      = {Brussels, Belgium},
   month        = {November},
@@ -30,7 +30,7 @@ If you find this code useful please consider citing our paper:
 # Recommended Installation
 
 1. Clone this repo.
-   ```
+   ```bash
    git clone https://github.com/jabalazs/implicit_emotion.git
    cd implicit_emotion
    ```
@@ -42,14 +42,18 @@ If you find this code useful please consider citing our paper:
    You can then easily create and activate a new conda environment with Python 3.6
    by executing:
    
-   ```
+   ```bash
    conda create -n iest python=3.6
    source activate iest
    ```
    
    Where you can replace `iest` by any environment name you like.
 
-3. Run `scripts/install.sh`
+3. Run 
+
+    ```bash
+    scripts/install.sh
+    ```
 
    This will install pytorch, a few dependencies for our code, AllenNLP (ELMo) and
    all of its dependencies. See https://github.com/allenai/allennlp for more ways
@@ -77,7 +81,8 @@ If you find this code useful please consider citing our paper:
    
    If you want to use this feature you need java. You can easily install it
    within your conda environment with
-   ```
+
+   ```bash
    conda install -c cyclus java-jdk
    ```
    
@@ -104,11 +109,12 @@ If you find this code useful please consider citing our paper:
 2. Once you have your `USERNAME` and `PASSWORD`, get the data by running the
    following command, and typing your password when prompted:
 
-   ```
+   ```bash
    scripts/get_data.sh USERNAME
    ```
 
    This script will download the following:
+
    - train \ dev \ test splits (~23 MB unzipped) into `data/`
    - pre-trained GloVe embeddings (~2.2 GB zipped, ~5.6 GB unzipped) into
      `data/word_embeddings`
@@ -126,12 +132,14 @@ If you find this code useful please consider citing our paper:
    > [`src/config.py`](src/config.py).
 
 3. Run the preprocessing script
-   ```
+
+   ```bash
    scripts/preprocess.sh
    ```
 
 4. (Optional) If you installed java and want to obtain the pos tags, execute:
-   ```
+
+   ```bash
    scripts/get_pos.sh
    ```
 
@@ -145,7 +153,7 @@ if something failed during the installation process.
 
 To train a best-performing model, run:
 
-```
+```bash
 python run.py --write_mode=BOTH --save_model
 ```
 
@@ -166,7 +174,7 @@ section](#experiment-results-directory-structure) for more details.
 
 To test a trained model, run:
 
-```
+```bash
 python run.py --model_hash=<partial_model_hash> --test
 ```
 
@@ -224,7 +232,8 @@ data/results/<hash>
 * `best_dev_predictions.txt` contains 9591 rows with a single column containing
   the predicted label for the best epoch for the dev (trial) examples. This is
   how its `head` looks like:
-  ```
+
+  ```txt
   surprise
   disgust
   anger
@@ -275,7 +284,7 @@ data/results/<hash>
   extra information, such as the date the model was run and its hash. For
   example:
 
-  ```
+  ```json
   {
     "epochs": 10,
     "batch_size": 64,
