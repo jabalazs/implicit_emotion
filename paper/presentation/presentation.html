@@ -16,7 +16,7 @@
       span.underline{text-decoration: underline;}
       div.column{display: inline-block; vertical-align: top; width: 50%;}
   </style>
-  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <link rel="stylesheet" href="reveal.js/css/theme/white.css" id="theme">
   <!-- Printing and PDF exports -->
   <script>
     var link = document.createElement( 'link' );
@@ -80,46 +80,121 @@
   <p class="author">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
   <p class="date">October 31, 2018</p>
 </section>
-<section id="TOC">
-<ul>
-<li><a href="#/introduction">Introduction</a></li>
-<li><a href="#/proposed-approach">Proposed Approach</a><ul>
-<li><a href="#/preprocessing">Preprocessing</a></li>
-<li><a href="#/architecture">Architecture</a></li>
-<li><a href="#/implementation-details-and-hyperparameters">Implementation Details and Hyperparameters</a></li>
-<li><a href="#/ensembles">Ensembles</a></li>
-</ul></li>
-<li><a href="#/experiments-and-analyses">Experiments and Analyses</a><ul>
-<li><a href="#/ablation-study">Ablation Study</a></li>
-<li><a href="#/error-analysis">Error Analysis</a></li>
-<li><a href="#/effect-of-the-amount-of-training-data">Effect of the Amount of Training Data</a></li>
-<li><a href="#/effect-of-emoji-and-hashtags">Effect of Emoji and Hashtags</a></li>
-</ul></li>
-<li><a href="#/conclusions-and-future-work">Conclusions and Future Work</a></li>
-</ul>
-</section>
 
-<section id="introduction" class="title-slide slide level1"><h1>Introduction</h1></section>
-<section><section id="proposed-approach" class="title-slide slide level1"><h1>Proposed Approach</h1></section><section id="preprocessing" class="slide level2">
-<h2>Preprocessing</h2>
-</section><section id="architecture" class="slide level2">
-<h2>Architecture</h2>
-</section><section id="implementation-details-and-hyperparameters" class="slide level2">
-<h2>Implementation Details and Hyperparameters</h2>
-</section><section id="ensembles" class="slide level2">
-<h2>Ensembles</h2>
-</section></section>
-<section><section id="experiments-and-analyses" class="title-slide slide level1"><h1>Experiments and Analyses</h1></section><section id="ablation-study" class="slide level2">
-<h2>Ablation Study</h2>
-<p><img data-src="../images/ablation_table.png" style="width:40.0%;height:40.0%" /></p>
-</section><section id="error-analysis" class="slide level2">
-<h2>Error Analysis</h2>
-</section><section id="effect-of-the-amount-of-training-data" class="slide level2">
-<h2>Effect of the Amount of Training Data</h2>
-</section><section id="effect-of-emoji-and-hashtags" class="slide level2">
-<h2>Effect of Emoji and Hashtags</h2>
-</section></section>
-<section id="conclusions-and-future-work" class="title-slide slide level1"><h1>Conclusions and Future Work</h1></section>
+<section id="introduction" class="slide level1 center">
+<h1>Introduction</h1>
+</section>
+<section id="proposed-approach" class="slide level1 center">
+<h1>Proposed Approach</h1>
+</section>
+<section id="preprocessing" class="slide level1">
+<h1>Preprocessing</h1>
+</section>
+<section id="architecture" class="slide level1">
+<h1>Architecture</h1>
+</section>
+<section id="implementation-details-and-hyperparameters" class="slide level1">
+<h1>Implementation Details and Hyperparameters</h1>
+</section>
+<section id="ensembles" class="slide level1">
+<h1>Ensembles</h1>
+</section>
+<section id="experiments-and-analyses" class="slide level1 center">
+<h1>Experiments and Analyses</h1>
+</section>
+<section id="ablation-study" class="slide level1">
+<h1>Ablation Study</h1>
+<p><img data-src="../images/ablation_table.png" class="plain" style="width:40.0%;height:40.0%" /></p>
+</section>
+<section id="ablation-study-1" class="slide level1">
+<h1>Ablation Study</h1>
+<figure>
+<img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Dropout</figcaption>
+</figure>
+<aside class="notes">
+<p>This is my note.</p>
+<ul>
+<li>It can contain Markdown</li>
+<li>like this list</li>
+</ul>
+</aside>
+</section>
+<section id="error-analysis" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Confusion Matrix</figcaption>
+</figure>
+</section>
+<section id="error-analysis-1" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Classification Report</figcaption>
+</figure>
+</section>
+<section id="error-analysis-2" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/pca.png" title="PCA projection" alt="PCA projection" class="plain" style="width:50.0%;height:50.0%" /><figcaption>PCA projection</figcaption>
+</figure>
+</section>
+<section id="effect-of-the-amount-of-training-data" class="slide level1">
+<h1>Effect of the Amount of Training Data</h1>
+<p><img data-src="../images/acc_vs_tdp_variation.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+</section>
+<section id="effect-of-emoji-and-hashtags" class="slide level1">
+<h1>Effect of Emoji and Hashtags</h1>
+</section>
+<section id="conclusions-and-future-work" class="slide level1 center">
+<h1>Conclusions and Future Work</h1>
+<!-- # In the morning
+
+- Eat eggs
+- Drink coffee
+
+# In the evening
+
+- Eat spaghetti
+- Drink wine
+
+# Fragments test
+
+<p class="fragment grow">grow</p>
+<p class="fragment shrink">shrink</p>
+<p class="fragment fade-out">fade-out</p>
+<p class="fragment fade-up">fade-up (also down, left and right!)</p>
+<p class="fragment fade-in-then-out">fades in, then out when we move to the next step</p>
+<p class="fragment fade-in-then-semi-out">fades in, then obfuscate when we move to the next step</p>
+<p class="fragment highlight-current-blue">blue only once</p>
+<p class="fragment highlight-red">highlight-red</p>
+<p class="fragment highlight-green">highlight-green</p>
+<p class="fragment highlight-blue">highlight-blue</p>
+
+# Do columns work?
+
+<div class="twocolumn">
+<div>
+- These
+- Are
+- Awesome super long elements to the left
+</div>
+<div>
+- You can place two graphs on a slide
+- Or two columns of text
+- These are all created with div elements
+</div>
+</div>
+Then what about a
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+# Conclusion
+
+- And the answer is...
+- $f(x)=\sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n$
+ -->
+</section>
     </div>
   </div>
 
@@ -138,7 +213,7 @@
         // Push each slide change to the browser history
         history: true,
         // Vertical centering of slides
-        center: true,
+        center: false,
         // Transition style
         transition: 'none', // none/fade/slide/convex/concave/zoom
         // The "normal" size of the presentation, aspect ratio will be preserved

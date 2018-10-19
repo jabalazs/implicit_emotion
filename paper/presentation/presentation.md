@@ -7,7 +7,7 @@ date: October 31, 2018
 controls: "false"
 transition: "none"
 slideNumber: "true"
-center: "true"
+center: "false"
 width: |
     `"100%"`{=html}
 height: |
@@ -15,27 +15,56 @@ height: |
 margin: 0
 minScale: 1
 maxScale: 1
+
+theme: white
 ---
 
-# Introduction
+# Introduction {.center}
 
-# Proposed Approach
+# Proposed Approach {.center}
 
-## Preprocessing
-## Architecture
-## Implementation Details and Hyperparameters
-## Ensembles
+# Preprocessing
+# Architecture
+# Implementation Details and Hyperparameters
+# Ensembles
 
-# Experiments and Analyses
-## Ablation Study
+# Experiments and Analyses {.center}
+# Ablation Study
 
-![](../images/ablation_table.png){width=40% height=40%}
+![](../images/ablation_table.png){width=40% height=40% .plain}
 
-## Error Analysis
-## Effect of the Amount of Training Data
-## Effect of Emoji and Hashtags
+# Ablation Study
 
-# Conclusions and Future Work
+![Dropout](../images/dropout_table.png "Dropout"){width=50% height=50% .plain}
+
+::: notes
+
+This is my note.
+
+- It can contain Markdown
+- like this list
+
+:::
+
+# Error Analysis
+
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
+
+# Error Analysis
+
+![Classification Report](../images/classification_report.png "Classification Report"){width=50% height=50% .plain}
+
+# Error Analysis
+
+![PCA projection](../images/pca.png "PCA projection"){width=50% height=50% .plain}
+
+# Effect of the Amount of Training Data
+
+![](../images/acc_vs_tdp_variation.png){width=60% height=60% .plain}
+
+# Effect of Emoji and Hashtags
+
+# Conclusions and Future Work {.center}
 
 <!-- # In the morning
 
