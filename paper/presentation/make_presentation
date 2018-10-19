@@ -1,0 +1,5 @@
+#!/bin/bash
+
+pandoc -s --mathjax -t revealjs+raw_attribute --template=my.revealjs presentation.md -o presentation.html
+sed 's/reveal.js\///g' presentation.html > reveal.js/index.html
+npm start --prefix reveal.js

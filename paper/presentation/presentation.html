@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo">
+  <meta name="dcterms.date" content="2018-10-31">
+  <title>IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+  <style type="text/css">
+  #left {
+    left:-8.33%;
+    text-align: left;
+    float: left;
+    width:50%;
+    z-index:-10;
+  }
+  
+  #right {
+    left:31.25%;
+    top: 75px;
+    float: right;
+    text-align: right;
+    z-index:-10;
+    width:50%;
+    margin-right: 2%;
+  }
+  
+  .multicol {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+      text-align: left;
+      .col {
+          display: table-cell;
+          vertical-align: top;
+          width: 50%;
+          &:first-of-type { padding-left: 0; }
+      }
+  }
+  
+  .twocolumn {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 10px;
+      text-align: left;
+      padding: 10% 10% 10% 10%;
+      margin-right: 10%;
+      margin-left: 10%;
+  }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</h1>
+  <p class="author">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
+  <p class="date">October 31, 2018</p>
+</section>
+<section id="TOC">
+<ul>
+<li><a href="#/introduction">Introduction</a></li>
+<li><a href="#/proposed-approach">Proposed Approach</a><ul>
+<li><a href="#/preprocessing">Preprocessing</a></li>
+<li><a href="#/architecture">Architecture</a></li>
+<li><a href="#/implementation-details-and-hyperparameters">Implementation Details and Hyperparameters</a></li>
+<li><a href="#/ensembles">Ensembles</a></li>
+</ul></li>
+<li><a href="#/experiments-and-analyses">Experiments and Analyses</a><ul>
+<li><a href="#/ablation-study">Ablation Study</a></li>
+<li><a href="#/error-analysis">Error Analysis</a></li>
+<li><a href="#/effect-of-the-amount-of-training-data">Effect of the Amount of Training Data</a></li>
+<li><a href="#/effect-of-emoji-and-hashtags">Effect of Emoji and Hashtags</a></li>
+</ul></li>
+<li><a href="#/conclusions-and-future-work">Conclusions and Future Work</a></li>
+</ul>
+</section>
+
+<section id="introduction" class="title-slide slide level1"><h1>Introduction</h1></section>
+<section><section id="proposed-approach" class="title-slide slide level1"><h1>Proposed Approach</h1></section><section id="preprocessing" class="slide level2">
+<h2>Preprocessing</h2>
+</section><section id="architecture" class="slide level2">
+<h2>Architecture</h2>
+</section><section id="implementation-details-and-hyperparameters" class="slide level2">
+<h2>Implementation Details and Hyperparameters</h2>
+</section><section id="ensembles" class="slide level2">
+<h2>Ensembles</h2>
+</section></section>
+<section><section id="experiments-and-analyses" class="title-slide slide level1"><h1>Experiments and Analyses</h1></section><section id="ablation-study" class="slide level2">
+<h2>Ablation Study</h2>
+<p><img data-src="../images/ablation_table.png" style="width:40.0%;height:40.0%" /></p>
+</section><section id="error-analysis" class="slide level2">
+<h2>Error Analysis</h2>
+</section><section id="effect-of-the-amount-of-training-data" class="slide level2">
+<h2>Effect of the Amount of Training Data</h2>
+</section><section id="effect-of-emoji-and-hashtags" class="slide level2">
+<h2>Effect of Emoji and Hashtags</h2>
+</section></section>
+<section id="conclusions-and-future-work" class="title-slide slide level1"><h1>Conclusions and Future Work</h1></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Vertical centering of slides
+        center: true,
+        // Transition style
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: "100%",
+        height: "100%",
+        // Factor of the display size that should remain empty around the content
+        margin: 0,
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 1,
+        maxScale: 1,
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/math/math.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
