@@ -89,15 +89,73 @@
 </section>
 <section id="preprocessing" class="slide level1">
 <h1>Preprocessing</h1>
+<p><img data-src="../images/preprocessing_substitutions.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+<aside class="notes">
+<ul>
+<li>This was made mostly for sanity</li>
+<li>The replacements were chosen arbitrarily</li>
+<li>One reviewer asked what happened with shorter replacements; we found out that results did not change significantly</li>
+</ul>
+</aside>
 </section>
 <section id="architecture" class="slide level1">
 <h1>Architecture</h1>
+<p><img data-src="../images/iest_architecture.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </section>
 <section id="implementation-details-and-hyperparameters" class="slide level1">
 <h1>Implementation Details and Hyperparameters</h1>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>ELMo Layer</strong></td>
+<td>Official implementation with default parameters</td>
+</tr>
+<tr class="even">
+<td><strong>Dimensionalities</strong></td>
+<td><p>ELMo output = <span class="math inline">\(1024\)</span></p>
+<p>BiLSTM output = <span class="math inline">\(4096\)</span> (<span class="math inline">\(2048\)</span> per direction)</p>
+<p>Sentence vector representation = <span class="math inline">\(4096\)</span></p>
+<p>Fully connected (FC) input: <span class="math inline">\(4096\)</span></p>
+<p>FC hidden = <span class="math inline">\(512\)</span></p>
+<p>FC output = <span class="math inline">\(6\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="implementation-details-and-hyperparameters-1" class="slide level1">
+<h1>Implementation Details and Hyperparameters</h1>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Loss Function</strong></td>
+<td>Cross-Entropy</td>
+</tr>
+<tr class="even">
+<td><strong>Optimizer</strong></td>
+<td>Default Adam (<span class="math inline">\(\beta_1=0.9\)</span>, <span class="math inline">\(\beta_2=0.999\)</span>, <span class="math inline">\(\epsilon=10^{-8}\)</span>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Learning Rate</strong></td>
+<td>Slanted triangular schedule (<span class="math inline">\(cut\_frac=0.1,\)</span> <br> <span class="math inline">\(ratio=32,\,\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
+</tr>
+<tr class="even">
+<td><strong>Regularization</strong></td>
+<td>Dropout (<span class="math inline">\(0.5\)</span> after Elmo Layer and FC hidden;<br> <span class="math inline">\(0.1\)</span> after max-pooling layer)</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="ensembles" class="slide level1">
 <h1>Ensembles</h1>
+<p><img data-src="../images/best_ensembles.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </section>
 <section id="experiments-and-analyses" class="slide level1 center">
 <h1>Experiments and Analyses</h1>
@@ -193,6 +251,34 @@ no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
 - And the answer is...
 - $f(x)=\sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n$
+ -->
+<!-- Another way of creating two column slides -->
+<!-- # Implementation Details and Hyperparameters
+
+<div class="columns">
+<div class="column" style="text-align:justify;width:20%;">
+
+**ELMo Layer**
+
+Optimizer
+
+<br>
+<br>
+Learning Rate
+
+</div>
+<div class="column" style="text-align:justify;width:55%;">
+
+Official implementation with default parameters
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+</div>
+</div>
  -->
 </section>
     </div>

@@ -24,9 +24,61 @@ theme: white
 # Proposed Approach {.center}
 
 # Preprocessing
+
+![](../images/preprocessing_substitutions.png){width=80% height=80% .plain}
+
+::: notes
+
+- This was made mostly for sanity
+- The replacements were chosen arbitrarily
+- One reviewer asked what happened with shorter replacements; we found out that
+  results did not change significantly
+
+:::
+
+
 # Architecture
+
+![](../images/iest_architecture.png){width=80% height=80% .plain}
+
 # Implementation Details and Hyperparameters
+
++----------------------+-------------------------------------------------+
+| **ELMo Layer**       | Official implementation with default parameters |
++----------------------+-------------------------------------------------+
+| **Dimensionalities** | ELMo output = $1024$                            |
+|                      |                                                 |
+|                      | BiLSTM output = $4096$ ($2048$ per direction)   |
+|                      |                                                 |
+|                      | Sentence vector representation = $4096$         |
+|                      |                                                 |
+|                      | Fully connected (FC) input: $4096$              |
+|                      |                                                 |
+|                      | FC hidden = $512$                               |
+|                      |                                                 |
+|                      | FC output = $6$                                 |
++----------------------+-------------------------------------------------+
+
+# Implementation Details and Hyperparameters
+
++--------------------+-------------------------------------------------------------------+
+| **Loss Function**  | Cross-Entropy                                                     |
++--------------------+-------------------------------------------------------------------+
+| **Optimizer**      | Default Adam ($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$) |
++--------------------+-------------------------------------------------------------------+
+| **Learning Rate**  | Slanted triangular schedule ($cut\_frac=0.1,$ <br>                |
+|                    | $ratio=32,\,\eta_{max}=10^{-3},\,T=23,970$)                       |
+|                    |                                                                   |
+|                    |                                                                   |
++--------------------+-------------------------------------------------------------------+
+| **Regularization** | Dropout ($0.5$ after Elmo Layer and FC hidden;<br>                |
+|                    | $0.1$ after max-pooling layer)                                    |
++--------------------+-------------------------------------------------------------------+
+
+
 # Ensembles
+
+![](../images/best_ensembles.png){width=80% height=80% .plain}
 
 # Experiments and Analyses {.center}
 # Ablation Study
@@ -113,4 +165,33 @@ no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
 - And the answer is...
 - $f(x)=\sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n$
+ -->
+
+<!-- Another way of creating two column slides -->
+<!-- # Implementation Details and Hyperparameters
+
+<div class="columns">
+<div class="column" style="text-align:justify;width:20%;">
+
+**ELMo Layer**
+
+Optimizer
+
+<br>
+<br>
+Learning Rate
+
+</div>
+<div class="column" style="text-align:justify;width:55%;">
+
+Official implementation with default parameters
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+</div>
+</div>
  -->
