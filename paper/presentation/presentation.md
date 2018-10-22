@@ -48,15 +48,15 @@ theme: white
 +----------------------+-------------------------------------------------+
 | **Dimensionalities** | ELMo output = $1024$                            |
 |                      |                                                 |
-|                      | BiLSTM output = $4096$ ($2048$ per direction)   |
+|                      | BiLSTM output = $2048$ for each direction       |
 |                      |                                                 |
 |                      | Sentence vector representation = $4096$         |
 |                      |                                                 |
-|                      | Fully connected (FC) input: $4096$              |
+|                      | Fully-connected (FC) layer input = $4096$        |
 |                      |                                                 |
-|                      | FC hidden = $512$                               |
+|                      | FC layer hidden = $512$                         |
 |                      |                                                 |
-|                      | FC output = $6$                                 |
+|                      | FC layer output = $6$                           |
 +----------------------+-------------------------------------------------+
 
 # Implementation Details and Hyperparameters
@@ -89,14 +89,6 @@ theme: white
 
 ![Dropout](../images/dropout_table.png "Dropout"){width=50% height=50% .plain}
 
-::: notes
-
-This is my note.
-
-- It can contain Markdown
-- like this list
-
-:::
 
 # Error Analysis
 
@@ -115,6 +107,14 @@ This is my note.
 ![](../images/acc_vs_tdp_variation.png){width=60% height=60% .plain}
 
 # Effect of Emoji and Hashtags
+
+<div class="center">
+![](../images/emoji_hashtag_performance.png){width=60% height=60% .plain}
+</div>
+
+# Effect of Emoji and Hashtags
+
+![](../images/fine_grained_performance.png){width=60% height=60% .plain}
 
 # Conclusions and Future Work {.center}
 

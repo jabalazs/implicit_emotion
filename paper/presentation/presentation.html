@@ -117,11 +117,11 @@
 <tr class="even">
 <td><strong>Dimensionalities</strong></td>
 <td><p>ELMo output = <span class="math inline">\(1024\)</span></p>
-<p>BiLSTM output = <span class="math inline">\(4096\)</span> (<span class="math inline">\(2048\)</span> per direction)</p>
+<p>BiLSTM output = <span class="math inline">\(2048\)</span> for each direction</p>
 <p>Sentence vector representation = <span class="math inline">\(4096\)</span></p>
-<p>Fully connected (FC) input: <span class="math inline">\(4096\)</span></p>
-<p>FC hidden = <span class="math inline">\(512\)</span></p>
-<p>FC output = <span class="math inline">\(6\)</span></p></td>
+<p>Fully-connected (FC) layer input = <span class="math inline">\(4096\)</span></p>
+<p>FC layer hidden = <span class="math inline">\(512\)</span></p>
+<p>FC layer output = <span class="math inline">\(6\)</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -169,13 +169,6 @@
 <figure>
 <img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Dropout</figcaption>
 </figure>
-<aside class="notes">
-<p>This is my note.</p>
-<ul>
-<li>It can contain Markdown</li>
-<li>like this list</li>
-</ul>
-</aside>
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
@@ -201,6 +194,13 @@
 </section>
 <section id="effect-of-emoji-and-hashtags" class="slide level1">
 <h1>Effect of Emoji and Hashtags</h1>
+<div class="center">
+<p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+</div>
+</section>
+<section id="effect-of-emoji-and-hashtags-1" class="slide level1">
+<h1>Effect of Emoji and Hashtags</h1>
+<p><img data-src="../images/fine_grained_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
 </section>
 <section id="conclusions-and-future-work" class="slide level1 center">
 <h1>Conclusions and Future Work</h1>
