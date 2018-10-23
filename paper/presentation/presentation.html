@@ -162,27 +162,47 @@
 </section>
 <section id="ablation-study" class="slide level1">
 <h1>Ablation Study</h1>
-<p><img data-src="../images/ablation_table.png" class="plain" style="width:40.0%;height:40.0%" /></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="../images/ablation_table.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+</div><div class="column" style="text-align:justify;width:40%;">
+<ul>
+<li class="fragment">ELMo provided the biggest boost in performance</li>
+<li class="fragment">Emoji also helped (<a href="#/effect-of-emoji-and-hashtags">analysis</a>)</li>
+<li class="fragment">Different BiLSTM sizes did not improve results</li>
+<li class="fragment">POS tag Embeddings of dimension 50 slightly helped.</li>
+<li class="fragment">Others optimizers did not help</li>
+</ul>
+</div>
+</div>
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
 <figure>
 <img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Dropout</figcaption>
 </figure>
+<!-- # Error Analysis
+
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
+ -->
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
-<figure>
-<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Confusion Matrix</figcaption>
-</figure>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /></p>
+</div><div class="column" style="text-align:justify;width:40%;">
+<ul>
+<li class="fragment"><code>anger</code> was the hardest class to predict</li>
+<li class="fragment"><code>joy</code> was the easiest one
+<div class="fragment">
+(probably due to an annotation artifact)
+</div></li>
+</ul>
+</div>
+</div>
 </section>
 <section id="error-analysis-1" class="slide level1">
-<h1>Error Analysis</h1>
-<figure>
-<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Classification Report</figcaption>
-</figure>
-</section>
-<section id="error-analysis-2" class="slide level1">
 <h1>Error Analysis</h1>
 <figure>
 <img data-src="../images/pca.png" title="PCA projection" alt="PCA projection" class="plain" style="width:50.0%;height:50.0%" /><figcaption>PCA projection</figcaption>
@@ -194,8 +214,11 @@
 </section>
 <section id="effect-of-emoji-and-hashtags" class="slide level1">
 <h1>Effect of Emoji and Hashtags</h1>
-<div class="center">
 <p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+<div>
+<ul>
+<li class="fragment">Numbers between parentheses represent the percentage of examples classified correctly</li>
+</ul>
 </div>
 </section>
 <section id="effect-of-emoji-and-hashtags-1" class="slide level1">
@@ -204,6 +227,12 @@
 </section>
 <section id="conclusions-and-future-work" class="slide level1 center">
 <h1>Conclusions and Future Work</h1>
+</section>
+<section id="references" class="slide level1">
+<h1>References</h1>
+<div id="refs">
+<!-- pandoc-citeproc will insert bibliography here -->
+</div>
 <!-- # In the morning
 
 - Eat eggs
@@ -279,6 +308,8 @@ Official implementation with default parameters
 
 </div>
 </div>
+
+For citing: [@luong2016achieving]
  -->
 </section>
     </div>
@@ -298,6 +329,8 @@ Official implementation with default parameters
         slideNumber: true,
         // Push each slide change to the browser history
         history: true,
+        // Enable the slide overview mode
+        overview: true,
         // Vertical centering of slides
         center: false,
         // Transition style
@@ -329,10 +362,16 @@ Official implementation with default parameters
           },
         },
 
+        menu: {
+            openButton: false,
+          },
+
         // Optional reveal.js plugins
         dependencies: [
           { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
           { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          // { src: 'reveal.js/plugin/spotlight/spotlight.js', async: true },
+          { src: 'reveal.js/plugin/menu/menu.js', async: true },
           { src: 'reveal.js/plugin/math/math.js', async: true },
           { src: 'reveal.js/plugin/notes/notes.js', async: true }
         ]

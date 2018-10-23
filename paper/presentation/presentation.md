@@ -8,6 +8,7 @@ controls: "false"
 transition: "none"
 slideNumber: "true"
 center: "false"
+overview: "true"
 width: |
     `"100%"`{=html}
 height: |
@@ -17,6 +18,8 @@ minScale: 1
 maxScale: 1
 
 theme: white
+
+link-citations: "true"
 ---
 
 # Introduction {.center}
@@ -81,23 +84,49 @@ theme: white
 ![](../images/best_ensembles.png){width=80% height=80% .plain}
 
 # Experiments and Analyses {.center}
+
 # Ablation Study
 
-![](../images/ablation_table.png){width=40% height=40% .plain}
+:::::: columns
+
+<div class="column" style="width:50%;">
+![](../images/ablation_table.png){width=80% height=80% .plain}
+</div>
+<div class="column" style="text-align:justify;width:40%;">
+>- ELMo provided the biggest boost in performance
+>- Emoji also helped ([analysis](#effect-of-emoji-and-hashtags))
+>- Different BiLSTM sizes did not improve results
+>- POS tag Embeddings of dimension 50 slightly helped.
+>- Others optimizers did not help 
+</div>
+
+::::::
+
 
 # Ablation Study
 
 ![Dropout](../images/dropout_table.png "Dropout"){width=50% height=50% .plain}
 
 
-# Error Analysis
+<!-- # Error Analysis
 
 ![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
-
+ -->
 # Error Analysis
 
-![Classification Report](../images/classification_report.png "Classification Report"){width=50% height=50% .plain}
+:::::: columns
 
+<div class="column" style="width:50%;">
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=70% height=70% .plain}
+![Classification Report](../images/classification_report.png "Classification Report"){width=50% height=50% .plain}
+</div>
+<div class="column" style="text-align:justify;width:40%;">
+>- `anger` was the hardest class to predict
+>- `joy` was the easiest one 
+   <div class="fragment">(probably due to an annotation artifact)</div>
+</div>
+
+::::::
 # Error Analysis
 
 ![PCA projection](../images/pca.png "PCA projection"){width=50% height=50% .plain}
@@ -108,15 +137,27 @@ theme: white
 
 # Effect of Emoji and Hashtags
 
-<div class="center">
 ![](../images/emoji_hashtag_performance.png){width=60% height=60% .plain}
-</div>
+
+::: {.incremental}
+
+- Numbers between parentheses represent the percentage of examples classified
+  correctly
+
+:::
 
 # Effect of Emoji and Hashtags
 
 ![](../images/fine_grained_performance.png){width=60% height=60% .plain}
 
+
 # Conclusions and Future Work {.center}
+
+# References
+<div id="refs">
+<!-- pandoc-citeproc will insert bibliography here -->
+</div>
+
 
 <!-- # In the morning
 
@@ -194,4 +235,6 @@ Official implementation with default parameters
 
 </div>
 </div>
+
+For citing: [@luong2016achieving]
  -->

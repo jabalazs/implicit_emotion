@@ -397,7 +397,30 @@ Reveal.addEventListener( 'customevent', function() {
 				center: true,
 
 				transition: 'slide', // none/fade/slide/convex/concave/zoom
+                spotlight: {
 
+                    // size of the spotlight
+                    size: 60,
+
+                    // toggle spotlight by holding down the mouse key
+                    toggleSpotlightOnMouseDown: true,
+
+                    // choose the cursor when spotlight is on. Maybe "crosshair"?
+                    presentingCursor: "none", 
+
+                    // true: cursor is always "none" except when spotlight is on. 
+                    presentingCursorOnlyVisibleWhenSpotlightVisible: true
+                },
+                keyboard: {	
+                        // alternative to toggleSpotlightOnMouseDown: 
+                        // toggle spotlight by pressing key 'c'
+                        67: function() { RevealSpotlight.toggleSpotlight() },
+
+                        // enter/leave presentation mode by pressing key 'Windows Menu/Right'
+                        // 93: function() { 
+                        //     RevealSpotlight.togglePresentationMode(); 
+                        // }
+                },
 				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
 					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
@@ -406,7 +429,9 @@ Reveal.addEventListener( 'customevent', function() {
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
 					{ src: 'plugin/search/search.js', async: true },
 					{ src: 'plugin/zoom-js/zoom.js', async: true },
-					{ src: 'plugin/notes/notes.js', async: true }
+					{ src: 'plugin/notes/notes.js', async: true },
+                    { src: 'plugin/spotlight/spotlight.js', async: true },
+                    { src: 'plugin/menu/menu.js', async: true }
 				]
 			});
 

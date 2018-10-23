@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <meta name="author" content="John Doe">
-  <meta name="dcterms.date" content="2005-03-22">
-  <title>Eating Habits</title>
+  <meta name="author" content="Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo">
+  <meta name="dcterms.date" content="2018-10-31">
+  <title>IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -16,7 +16,7 @@
       span.underline{text-decoration: underline;}
       div.column{display: inline-block; vertical-align: top; width: 50%;}
   </style>
-  <link rel="stylesheet" href="css/theme/black.css" id="theme">
+  <link rel="stylesheet" href="css/theme/white.css" id="theme">
   <!-- Printing and PDF exports -->
   <script>
     var link = document.createElement( 'link' );
@@ -28,76 +28,258 @@
   <!--[if lt IE 9]>
   <script src="lib/js/html5shiv.js"></script>
   <![endif]-->
+  <style type="text/css">
+  #left {
+    left:-8.33%;
+    text-align: left;
+    float: left;
+    width:50%;
+    z-index:-10;
+  }
+  
+  #right {
+    left:31.25%;
+    top: 75px;
+    float: right;
+    text-align: right;
+    z-index:-10;
+    width:50%;
+    margin-right: 2%;
+  }
+  
+  .multicol {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+      text-align: left;
+      .col {
+          display: table-cell;
+          vertical-align: top;
+          width: 50%;
+          &:first-of-type { padding-left: 0; }
+      }
+  }
+  
+  .twocolumn {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 10px;
+      text-align: left;
+      padding: 10% 10% 10% 10%;
+      margin-right: 10%;
+      margin-left: 10%;
+  }
+  </style>
 </head>
 <body>
   <div class="reveal">
     <div class="slides">
 
 <section id="title-slide">
-  <h1 class="title">Eating Habits</h1>
-  <p class="author">John Doe</p>
-  <p class="date">March 22, 2005</p>
+  <h1 class="title">IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</h1>
+  <p class="author">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
+  <p class="date">October 31, 2018</p>
 </section>
 
-<section class="slide level1">
+<section id="introduction" class="slide level1 center">
+<h1>Introduction</h1>
+</section>
+<section id="proposed-approach" class="slide level1 center">
+<h1>Proposed Approach</h1>
+</section>
+<section id="preprocessing" class="slide level1">
+<h1>Preprocessing</h1>
+<p><img data-src="../images/preprocessing_substitutions.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+<aside class="notes">
+<ul>
+<li>This was made mostly for sanity</li>
+<li>The replacements were chosen arbitrarily</li>
+<li>One reviewer asked what happened with shorter replacements; we found out that results did not change significantly</li>
+</ul>
+</aside>
+</section>
+<section id="architecture" class="slide level1">
+<h1>Architecture</h1>
+<p><img data-src="../images/iest_architecture.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+</section>
+<section id="implementation-details-and-hyperparameters" class="slide level1">
+<h1>Implementation Details and Hyperparameters</h1>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>ELMo Layer</strong></td>
+<td>Official implementation with default parameters</td>
+</tr>
+<tr class="even">
+<td><strong>Dimensionalities</strong></td>
+<td><p>ELMo output = <span class="math inline">\(1024\)</span></p>
+<p>BiLSTM output = <span class="math inline">\(2048\)</span> for each direction</p>
+<p>Sentence vector representation = <span class="math inline">\(4096\)</span></p>
+<p>Fully-connected (FC) layer input = <span class="math inline">\(4096\)</span></p>
+<p>FC layer hidden = <span class="math inline">\(512\)</span></p>
+<p>FC layer output = <span class="math inline">\(6\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="implementation-details-and-hyperparameters-1" class="slide level1">
+<h1>Implementation Details and Hyperparameters</h1>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Loss Function</strong></td>
+<td>Cross-Entropy</td>
+</tr>
+<tr class="even">
+<td><strong>Optimizer</strong></td>
+<td>Default Adam (<span class="math inline">\(\beta_1=0.9\)</span>, <span class="math inline">\(\beta_2=0.999\)</span>, <span class="math inline">\(\epsilon=10^{-8}\)</span>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Learning Rate</strong></td>
+<td>Slanted triangular schedule (<span class="math inline">\(cut\_frac=0.1,\)</span> <br> <span class="math inline">\(ratio=32,\,\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
+</tr>
+<tr class="even">
+<td><strong>Regularization</strong></td>
+<td>Dropout (<span class="math inline">\(0.5\)</span> after Elmo Layer and FC hidden;<br> <span class="math inline">\(0.1\)</span> after max-pooling layer)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ensembles" class="slide level1">
+<h1>Ensembles</h1>
+<p><img data-src="../images/best_ensembles.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+</section>
+<section id="experiments-and-analyses" class="slide level1 center">
+<h1>Experiments and Analyses</h1>
+</section>
+<section id="ablation-study" class="slide level1">
+<h1>Ablation Study</h1>
+<p><img data-src="../images/ablation_table.png" class="plain" style="width:40.0%;height:40.0%" /></p>
+</section>
+<section id="ablation-study-1" class="slide level1">
+<h1>Ablation Study</h1>
+<figure>
+<img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Dropout</figcaption>
+</figure>
+</section>
+<section id="error-analysis" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Confusion Matrix</figcaption>
+</figure>
+</section>
+<section id="error-analysis-1" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Classification Report</figcaption>
+</figure>
+</section>
+<section id="error-analysis-2" class="slide level1">
+<h1>Error Analysis</h1>
+<figure>
+<img data-src="../images/pca.png" title="PCA projection" alt="PCA projection" class="plain" style="width:50.0%;height:50.0%" /><figcaption>PCA projection</figcaption>
+</figure>
+</section>
+<section id="effect-of-the-amount-of-training-data" class="slide level1">
+<h1>Effect of the Amount of Training Data</h1>
+<p><img data-src="../images/acc_vs_tdp_variation.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+</section>
+<section id="effect-of-emoji-and-hashtags" class="slide level1">
+<h1>Effect of Emoji and Hashtags</h1>
+<div class="center">
+<p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+</div>
+</section>
+<section id="effect-of-emoji-and-hashtags-1" class="slide level1">
+<h1>Effect of Emoji and Hashtags</h1>
+<p><img data-src="../images/fine_grained_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+</section>
+<section id="conclusions-and-future-work" class="slide level1 center">
+<h1>Conclusions and Future Work</h1>
+<!-- # In the morning
 
-<!-- For making this presentation runable from a web server we need to remove
-the  directory from the resulting .html after transforming with
-pandoc-->
-</section>
-<section id="in-the-morning" class="slide level1">
-<h1>In the morning</h1>
-<ul>
-<li>Eat eggs</li>
-<li>Drink coffee</li>
-</ul>
-</section>
-<section id="in-the-evening" class="slide level1">
-<h1>In the evening</h1>
-<ul>
-<li>Eat spaghetti</li>
-<li>Drink wine</li>
-</ul>
-</section>
-<section id="fragments-test" class="slide level1">
-<h1>Fragments test</h1>
-<p class="fragment grow">
-grow
-</p>
-<p class="fragment shrink">
-shrink
-</p>
-<p class="fragment fade-out">
-fade-out
-</p>
-<p class="fragment fade-up">
-fade-up (also down, left and right!)
-</p>
-<p class="fragment fade-in-then-out">
-fades in, then out when we move to the next step
-</p>
-<p class="fragment fade-in-then-semi-out">
-fades in, then obfuscate when we move to the next step
-</p>
-<p class="fragment highlight-current-blue">
-blue only once
-</p>
-<p class="fragment highlight-red">
-highlight-red
-</p>
-<p class="fragment highlight-green">
-highlight-green
-</p>
-<p class="fragment highlight-blue">
-highlight-blue
-</p>
-</section>
-<section id="conclusion" class="slide level1">
-<h1>Conclusion</h1>
-<ul>
-<li>And the answer is…</li>
-<li><span class="math inline">\(f(x)=\sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n\)</span></li>
-</ul>
+- Eat eggs
+- Drink coffee
+
+# In the evening
+
+- Eat spaghetti
+- Drink wine
+
+# Fragments test
+
+<p class="fragment grow">grow</p>
+<p class="fragment shrink">shrink</p>
+<p class="fragment fade-out">fade-out</p>
+<p class="fragment fade-up">fade-up (also down, left and right!)</p>
+<p class="fragment fade-in-then-out">fades in, then out when we move to the next step</p>
+<p class="fragment fade-in-then-semi-out">fades in, then obfuscate when we move to the next step</p>
+<p class="fragment highlight-current-blue">blue only once</p>
+<p class="fragment highlight-red">highlight-red</p>
+<p class="fragment highlight-green">highlight-green</p>
+<p class="fragment highlight-blue">highlight-blue</p>
+
+# Do columns work?
+
+<div class="twocolumn">
+<div>
+- These
+- Are
+- Awesome super long elements to the left
+</div>
+<div>
+- You can place two graphs on a slide
+- Or two columns of text
+- These are all created with div elements
+</div>
+</div>
+Then what about a
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+# Conclusion
+
+- And the answer is...
+- $f(x)=\sum_{n=0}^\infty\frac{f^{(n)}(a)}{n!}(x-a)^n$
+ -->
+<!-- Another way of creating two column slides -->
+<!-- # Implementation Details and Hyperparameters
+
+<div class="columns">
+<div class="column" style="text-align:justify;width:20%;">
+
+**ELMo Layer**
+
+Optimizer
+
+<br>
+<br>
+Learning Rate
+
+</div>
+<div class="column" style="text-align:justify;width:55%;">
+
+Official implementation with default parameters
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+- Lorem ipsum dolor sit amet, 
+- consetetur sadipscing elitr, sed diam nonumy
+
+</div>
+</div>
+ -->
 </section>
     </div>
   </div>
@@ -110,12 +292,14 @@ highlight-blue
       // Full list of configuration options available at:
       // https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
         // Display the page number of the current slide
         slideNumber: true,
         // Push each slide change to the browser history
         history: true,
         // Vertical centering of slides
-        center: true,
+        center: false,
         // Transition style
         transition: 'none', // none/fade/slide/convex/concave/zoom
         // The "normal" size of the presentation, aspect ratio will be preserved
@@ -149,6 +333,7 @@ highlight-blue
         dependencies: [
           { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
           { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/spotlight/spotlight.js', async: true },
           { src: 'plugin/math/math.js', async: true },
           { src: 'plugin/notes/notes.js', async: true }
         ]
