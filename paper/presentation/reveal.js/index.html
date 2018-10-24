@@ -17,6 +17,7 @@
       div.column{display: inline-block; vertical-align: top; width: 50%;}
   </style>
   <link rel="stylesheet" href="css/theme/white.css" id="theme">
+  <link rel="stylesheet" href="custom.css"/>
   <!-- Printing and PDF exports -->
   <script>
     var link = document.createElement( 'link' );
@@ -28,48 +29,6 @@
   <!--[if lt IE 9]>
   <script src="lib/js/html5shiv.js"></script>
   <![endif]-->
-  <style type="text/css">
-  #left {
-    left:-8.33%;
-    text-align: left;
-    float: left;
-    width:50%;
-    z-index:-10;
-  }
-  
-  #right {
-    left:31.25%;
-    top: 75px;
-    float: right;
-    text-align: right;
-    z-index:-10;
-    width:50%;
-    margin-right: 2%;
-  }
-  
-  .multicol {
-      display: table;
-      table-layout: fixed;
-      width: 100%;
-      text-align: left;
-      .col {
-          display: table-cell;
-          vertical-align: top;
-          width: 50%;
-          &:first-of-type { padding-left: 0; }
-      }
-  }
-  
-  .twocolumn {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-gap: 10px;
-      text-align: left;
-      padding: 10% 10% 10% 10%;
-      margin-right: 10%;
-      margin-left: 10%;
-  }
-  </style>
 </head>
 <body>
   <div class="reveal">
@@ -130,8 +89,8 @@
 <h1>Implementation Details and Hyperparameters</h1>
 <table>
 <colgroup>
-<col style="width: 23%" />
-<col style="width: 76%" />
+<col style="width: 27%" />
+<col style="width: 72%" />
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -155,38 +114,103 @@
 </section>
 <section id="ensembles" class="slide level1">
 <h1>Ensembles</h1>
-<p><img data-src="../images/best_ensembles.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+<div class="flex-container" style="padding-top:5%;">
+<div>
+<p><img data-src="../images/best_ensembles.png" class="plain" style="width:100.0%;height:100.0%" /></p>
+</div>
+<div class="fragment" style="padding-right:5%;text-align:justify;">
+<p>We tried <span class="math inline">\(\sum_{k=1}^{9}{\binom{9}{k}}=511\)</span> combinations of 9 trained models initialized with different random seeds.</p>
+<p>Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Can (<a href="#/ref-bonab2016theoretical">2016</a>)</span>, we found out that ensembling 6 models yielded the best results.</p>
+</div>
+</div>
 </section>
 <section id="experiments-and-analyses" class="slide level1 center">
 <h1>Experiments and Analyses</h1>
 </section>
 <section id="ablation-study" class="slide level1">
 <h1>Ablation Study</h1>
-<p><img data-src="../images/ablation_table.png" class="plain" style="width:40.0%;height:40.0%" /></p>
+<div class="flex-container">
+<div>
+<p><img data-src="../images/ablation_table.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+</div>
+<div style="padding-right:2%;text-align:justify;">
+<ul>
+<li class="fragment">ELMo provided the biggest boost in performance.</li>
+<li class="fragment">Emoji also helped (<a href="#/effect-of-emoji-and-hashtags">analysis</a>).</li>
+<li class="fragment">Concat pooling <span class="citation" data-cites="howard2018universal">(Howard and Ruder <a href="#/ref-howard2018universal">2018</a>)</span>, did not help.</li>
+<li class="fragment">Different BiLSTM sizes did not improve results.</li>
+<li class="fragment">POS tag Embeddings of dimension 50 slightly helped.</li>
+<li class="fragment">SGD optimizer with simpler LR schedule <span class="citation" data-cites="conneau2017supervised">(Conneau et al. <a href="#/ref-conneau2017supervised">2017</a>)</span>, did not help.</li>
+</ul>
+</div>
+</div>
+<!-- # Ablation Study
+
+<div class="columns" style="display:table;">
+<div class="column" style="width:50%;display:table-cell;vertical-align:middle;">
+![Dropout](../images/dropout_table.png "Dropout"){width=80% height=80% .plain}
+</div>
+<div class="column" style="width:40%;display:table-cell;vertical-align:middle;text-align:justify;padding=2%;">
+
+<div class="fragment" style="padding-right:3%;text-align:justify;">
+
+Dropout concentrated around high values for word-level
+representations and low values for sentence-level representations yielded better
+results.
+
+</div>
+
+</div>
+</div>
+ -->
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
+<div class="flex-container" style="padding-top:5%">
+<div>
 <figure>
-<img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Dropout</figcaption>
+<img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:100.0%;height:100.0%" /><figcaption>Dropout</figcaption>
 </figure>
+</div>
+<div>
+<div class="fragment" style="padding-right:3%;text-align:justify;">
+<p>Dropout concentrated around high values for word-level representations and low values for sentence-level representations yielded better results.</p>
+</div>
+</div>
+</div>
+<!-- # Error Analysis
+
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
+ -->
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
-<figure>
-<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Confusion Matrix</figcaption>
-</figure>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /></p>
+</div><div class="column" style="padding-top:5%;text-align:justify;width:40%;">
+<ul>
+<li class="fragment"><code>anger</code> was the hardest class to predict</li>
+<li class="fragment"><code>joy</code> was the easiest one
+<div class="fragment">
+(probably due to an annotation artifact)
+</div></li>
+</ul>
+</div>
+</div>
 </section>
 <section id="error-analysis-1" class="slide level1">
 <h1>Error Analysis</h1>
+<div class="flex-container">
+<div>
 <figure>
-<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /><figcaption>Classification Report</figcaption>
+<img data-src="../images/pca.png" title="PCA projection of test sentence representations" alt="PCA projection of test sentence representations" class="plain" style="width:80.0%;height:80.0%" /><figcaption>PCA projection of test sentence representations</figcaption>
 </figure>
-</section>
-<section id="error-analysis-2" class="slide level1">
-<h1>Error Analysis</h1>
-<figure>
-<img data-src="../images/pca.png" title="PCA projection" alt="PCA projection" class="plain" style="width:50.0%;height:50.0%" /><figcaption>PCA projection</figcaption>
-</figure>
+</div>
+<div class="fragment" style="padding-right:5%;text-align:justify;">
+<p>Separate <code>joy</code> cluster corresponds to those sentences containing the “un<code>[#TRIGGERWORD#]</code>” pattern.</p>
+</div>
+</div>
 </section>
 <section id="effect-of-the-amount-of-training-data" class="slide level1">
 <h1>Effect of the Amount of Training Data</h1>
@@ -194,16 +218,59 @@
 </section>
 <section id="effect-of-emoji-and-hashtags" class="slide level1">
 <h1>Effect of Emoji and Hashtags</h1>
-<div class="center">
-<p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+<div class="flex-container" style="padding-top:5%;flex-direction:column">
+<div>
+<p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </div>
+<div>
+<p class="fragment" style="padding:0 5%;text-align:justify;">
+Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly.
+</p>
+<p class="fragment" style="padding:0 5%;text-align:justify;">
+Tweets and hashtags, to a lesser extent, seem to improve performance.
+</p>
+</div>
+</div>
+<aside class="notes">
+<p>Overall effect of hashtags and emoji on classification performance.</p>
+<p>Tweets containing emoji seem to be easier for the model to classify than those without.</p>
+<p>Hashtags also have a positive effect on classification performance, however it is less significant.</p>
+<p>This implies that emoji, and hashtags in a smaller degree, provide tweets with a context richer in sentiment information, allowing the model to better guess the emotion of the <code>trigger-word</code>.</p>
+</aside>
 </section>
 <section id="effect-of-emoji-and-hashtags-1" class="slide level1">
 <h1>Effect of Emoji and Hashtags</h1>
-<p><img data-src="../images/fine_grained_performance.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+<div class="flex-container" style="padding-top:5%;">
+<div style="flex:6">
+<figure>
+<img data-src="../images/fine_grained_performance.png" alt="😷💕😍❤️😡😢😭😒😩😂😅😕" class="plain" style="width:80.0%;height:80.0%" /><figcaption>😷💕😍❤️😡😢😭😒😩😂😅😕</figcaption>
+</figure>
+</div>
+<div style="flex:4;padding-right:3%;text-align:justify;">
+<ul>
+<li class="fragment"><code>rage</code> 😡, <code>mask</code> 😷, and <code>cry</code> 😢, were the most informative emoji.</li>
+<li class="fragment">Counter-intuitively, <code>sob</code> 😭 was less informative than 😢 despite representing a stronger emotion.</li>
+</ul>
+</div>
+</div>
 </section>
 <section id="conclusions-and-future-work" class="slide level1 center">
 <h1>Conclusions and Future Work</h1>
+</section>
+<section id="references" class="slide level1">
+<h1>References</h1>
+<div id="refs">
+<!-- pandoc-citeproc will insert bibliography here -->
+<div id="ref-bonab2016theoretical">
+<p>Bonab, Hamed R., and Fazli Can. 2016. “A Theoretical Framework on the Ideal Number of Classifiers for Online Ensembles in Data Streams.” In <em>Proceedings of the 25th Acm International on Conference on Information and Knowledge Management</em>, 2053–6. CIKM ’16. New York, NY, USA: ACM. <a href="https://doi.org/10.1145/2983323.2983907">https://doi.org/10.1145/2983323.2983907</a>.</p>
+</div>
+<div id="ref-conneau2017supervised">
+<p>Conneau, Alexis, Douwe Kiela, Holger Schwenk, Loïc Barrault, and Antoine Bordes. 2017. “Supervised Learning of Universal Sentence Representations from Natural Language Inference Data.” In <em>Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing</em>, 670–80. Copenhagen, Denmark: Association for Computational Linguistics. <a href="https://www.aclweb.org/anthology/D17-1070">https://www.aclweb.org/anthology/D17-1070</a>.</p>
+</div>
+<div id="ref-howard2018universal">
+<p>Howard, Jeremy, and Sebastian Ruder. 2018. “Universal Language Model Fine-tuning for Text Classification.” <em>ArXiv E-Prints</em>. <a href="http://arxiv.org/abs/1801.06146">http://arxiv.org/abs/1801.06146</a>.</p>
+</div>
+</div>
 <!-- # In the morning
 
 - Eat eggs
@@ -279,6 +346,8 @@ Official implementation with default parameters
 
 </div>
 </div>
+
+For citing: [@luong2016achieving]
  -->
 </section>
     </div>
@@ -298,8 +367,12 @@ Official implementation with default parameters
         slideNumber: true,
         // Push each slide change to the browser history
         history: true,
+        // Enable the slide overview mode
+        overview: true,
         // Vertical centering of slides
         center: false,
+        // Turns fragments on and off globally
+        fragments: true,
         // Transition style
         transition: 'none', // none/fade/slide/convex/concave/zoom
         // The "normal" size of the presentation, aspect ratio will be preserved
@@ -329,11 +402,16 @@ Official implementation with default parameters
           },
         },
 
+        menu: {
+            openButton: false,
+          },
+
         // Optional reveal.js plugins
         dependencies: [
           { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
           { src: 'plugin/zoom-js/zoom.js', async: true },
-          { src: 'plugin/spotlight/spotlight.js', async: true },
+          // { src: 'plugin/spotlight/spotlight.js', async: true },
+          { src: 'plugin/menu/menu.js', async: true },
           { src: 'plugin/math/math.js', async: true },
           { src: 'plugin/notes/notes.js', async: true }
         ]

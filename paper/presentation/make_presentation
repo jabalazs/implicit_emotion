@@ -1,5 +1,9 @@
 #!/bin/bash
 
-pandoc -s --mathjax -t revealjs+raw_attribute+grid_tables --template=my.revealjs presentation.md -o presentation.html -H custom.html 
+pandoc -s --mathjax -t revealjs+raw_attribute+grid_tables --template=my.revealjs presentation.md -o presentation.html --bibliography=../bibliography.bib --css=custom.css
 sed 's/reveal.js\///g' presentation.html > reveal.js/index.html
+
+# src_dir="../images/"
+# tgt_dit="reveal.js/"
+# cp -r "$src_dir" "$tgt_dir"
 npm start --prefix reveal.js
