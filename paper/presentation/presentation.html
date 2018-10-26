@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <meta name="author" content="Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo">
-  <meta name="dcterms.date" content="2018-10-31">
-  <title>IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</title>
+  <title>IIIDYT at IEST 2018</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -34,12 +32,30 @@
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide">
-  <h1 class="title">IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</h1>
-  <p class="author">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
-  <p class="date">October 31, 2018</p>
-</section>
 
+<section class="slide level1">
+
+<!-- 
+title: "IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations"
+author: 
+- Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
+date: October 31, 2018
+minScale: 1
+maxScale: 1
+margin: 0
+width: |
+    `"100%"`{=html}
+height: |
+    `"100%"`{=html}
+ -->
+<h1 style="font-size:130%">
+IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations
+</h1>
+<br>
+<p style="font-size:80%">
+Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
+</p>
+</section>
 <section id="introduction" class="slide level1 center">
 <h1>Introduction</h1>
 </section>
@@ -61,12 +77,13 @@
 <h1>Architecture</h1>
 <p><img data-src="../images/iest_architecture.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </section>
-<section id="implementation-details-and-hyperparameters" class="slide level1">
-<h1>Implementation Details and Hyperparameters</h1>
+<section id="hyperparameters" class="slide level1">
+<h1>Hyperparameters</h1>
+<div style="font-size:60%">
 <table>
 <colgroup>
-<col style="width: 31%" />
-<col style="width: 68%" />
+<col style="width: 29%" />
+<col style="width: 70%" />
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -82,17 +99,6 @@
 <p>FC layer hidden = <span class="math inline">\(512\)</span></p>
 <p>FC layer output = <span class="math inline">\(6\)</span></p></td>
 </tr>
-</tbody>
-</table>
-</section>
-<section id="implementation-details-and-hyperparameters-1" class="slide level1">
-<h1>Implementation Details and Hyperparameters</h1>
-<table>
-<colgroup>
-<col style="width: 27%" />
-<col style="width: 72%" />
-</colgroup>
-<tbody>
 <tr class="odd">
 <td><strong>Loss Function</strong></td>
 <td>Cross-Entropy</td>
@@ -103,7 +109,7 @@
 </tr>
 <tr class="odd">
 <td><strong>Learning Rate</strong></td>
-<td>Slanted triangular schedule (<span class="math inline">\(cut\_frac=0.1,\)</span> <br> <span class="math inline">\(ratio=32,\,\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
+<td>Slanted triangular schedule <br> (<span class="math inline">\(cut\_frac=0.1,\)</span> <span class="math inline">\(ratio=32,\)</span><br><span class="math inline">\(\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
 </tr>
 <tr class="even">
 <td><strong>Regularization</strong></td>
@@ -111,14 +117,15 @@
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="ensembles" class="slide level1">
 <h1>Ensembles</h1>
-<div class="flex-container" style="padding-top:5%;">
-<div>
+<div class="flex-container">
+<div style="flex:6;">
 <p><img data-src="../images/best_ensembles.png" class="plain" style="width:100.0%;height:100.0%" /></p>
 </div>
-<div class="fragment" style="padding-right:5%;text-align:justify;">
+<div class="fragment" style="flex:4;font-size:70%;text-align:justify;">
 <p>We tried <span class="math inline">\(\sum_{k=1}^{9}{\binom{9}{k}}=511\)</span> combinations of 9 trained models initialized with different random seeds.</p>
 <p>Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Can (<a href="#/ref-bonab2016theoretical">2016</a>)</span>, we found out that ensembling 6 models yielded the best results.</p>
 </div>
@@ -130,10 +137,10 @@
 <section id="ablation-study" class="slide level1">
 <h1>Ablation Study</h1>
 <div class="flex-container">
-<div>
+<div style="flex:5">
 <p><img data-src="../images/ablation_table.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </div>
-<div style="padding-right:2%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:justify;">
 <ul>
 <li class="fragment">ELMo provided the biggest boost in performance.</li>
 <li class="fragment">Emoji also helped (<a href="#/effect-of-emoji-and-hashtags">analysis</a>).</li>
@@ -144,51 +151,27 @@
 </ul>
 </div>
 </div>
-<!-- # Ablation Study
-
-<div class="columns" style="display:table;">
-<div class="column" style="width:50%;display:table-cell;vertical-align:middle;">
-![Dropout](../images/dropout_table.png "Dropout"){width=80% height=80% .plain}
-</div>
-<div class="column" style="width:40%;display:table-cell;vertical-align:middle;text-align:justify;padding=2%;">
-
-<div class="fragment" style="padding-right:3%;text-align:justify;">
-
-Dropout concentrated around high values for word-level
-representations and low values for sentence-level representations yielded better
-results.
-
-</div>
-
-</div>
-</div>
- -->
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
-<div class="flex-container" style="padding-top:5%">
-<div>
+<div class="flex-container">
+<div style="flex:4;font-size:50%;">
 <figure>
 <img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:100.0%;height:100.0%" /><figcaption>Dropout</figcaption>
 </figure>
 </div>
-<div>
-<div class="fragment" style="padding-right:3%;text-align:justify;">
-<p>Dropout concentrated around high values for word-level representations and low values for sentence-level representations yielded better results.</p>
+<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
+<p>Best dropout configurations concentrated around high values for word-level representations and low values for sentence-level representations.</p>
 </div>
 </div>
-</div>
-<!-- # Error Analysis
-
-![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
- -->
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:50.0%;height:50.0%" /></p>
-</div><div class="column" style="padding-top:5%;text-align:justify;width:40%;">
+<div class="flex-container">
+<div style="flex:5;">
+<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:80.0%;height:80.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /></p>
+</div>
+<div style="flex:5;font-size:70%;text-align:justify;">
 <ul>
 <li class="fragment"><code>anger</code> was the hardest class to predict</li>
 <li class="fragment"><code>joy</code> was the easiest one
@@ -202,32 +185,31 @@ results.
 <section id="error-analysis-1" class="slide level1">
 <h1>Error Analysis</h1>
 <div class="flex-container">
-<div>
+<div style="flex:5;font-size:50%;">
 <figure>
 <img data-src="../images/pca.png" title="PCA projection of test sentence representations" alt="PCA projection of test sentence representations" class="plain" style="width:80.0%;height:80.0%" /><figcaption>PCA projection of test sentence representations</figcaption>
 </figure>
 </div>
-<div class="fragment" style="padding-right:5%;text-align:justify;">
+<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
 <p>Separate <code>joy</code> cluster corresponds to those sentences containing the “un<code>[#TRIGGERWORD#]</code>” pattern.</p>
 </div>
 </div>
 </section>
-<section id="effect-of-the-amount-of-training-data" class="slide level1">
-<h1>Effect of the Amount of Training Data</h1>
+<section id="amount-of-training-data" class="slide level1">
+<h1>Amount of Training Data</h1>
 <p><img data-src="../images/acc_vs_tdp_variation.png" class="plain" style="width:60.0%;height:60.0%" /></p>
 </section>
-<section id="effect-of-emoji-and-hashtags" class="slide level1">
-<h1>Effect of Emoji and Hashtags</h1>
-<div class="flex-container" style="padding-top:5%;flex-direction:column">
-<div>
-<p><img data-src="../images/emoji_hashtag_performance.png" class="plain" style="width:80.0%;height:80.0%" /></p>
+<section id="emoji-hashtags" class="slide level1">
+<h1>Emoji &amp; Hashtags</h1>
+<div class="flex-container" style="padding-top:15%;">
+<div style="flex:5;font-size:40%">
+<figure>
+<img data-src="../images/emoji_hashtag_performance.png" alt="Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly." class="plain" style="width:80.0%;height:80.0%" /><figcaption>Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly.</figcaption>
+</figure>
 </div>
-<div>
-<p class="fragment" style="padding:0 5%;text-align:justify;">
-Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly.
-</p>
-<p class="fragment" style="padding:0 5%;text-align:justify;">
-Tweets and hashtags, to a lesser extent, seem to improve performance.
+<div style="flex:5;font-size:70%;text-align:justify;">
+<p class="fragment">
+Tweets and hashtags, to a lesser extent, seem to be good discriminating features.
 </p>
 </div>
 </div>
@@ -238,15 +220,15 @@ Tweets and hashtags, to a lesser extent, seem to improve performance.
 <p>This implies that emoji, and hashtags in a smaller degree, provide tweets with a context richer in sentiment information, allowing the model to better guess the emotion of the <code>trigger-word</code>.</p>
 </aside>
 </section>
-<section id="effect-of-emoji-and-hashtags-1" class="slide level1">
-<h1>Effect of Emoji and Hashtags</h1>
+<section id="emoji-hashtags-1" class="slide level1">
+<h1>Emoji &amp; Hashtags</h1>
 <div class="flex-container" style="padding-top:5%;">
-<div style="flex:6">
+<div style="flex:5;font-size:50%;">
 <figure>
 <img data-src="../images/fine_grained_performance.png" alt="😷💕😍❤️😡😢😭😒😩😂😅😕" class="plain" style="width:80.0%;height:80.0%" /><figcaption>😷💕😍❤️😡😢😭😒😩😂😅😕</figcaption>
 </figure>
 </div>
-<div style="flex:4;padding-right:3%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:justify;">
 <ul>
 <li class="fragment"><code>rage</code> 😡, <code>mask</code> 😷, and <code>cry</code> 😢, were the most informative emoji.</li>
 <li class="fragment">Counterintuitively, <code>sob</code> 😭 was less informative than 😢 despite representing a stronger emotion.</li>
@@ -376,16 +358,6 @@ For citing: [@luong2016achieving]
         fragments: true,
         // Transition style
         transition: 'none', // none/fade/slide/convex/concave/zoom
-        // The "normal" size of the presentation, aspect ratio will be preserved
-        // when the presentation is scaled to fit different resolutions. Can be
-        // specified using percentage units.
-        width: "100%",
-        height: "100%",
-        // Factor of the display size that should remain empty around the content
-        margin: 0,
-        // Bounds for smallest/largest possible scale to apply to content
-        minScale: 1,
-        maxScale: 1,
         math: {
           mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js',
           config: 'TeX-AMS_HTML-full',

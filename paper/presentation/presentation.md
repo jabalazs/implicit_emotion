@@ -1,21 +1,11 @@
 ---
-title: "IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations"
-author: 
-- Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
-date: October 31, 2018
+pagetitle: "IIIDYT at IEST 2018"
 
 controls: "false"
 transition: "none"
 slideNumber: "true"
 center: "false"
 overview: "true"
-width: |
-    `"100%"`{=html}
-height: |
-    `"100%"`{=html}
-margin: 0
-minScale: 1
-maxScale: 1
 
 theme: white
 
@@ -23,6 +13,25 @@ fragments: "true"
 
 link-citations: "true"
 ---
+
+<!-- 
+title: "IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations"
+author: 
+- Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
+date: October 31, 2018
+minScale: 1
+maxScale: 1
+margin: 0
+width: |
+    `"100%"`{=html}
+height: |
+    `"100%"`{=html}
+ -->
+
+<h1 style="font-size:130%">IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Word Representations</h1>
+
+<br>
+<p style="font-size:80%">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
 
 # Introduction {.center}
 
@@ -46,54 +55,51 @@ link-citations: "true"
 
 ![](../images/iest_architecture.png){width=80% height=80% .plain}
 
-# Implementation Details and Hyperparameters
+# Hyperparameters
 
-+----------------------+-------------------------------------------------+
-| **ELMo Layer**       | Official implementation with default parameters |
-+----------------------+-------------------------------------------------+
-| **Dimensionalities** | ELMo output = $1024$                            |
-|                      |                                                 |
-|                      | BiLSTM output = $2048$ for each direction       |
-|                      |                                                 |
-|                      | Sentence vector representation = $4096$         |
-|                      |                                                 |
-|                      | Fully-connected (FC) layer input = $4096$        |
-|                      |                                                 |
-|                      | FC layer hidden = $512$                         |
-|                      |                                                 |
-|                      | FC layer output = $6$                           |
-+----------------------+-------------------------------------------------+
+<div style="font-size:60%">
 
-# Implementation Details and Hyperparameters
++----------------------+------------------------------------------------------+
+| **ELMo Layer**       | Official implementation with default parameters      |
++----------------------+------------------------------------------------------+
+| **Dimensionalities** | ELMo output = $1024$                                 |
+|                      |                                                      |
+|                      | BiLSTM output = $2048$ for each direction            |
+|                      |                                                      |
+|                      | Sentence vector representation = $4096$              |
+|                      |                                                      |
+|                      | Fully-connected (FC) layer input = $4096$            |
+|                      |                                                      |
+|                      | FC layer hidden = $512$                              |
+|                      |                                                      |
+|                      | FC layer output = $6$                                |
++----------------------+------------------------------------------------------+
+| **Loss Function**    | Cross-Entropy                                        |
++----------------------+------------------------------------------------------+
+| **Optimizer**        | Default Adam                                         |
+|                      | ($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$) |
++----------------------+------------------------------------------------------+
+| **Learning Rate**    | Slanted triangular schedule <br> ($cut\_frac=0.1,$   |
+|                      | $ratio=32,$<br>$\eta_{max}=10^{-3},\,T=23,970$)      |
+|                      |                                                      |
+|                      |                                                      |
++----------------------+------------------------------------------------------+
+| **Regularization**   | Dropout ($0.5$ after Elmo Layer and FC hidden;<br>   |
+|                      | $0.1$ after max-pooling layer)                       |
++----------------------+------------------------------------------------------+
 
-+--------------------+------------------------------------------------------+
-| **Loss Function**  | Cross-Entropy                                        |
-+--------------------+------------------------------------------------------+
-| **Optimizer**      | Default Adam                                         |
-|                    | ($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$) |
-+--------------------+------------------------------------------------------+
-| **Learning Rate**  | Slanted triangular schedule ($cut\_frac=0.1,$ <br>   |
-|                    | $ratio=32,\,\eta_{max}=10^{-3},\,T=23,970$)          |
-|                    |                                                      |
-|                    |                                                      |
-+--------------------+------------------------------------------------------+
-| **Regularization** | Dropout ($0.5$ after Elmo Layer and FC hidden;<br>   |
-|                    | $0.1$ after max-pooling layer)                       |
-+--------------------+------------------------------------------------------+
 
+</div>
 
 # Ensembles
 
+<div class="flex-container">
 
-
-
-<div class="flex-container" style="padding-top:5%;">
-
-<div>
+<div style="flex:6;">
 ![](../images/best_ensembles.png){width=100% height=100% .plain}
 </div>
 
-<div class="fragment" style="padding-right:5%;text-align:justify;">
+<div class="fragment" style="flex:4;font-size:70%;text-align:justify;">
 We tried $\sum_{k=1}^{9}{\binom{9}{k}}=511$ combinations of 9 trained models
 initialized with different random seeds.
 
@@ -110,10 +116,10 @@ yielded the best results.
 
 <div class="flex-container">
 
-<div>
+<div style="flex:5">
 ![](../images/ablation_table.png){width=80% height=80% .plain}
 </div>
-<div style="padding-right:2%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:justify;">
 >- ELMo provided the biggest boost in performance.
 >- Emoji also helped ([analysis](#effect-of-emoji-and-hashtags)).
 >- Concat pooling [@howard2018universal], did not help.
@@ -125,75 +131,48 @@ yielded the best results.
 </div>
 
 
-<!-- # Ablation Study
-
-<div class="columns" style="display:table;">
-<div class="column" style="width:50%;display:table-cell;vertical-align:middle;">
-![Dropout](../images/dropout_table.png "Dropout"){width=80% height=80% .plain}
-</div>
-<div class="column" style="width:40%;display:table-cell;vertical-align:middle;text-align:justify;padding=2%;">
-
-<div class="fragment" style="padding-right:3%;text-align:justify;">
-
-Dropout concentrated around high values for word-level
-representations and low values for sentence-level representations yielded better
-results.
-
-</div>
-
-</div>
-</div>
- -->
-
 # Ablation Study
 
 
-<div class="flex-container" style="padding-top:5%">
+<div class="flex-container">
 
-<div>
+<div style="flex:4;font-size:50%;">
 ![Dropout](../images/dropout_table.png "Dropout"){width=100% height=100% .plain}
 </div>
-<div>
 
-<div class="fragment" style="padding-right:3%;text-align:justify;">
-
-Dropout concentrated around high values for word-level
-representations and low values for sentence-level representations yielded better
-results.
-
+<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
+Best dropout configurations concentrated around high values for word-level
+representations and low values for sentence-level representations.
 </div>
 
 </div>
-</div>
-
-<!-- # Error Analysis
-
-![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=50% height=50% .plain}
- -->
-# Error Analysis
-
-:::::: columns
-
-<div class="column" style="width:50%;">
-![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=70% height=70% .plain}
-![Classification Report](../images/classification_report.png "Classification Report"){width=50% height=50% .plain}
-</div>
-<div class="column" style="padding-top:5%;text-align:justify;width:40%;">
->- `anger` was the hardest class to predict
->- `joy` was the easiest one 
-   <div class="fragment">(probably due to an annotation artifact)</div>
-</div>
-
-::::::
 
 # Error Analysis
 
 <div class="flex-container">
 
-<div>
+<div style="flex:5;">
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=80% height=80% .plain}
+![Classification Report](../images/classification_report.png "Classification Report"){width=60% height=60% .plain}
+</div>
+
+<div style="flex:5;font-size:70%;text-align:justify;">
+>- `anger` was the hardest class to predict
+>- `joy` was the easiest one 
+   <div class="fragment">(probably due to an annotation artifact)</div>
+</div>
+
+</div>
+
+
+# Error Analysis
+
+<div class="flex-container">
+
+<div style="flex:5;font-size:50%;">
 ![PCA projection of test sentence representations](../images/pca.png "PCA projection of test sentence representations"){width=80% height=80% .plain}
 </div>
-<div class="fragment" style="padding-right:5%;text-align:justify;">
+<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
 Separate `joy` cluster corresponds to those sentences containing the
 "un`[#TRIGGERWORD#]`" pattern.
 </div>
@@ -203,24 +182,21 @@ Separate `joy` cluster corresponds to those sentences containing the
 
 
 
-# Effect of the Amount of Training Data
+# Amount of Training Data
 
 ![](../images/acc_vs_tdp_variation.png){width=60% height=60% .plain}
 
-# Effect of Emoji and Hashtags
+# Emoji & Hashtags
 
-<div class="flex-container" style="padding-top:5%;flex-direction:column">
-<div>
-![](../images/emoji_hashtag_performance.png){width=80% height=80% .plain}
+<div class="flex-container" style="padding-top:15%;">
+<div style="flex:5;font-size:40%">
+![Number of examples with and without emoji and hashtags.
+  Numbers between parentheses correspond to the percentage of examples classified correctly.](../images/emoji_hashtag_performance.png){width=80% height=80% .plain}
 </div>
-<div>
-<p class="fragment" style="padding:0 5%;text-align:justify;">
-Number of examples with and without emoji and hashtags. Numbers between
-parentheses correspond to the percentage of examples classified correctly.
-</p>
+<div style="flex:5;font-size:70%;text-align:justify;">
 
-<p class="fragment" style="padding:0 5%;text-align:justify;">
-Tweets and hashtags, to a lesser extent, seem to improve performance.
+<p class="fragment">
+Tweets and hashtags, to a lesser extent, seem to be good discriminating features.
 </p>
 </div>
 </div>
@@ -241,16 +217,16 @@ emotion of the `trigger-word`.
 
 :::
 
-# Effect of Emoji and Hashtags
+# Emoji & Hashtags
 
 <div class="flex-container" style="padding-top:5%;">
-<div style="flex:6">
+<div style="flex:5;font-size:50%;">
 ![😷💕😍❤️😡😢😭😒😩😂😅😕](../images/fine_grained_performance.png){width=80% height=80% .plain}
 
 
 </div>
 
-<div style="flex:4;padding-right:3%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:justify;">
 >- `rage` 😡, `mask` 😷, and `cry` 😢, were the most informative emoji.
 >- Counterintuitively, `sob` 😭 was less informative than 😢 despite
    representing a stronger emotion.
