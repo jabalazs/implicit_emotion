@@ -93,18 +93,22 @@ height: |
 
 # Ensembles
 
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 
 <div style="flex:6;">
 ![](../images/best_ensembles.png){width=100% height=100% .plain}
 </div>
 
-<div class="fragment" style="flex:4;font-size:70%;text-align:justify;">
+<div  style="flex:4;font-size:70%;text-align:justify;">
+<p class="fragment">
 We tried $\sum_{k=1}^{9}{\binom{9}{k}}=511$ combinations of 9 trained models
 initialized with different random seeds.
+</p>
 
+<p class="fragment">
 Similar to @bonab2016theoretical, we found out that ensembling 6 models
 yielded the best results.
+</p>
 </div>
 
 </div>
@@ -134,7 +138,7 @@ yielded the best results.
 # Ablation Study
 
 
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 
 <div style="flex:4;font-size:50%;">
 ![Dropout](../images/dropout_table.png "Dropout"){width=100% height=100% .plain}
@@ -152,7 +156,7 @@ representations and low values for sentence-level representations.
 <div class="flex-container">
 
 <div style="flex:5;">
-![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=80% height=80% .plain}
+![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=70% height=70% .plain}
 ![Classification Report](../images/classification_report.png "Classification Report"){width=60% height=60% .plain}
 </div>
 
@@ -167,7 +171,7 @@ representations and low values for sentence-level representations.
 
 # Error Analysis
 
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 
 <div style="flex:5;font-size:50%;">
 ![PCA projection of test sentence representations](../images/pca.png "PCA projection of test sentence representations"){width=80% height=80% .plain}
@@ -228,7 +232,7 @@ emotion of the `trigger-word`.
 
 <div style="flex:5;font-size:70%;text-align:justify;">
 >- `rage` 😡, `mask` 😷, and `cry` 😢, were the most informative emoji.
->- Counterintuitively, `sob` 😭 was less informative than 😢 despite
+>- Counterintuitively, `sob` 😭 was less informative than 😢, despite
    representing a stronger emotion.
 >- Removing `sweat_smile` 😅 and `confused` 😕 improved results.
 </div>

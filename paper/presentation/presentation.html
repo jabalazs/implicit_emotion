@@ -121,13 +121,17 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </section>
 <section id="ensembles" class="slide level1">
 <h1>Ensembles</h1>
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 <div style="flex:6;">
 <p><img data-src="../images/best_ensembles.png" class="plain" style="width:100.0%;height:100.0%" /></p>
 </div>
-<div class="fragment" style="flex:4;font-size:70%;text-align:justify;">
-<p>We tried <span class="math inline">\(\sum_{k=1}^{9}{\binom{9}{k}}=511\)</span> combinations of 9 trained models initialized with different random seeds.</p>
-<p>Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Can (<a href="#/ref-bonab2016theoretical">2016</a>)</span>, we found out that ensembling 6 models yielded the best results.</p>
+<div style="flex:4;font-size:70%;text-align:justify;">
+<p class="fragment">
+We tried <span class="math inline">\(\sum_{k=1}^{9}{\binom{9}{k}}=511\)</span> combinations of 9 trained models initialized with different random seeds.
+</p>
+<p class="fragment">
+Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Can (<a href="#/ref-bonab2016theoretical">2016</a>)</span>, we found out that ensembling 6 models yielded the best results.
+</p>
 </div>
 </div>
 </section>
@@ -154,7 +158,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 <div style="flex:4;font-size:50%;">
 <figure>
 <img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:100.0%;height:100.0%" /><figcaption>Dropout</figcaption>
@@ -169,7 +173,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 <h1>Error Analysis</h1>
 <div class="flex-container">
 <div style="flex:5;">
-<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:80.0%;height:80.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /></p>
+<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /></p>
 </div>
 <div style="flex:5;font-size:70%;text-align:justify;">
 <ul>
@@ -184,7 +188,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </section>
 <section id="error-analysis-1" class="slide level1">
 <h1>Error Analysis</h1>
-<div class="flex-container">
+<div class="flex-container" style="padding-top:5%;">
 <div style="flex:5;font-size:50%;">
 <figure>
 <img data-src="../images/pca.png" title="PCA projection of test sentence representations" alt="PCA projection of test sentence representations" class="plain" style="width:80.0%;height:80.0%" /><figcaption>PCA projection of test sentence representations</figcaption>
@@ -231,7 +235,7 @@ Tweets and hashtags, to a lesser extent, seem to be good discriminating features
 <div style="flex:5;font-size:70%;text-align:justify;">
 <ul>
 <li class="fragment"><code>rage</code> 😡, <code>mask</code> 😷, and <code>cry</code> 😢, were the most informative emoji.</li>
-<li class="fragment">Counterintuitively, <code>sob</code> 😭 was less informative than 😢 despite representing a stronger emotion.</li>
+<li class="fragment">Counterintuitively, <code>sob</code> 😭 was less informative than 😢, despite representing a stronger emotion.</li>
 <li class="fragment">Removing <code>sweat_smile</code> 😅 and <code>confused</code> 😕 improved results.</li>
 </ul>
 </div>
