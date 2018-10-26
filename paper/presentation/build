@@ -1,0 +1,3 @@
+#!/bin/bash
+
+pandoc -s --mathjax -t revealjs+raw_attribute+grid_tables --template=my.revealjs presentation.md -o presentation.html --bibliography=../bibliography.bib --css=custom.css

@@ -33,13 +33,32 @@ height: |
 <br>
 <p style="font-size:80%">Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo</p>
 
+<p style="font-size:50%">
+[https://arxiv.org/abs/1808.08672](https://arxiv.org/abs/1808.08672)
+</p>
+
 # Introduction {.center}
 
 # Proposed Approach {.center}
 
 # Preprocessing
 
-![](../images/preprocessing_substitutions.png){width=80% height=80% .plain}
+<div class="flex-container" style="padding-top:5%;">
+
+<div style="flex:5;">
+![](../images/preprocessing_substitutions.png){width=100% height=100% .plain}
+</div>
+
+<div style="flex:5;font-size:70%">
+>- We wanted to have a single format for special tokens
+>- The replacements were chosen arbitrarily
+>- Shorter replacements did not impact performance significantly
+>- Completely removing `[#TRIGGERWORD#]` had a negative $0.66\%$ impact in
+>  our best model.
+
+</div>
+
+</div>
 
 ::: notes
 
@@ -53,7 +72,9 @@ height: |
 
 # Architecture
 
+<div style="padding-top:5%">
 ![](../images/iest_architecture.png){width=80% height=80% .plain}
+</div>
 
 # Hyperparameters
 
@@ -99,7 +120,7 @@ height: |
 ![](../images/best_ensembles.png){width=100% height=100% .plain}
 </div>
 
-<div  style="flex:4;font-size:70%;text-align:justify;">
+<div  style="flex:4;font-size:70%;text-align:left;">
 <p class="fragment">
 We tried $\sum_{k=1}^{9}{\binom{9}{k}}=511$ combinations of 9 trained models
 initialized with different random seeds.
@@ -123,12 +144,12 @@ yielded the best results.
 <div style="flex:5">
 ![](../images/ablation_table.png){width=80% height=80% .plain}
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 >- ELMo provided the biggest boost in performance.
 >- Emoji also helped ([analysis](#effect-of-emoji-and-hashtags)).
 >- Concat pooling [@howard2018universal], did not help.
 >- Different BiLSTM sizes did not improve results.
->- POS tag Embeddings of dimension 50 slightly helped.
+>- POS tag embeddings of dimension 50 slightly helped.
 >- SGD optimizer with simpler LR schedule [@conneau2017supervised], did not help.
 </div>
 
@@ -144,9 +165,9 @@ yielded the best results.
 ![Dropout](../images/dropout_table.png "Dropout"){width=100% height=100% .plain}
 </div>
 
-<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
+<div class="fragment" style="flex:5;font-size:70%;text-align:left;">
 Best dropout configurations concentrated around high values for word-level
-representations and low values for sentence-level representations.
+representations, and low values for sentence-level representations.
 </div>
 
 </div>
@@ -160,10 +181,9 @@ representations and low values for sentence-level representations.
 ![Classification Report](../images/classification_report.png "Classification Report"){width=60% height=60% .plain}
 </div>
 
-<div style="flex:5;font-size:70%;text-align:justify;">
->- `anger` was the hardest class to predict
->- `joy` was the easiest one 
-   <div class="fragment">(probably due to an annotation artifact)</div>
+<div style="flex:5;font-size:70%;text-align:left;">
+>- `anger` was the hardest class to predict.
+>- `joy` was the easiest one <span class="fragment">(probably due to an annotation artifact).</span>
 </div>
 
 </div>
@@ -176,7 +196,7 @@ representations and low values for sentence-level representations.
 <div style="flex:5;font-size:50%;">
 ![PCA projection of test sentence representations](../images/pca.png "PCA projection of test sentence representations"){width=80% height=80% .plain}
 </div>
-<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
+<div class="fragment" style="flex:5;font-size:70%;text-align:left;">
 Separate `joy` cluster corresponds to those sentences containing the
 "un`[#TRIGGERWORD#]`" pattern.
 </div>
@@ -185,10 +205,26 @@ Separate `joy` cluster corresponds to those sentences containing the
 
 
 
+</section>
 
-# Amount of Training Data
+<section id="error-analysis-1" class="slide level1">
+<h1 style="font-size:190%;">Amount of Training Data</h1>
 
-![](../images/acc_vs_tdp_variation.png){width=60% height=60% .plain}
+
+<div class="flex-container" style="padding-top:10%;">
+
+<div style="flex:5;font-size:50%;">
+![](../images/acc_vs_tdp_variation.png){width=100% height=100% .plain}
+</div>
+
+<div style="flex:5;font-size:70%;text-align:left;">
+<p class="fragment">
+Upward trend suggests that the model is expressive enough to learn from new data,
+and is not overfitting the training set.
+</p>
+</div>
+
+</div>
 
 # Emoji & Hashtags
 
@@ -197,10 +233,10 @@ Separate `joy` cluster corresponds to those sentences containing the
 ![Number of examples with and without emoji and hashtags.
   Numbers between parentheses correspond to the percentage of examples classified correctly.](../images/emoji_hashtag_performance.png){width=80% height=80% .plain}
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 
 <p class="fragment">
-Tweets and hashtags, to a lesser extent, seem to be good discriminating features.
+Tweets and hashtags (to a lesser extent), seem to be good discriminating features.
 </p>
 </div>
 </div>
@@ -224,13 +260,13 @@ emotion of the `trigger-word`.
 # Emoji & Hashtags
 
 <div class="flex-container" style="padding-top:5%;">
-<div style="flex:5;font-size:50%;">
+<div style="flex:6;font-size:50%;">
 ![😷💕😍❤️😡😢😭😒😩😂😅😕](../images/fine_grained_performance.png){width=80% height=80% .plain}
 
 
 </div>
 
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 >- `rage` 😡, `mask` 😷, and `cry` 😢, were the most informative emoji.
 >- Counterintuitively, `sob` 😭 was less informative than 😢, despite
    representing a stronger emotion.
@@ -240,7 +276,44 @@ emotion of the `trigger-word`.
 </div>
 
 
-# Conclusions and Future Work {.center}
+# Conclusions 
+<div style="font-size:100%;text-align:left;">
+
+<div class="fragment">We obtained competitive results with: </div>
+>- simple preprocessing,
+>- almost no external data dependencies (save for the pretrained ELMo language
+>  model),
+>- a simple pipeline.
+
+</div>
+
+
+# Conclusions 
+<div style="font-size:100%;text-align:left;">
+
+<div class="fragment">We showed that: </div>
+>- The "un`[#TRIGGERWORD#]`" artifact had significant impact in the final example
+>  representations (as shown by the PCA projection).
+>- This in turn made the model better at classifying `joy` examples.
+>- Emoji and hashtags were good features for implicit emotion classification.
+</div>
+
+
+# Future Work
+
+<div style="font-size:100%;text-align:left;">
+>- Ensemble models with added POS tag features.
+>- Perform fine-grained hashtag analysis.
+>- Implement architectural improvements.
+</div>
+
+# Closing Words
+
+Our implementation is available at:
+
+[https://github.com/jabalazs/implicit_emotion](https://github.com/jabalazs/implicit_emotion)
+
+![](../images/repo_qr.png)
 
 # References
 <div id="refs">
@@ -301,7 +374,7 @@ no sea takimata sanctus est Lorem ipsum dolor sit amet.
 <!-- # Implementation Details and Hyperparameters
 
 <div class="columns">
-<div class="column" style="text-align:justify;width:20%;">
+<div class="column" style="text-align:left;width:20%;">
 
 **ELMo Layer**
 
@@ -312,7 +385,7 @@ Optimizer
 Learning Rate
 
 </div>
-<div class="column" style="text-align:justify;width:55%;">
+<div class="column" style="text-align:left;width:55%;">
 
 Official implementation with default parameters
 
