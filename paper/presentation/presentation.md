@@ -49,12 +49,14 @@ height: |
 ![](../images/preprocessing_substitutions.png){width=100% height=100% .plain}
 </div>
 
-<div style="flex:5;font-size:70%">
+<div style="flex:5;font-size:65%">
 >- We wanted to have a single format for special tokens
 >- The replacements were chosen arbitrarily
 >- Shorter replacements did not impact performance significantly
 >- Completely removing `[#TRIGGERWORD#]` had a negative $0.66\%$ impact in
 >  our best model.
+>- We tokenized the data using an emoji-aware modification of the `twokenize.py`
+>  script.
 
 </div>
 
@@ -63,7 +65,6 @@ height: |
 ::: notes
 
 - This was made mostly for sanity
-- The replacements were chosen arbitrarily
 - One reviewer asked what happened with shorter replacements; we found out that
   results did not change significantly
 
@@ -100,8 +101,8 @@ height: |
 | **Optimizer**        | Default Adam                                         |
 |                      | ($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$) |
 +----------------------+------------------------------------------------------+
-| **Learning Rate**    | Slanted triangular schedule <br> ($cut\_frac=0.1,$   |
-|                      | $ratio=32,$<br>$\eta_{max}=10^{-3},\,T=23,970$)      |
+| **Learning Rate**    | Slanted triangular schedule ($cut\_frac=0.1,$   |
+|                      | $ratio=32,\eta_{max}=10^{-3},\,T=23,970$)<br>[@howard2018universal]      |
 |                      |                                                      |
 |                      |                                                      |
 +----------------------+------------------------------------------------------+
@@ -134,6 +135,13 @@ yielded the best results.
 
 </div>
 
+::: notes
+
+- Stop and explain how we ensembled: Average of probabilities outputted by
+  models initialized with different random seeds
+
+:::
+
 
 # Experiments and Analyses {.center}
 
@@ -155,6 +163,12 @@ yielded the best results.
 
 </div>
 
+::: notes
+
+- No ELMo correspond to GloVe pre-trained word-embeddings
+- Concat Pooling -> [original; maxpooled; meanpooled]
+
+:::
 
 # Ablation Study
 
@@ -174,11 +188,15 @@ representations, and low values for sentence-level representations.
 
 # Error Analysis
 
-<div class="flex-container">
+<div class="flex-container" style="padding-bottom:5%;">
 
-<div style="flex:5;">
+<div style="flex:5;font-size:50%;">
+
 ![Confusion Matrix](../images/confusion_matrix.png "Confusion Matrix"){width=70% height=70% .plain}
+
+
 ![Classification Report](../images/classification_report.png "Classification Report"){width=60% height=60% .plain}
+
 </div>
 
 <div style="flex:5;font-size:70%;text-align:left;">
@@ -187,6 +205,13 @@ representations, and low values for sentence-level representations.
 </div>
 
 </div>
+
+::: notes
+
+- This confirms what Klinger et al. reported
+
+
+:::
 
 
 # Error Analysis
@@ -243,17 +268,6 @@ Tweets and hashtags (to a lesser extent), seem to be good discriminating feature
 
 ::: notes
 
-Overall effect of hashtags and emoji on classification performance.
-
-Tweets containing emoji seem to be easier for the model to classify than those
-without.
-
-Hashtags also have a positive effect on classification performance, however it
-is less significant.
-
-This implies that emoji, and hashtags in a smaller degree, provide tweets with a
-context richer in sentiment information, allowing the model to better guess the
-emotion of the `trigger-word`.
 
 :::
 
@@ -275,6 +289,16 @@ emotion of the `trigger-word`.
 
 </div>
 
+::: notes
+
+- Alternative interpretation: `rage`, `mask` and `cry` carry stronger signal
+  than the words in the tweet;
+- Contrast to `heart` which is not so informative, which might mean that words
+  in the tweet are more "lovey"
+
+
+:::
+
 
 # Conclusions 
 <div style="font-size:100%;text-align:left;">
@@ -283,7 +307,7 @@ emotion of the `trigger-word`.
 >- simple preprocessing,
 >- almost no external data dependencies (save for the pretrained ELMo language
 >  model),
->- a simple pipeline.
+>- a simple architecture.
 
 </div>
 

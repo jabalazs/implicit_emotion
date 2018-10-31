@@ -1,0 +1,26 @@
+.flex-container {
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:center;
+    /* align-content:space-around; */
+}
+
+li {
+    text-align:left;
+    margin: 3% 0 !important;
+}
+
+code {
+    border-radius: 3px;
+    background-color: #e8e8e8;
+}
+
+td > p {
+    margin: 0 !important;
+}
+
+#refs > div > p {
+    text-align: justify;
+    font-size: 50%;
+}

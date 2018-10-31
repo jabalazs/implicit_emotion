@@ -55,6 +55,9 @@ IIIDYT at IEST 2018: Implicit Emotion Classification with Deep Contextualized Wo
 <p style="font-size:80%">
 Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </p>
+<p style="font-size:50%">
+<a href="https://arxiv.org/abs/1808.08672">https://arxiv.org/abs/1808.08672</a>
+</p>
 </section>
 <section id="introduction" class="slide level1 center">
 <h1>Introduction</h1>
@@ -68,19 +71,19 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 <div style="flex:5;">
 <p><img data-src="../images/preprocessing_substitutions.png" class="plain" style="width:100.0%;height:100.0%" /></p>
 </div>
-<div style="flex:5;font-size:70%">
+<div style="flex:5;font-size:65%">
 <ul>
 <li class="fragment">We wanted to have a single format for special tokens</li>
 <li class="fragment">The replacements were chosen arbitrarily</li>
 <li class="fragment">Shorter replacements did not impact performance significantly</li>
 <li class="fragment">Completely removing <code>[#TRIGGERWORD#]</code> had a negative <span class="math inline">\(0.66\%\)</span> impact in our best model.</li>
+<li class="fragment">We tokenized the data using an emoji-aware modification of the <code>twokenize.py</code> script.</li>
 </ul>
 </div>
 </div>
 <aside class="notes">
 <ul>
 <li>This was made mostly for sanity</li>
-<li>The replacements were chosen arbitrarily</li>
 <li>One reviewer asked what happened with shorter replacements; we found out that results did not change significantly</li>
 </ul>
 </aside>
@@ -123,7 +126,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </tr>
 <tr class="odd">
 <td><strong>Learning Rate</strong></td>
-<td>Slanted triangular schedule <br> (<span class="math inline">\(cut\_frac=0.1,\)</span> <span class="math inline">\(ratio=32,\)</span><br><span class="math inline">\(\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
+<td>Slanted triangular schedule (<span class="math inline">\(cut\_frac=0.1,\)</span> <span class="math inline">\(ratio=32,\eta_{max}=10^{-3},\,T=23,970\)</span>)<br><span class="citation" data-cites="howard2018universal">(Howard and Ruder <a href="#/ref-howard2018universal">2018</a>)</span></td>
 </tr>
 <tr class="even">
 <td><strong>Regularization</strong></td>
@@ -139,7 +142,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 <div style="flex:6;">
 <p><img data-src="../images/best_ensembles.png" class="plain" style="width:100.0%;height:100.0%" /></p>
 </div>
-<div style="flex:4;font-size:70%;text-align:justify;">
+<div style="flex:4;font-size:70%;text-align:left;">
 <p class="fragment">
 We tried <span class="math inline">\(\sum_{k=1}^{9}{\binom{9}{k}}=511\)</span> combinations of 9 trained models initialized with different random seeds.
 </p>
@@ -148,6 +151,11 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 </p>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>Stop and explain how we ensembled: Average of probabilities outputted by models initialized with different random seeds</li>
+</ul>
+</aside>
 </section>
 <section id="experiments-and-analyses" class="slide level1 center">
 <h1>Experiments and Analyses</h1>
@@ -158,17 +166,23 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 <div style="flex:5">
 <p><img data-src="../images/ablation_table.png" class="plain" style="width:80.0%;height:80.0%" /></p>
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 <ul>
 <li class="fragment">ELMo provided the biggest boost in performance.</li>
 <li class="fragment">Emoji also helped (<a href="#/effect-of-emoji-and-hashtags">analysis</a>).</li>
 <li class="fragment">Concat pooling <span class="citation" data-cites="howard2018universal">(Howard and Ruder <a href="#/ref-howard2018universal">2018</a>)</span>, did not help.</li>
 <li class="fragment">Different BiLSTM sizes did not improve results.</li>
-<li class="fragment">POS tag Embeddings of dimension 50 slightly helped.</li>
+<li class="fragment">POS tag embeddings of dimension 50 slightly helped.</li>
 <li class="fragment">SGD optimizer with simpler LR schedule <span class="citation" data-cites="conneau2017supervised">(Conneau et al. <a href="#/ref-conneau2017supervised">2017</a>)</span>, did not help.</li>
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>No ELMo correspond to GloVe pre-trained word-embeddings</li>
+<li>Concat Pooling -&gt; [original; maxpooled; meanpooled]</li>
+</ul>
+</aside>
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
@@ -178,27 +192,34 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 <img data-src="../images/dropout_table.png" title="Dropout" alt="Dropout" class="plain" style="width:100.0%;height:100.0%" /><figcaption>Dropout</figcaption>
 </figure>
 </div>
-<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
-<p>Best dropout configurations concentrated around high values for word-level representations and low values for sentence-level representations.</p>
+<div class="fragment" style="flex:5;font-size:70%;text-align:left;">
+<p>Best dropout configurations concentrated around high values for word-level representations, and low values for sentence-level representations.</p>
 </div>
 </div>
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
-<div class="flex-container">
-<div style="flex:5;">
-<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /></p>
+<div class="flex-container" style="padding-bottom:5%;">
+<div style="flex:5;font-size:50%;">
+<figure>
+<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /><figcaption>Confusion Matrix</figcaption>
+</figure>
+<figure>
+<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /><figcaption>Classification Report</figcaption>
+</figure>
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 <ul>
-<li class="fragment"><code>anger</code> was the hardest class to predict</li>
-<li class="fragment"><code>joy</code> was the easiest one
-<div class="fragment">
-(probably due to an annotation artifact)
-</div></li>
+<li class="fragment"><code>anger</code> was the hardest class to predict.</li>
+<li class="fragment"><code>joy</code> was the easiest one <span class="fragment">(probably due to an annotation artifact).</span></li>
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>This confirms what Klinger et al. reported</li>
+</ul>
+</aside>
 </section>
 <section id="error-analysis-1" class="slide level1">
 <h1>Error Analysis</h1>
@@ -208,14 +229,25 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 <img data-src="../images/pca.png" title="PCA projection of test sentence representations" alt="PCA projection of test sentence representations" class="plain" style="width:80.0%;height:80.0%" /><figcaption>PCA projection of test sentence representations</figcaption>
 </figure>
 </div>
-<div class="fragment" style="flex:5;font-size:70%;text-align:justify;">
+<div class="fragment" style="flex:5;font-size:70%;text-align:left;">
 <p>Separate <code>joy</code> cluster corresponds to those sentences containing the “un<code>[#TRIGGERWORD#]</code>” pattern.</p>
 </div>
 </div>
 </section>
-<section id="amount-of-training-data" class="slide level1">
-<h1>Amount of Training Data</h1>
-<p><img data-src="../images/acc_vs_tdp_variation.png" class="plain" style="width:60.0%;height:60.0%" /></p>
+<section id="error-analysis-1" class="slide level1">
+<h1 style="font-size:190%;">
+Amount of Training Data
+</h1>
+<div class="flex-container" style="padding-top:10%;">
+<div style="flex:5;font-size:50%;">
+<p><img data-src="../images/acc_vs_tdp_variation.png" class="plain" style="width:100.0%;height:100.0%" /></p>
+</div>
+<div style="flex:5;font-size:70%;text-align:left;">
+<p class="fragment">
+Upward trend suggests that the model is expressive enough to learn from new data, and is not overfitting the training set.
+</p>
+</div>
+</div>
 </section>
 <section id="emoji-hashtags" class="slide level1">
 <h1>Emoji &amp; Hashtags</h1>
@@ -225,17 +257,14 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 <img data-src="../images/emoji_hashtag_performance.png" alt="Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly." class="plain" style="width:80.0%;height:80.0%" /><figcaption>Number of examples with and without emoji and hashtags. Numbers between parentheses correspond to the percentage of examples classified correctly.</figcaption>
 </figure>
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 <p class="fragment">
 Tweets and hashtags (to a lesser extent), seem to be good discriminating features.
 </p>
 </div>
 </div>
 <aside class="notes">
-<p>Overall effect of hashtags and emoji on classification performance.</p>
-<p>Tweets containing emoji seem to be easier for the model to classify than those without.</p>
-<p>Hashtags also have a positive effect on classification performance, however it is less significant.</p>
-<p>This implies that emoji, and hashtags in a smaller degree, provide tweets with a context richer in sentiment information, allowing the model to better guess the emotion of the <code>trigger-word</code>.</p>
+
 </aside>
 </section>
 <section id="emoji-hashtags-1" class="slide level1">
@@ -246,7 +275,7 @@ Tweets and hashtags (to a lesser extent), seem to be good discriminating feature
 <img data-src="../images/fine_grained_performance.png" alt="😷💕😍❤️😡😢😭😒😩😂😅😕" class="plain" style="width:80.0%;height:80.0%" /><figcaption>😷💕😍❤️😡😢😭😒😩😂😅😕</figcaption>
 </figure>
 </div>
-<div style="flex:5;font-size:70%;text-align:justify;">
+<div style="flex:5;font-size:70%;text-align:left;">
 <ul>
 <li class="fragment"><code>rage</code> 😡, <code>mask</code> 😷, and <code>cry</code> 😢, were the most informative emoji.</li>
 <li class="fragment">Counterintuitively, <code>sob</code> 😭 was less informative than 😢, despite representing a stronger emotion.</li>
@@ -254,9 +283,54 @@ Tweets and hashtags (to a lesser extent), seem to be good discriminating feature
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>Alternative interpretation: <code>rage</code>, <code>mask</code> and <code>cry</code> carry stronger signal than the words in the tweet;</li>
+<li>Contrast to <code>heart</code> which is not so informative, which might mean that words in the tweet are more “lovey”</li>
+</ul>
+</aside>
 </section>
-<section id="conclusions-and-future-work" class="slide level1 center">
-<h1>Conclusions and Future Work</h1>
+<section id="conclusions" class="slide level1">
+<h1>Conclusions</h1>
+<div style="font-size:100%;text-align:left;">
+<div class="fragment">
+We obtained competitive results with:
+</div>
+<ul>
+<li class="fragment">simple preprocessing,</li>
+<li class="fragment">almost no external data dependencies (save for the pretrained ELMo language model),</li>
+<li class="fragment">a simple architecture.</li>
+</ul>
+</div>
+</section>
+<section id="conclusions-1" class="slide level1">
+<h1>Conclusions</h1>
+<div style="font-size:100%;text-align:left;">
+<div class="fragment">
+We showed that:
+</div>
+<ul>
+<li class="fragment">The “un<code>[#TRIGGERWORD#]</code>” artifact had significant impact in the final example representations (as shown by the PCA projection).</li>
+<li class="fragment">This in turn made the model better at classifying <code>joy</code> examples.</li>
+<li class="fragment">Emoji and hashtags were good features for implicit emotion classification.</li>
+</ul>
+</div>
+</section>
+<section id="future-work" class="slide level1">
+<h1>Future Work</h1>
+<div style="font-size:100%;text-align:left;">
+<ul>
+<li class="fragment">Ensemble models with added POS tag features.</li>
+<li class="fragment">Perform fine-grained hashtag analysis.</li>
+<li class="fragment">Implement architectural improvements.</li>
+</ul>
+</div>
+</section>
+<section id="closing-words" class="slide level1">
+<h1>Closing Words</h1>
+<p>Our implementation is available at:</p>
+<p><a href="https://github.com/jabalazs/implicit_emotion">https://github.com/jabalazs/implicit_emotion</a></p>
+<p><img data-src="../images/repo_qr.png" /></p>
 </section>
 <section id="references" class="slide level1">
 <h1>References</h1>
@@ -324,7 +398,7 @@ no sea takimata sanctus est Lorem ipsum dolor sit amet.
 <!-- # Implementation Details and Hyperparameters
 
 <div class="columns">
-<div class="column" style="text-align:justify;width:20%;">
+<div class="column" style="text-align:left;width:20%;">
 
 **ELMo Layer**
 
@@ -335,7 +409,7 @@ Optimizer
 Learning Rate
 
 </div>
-<div class="column" style="text-align:justify;width:55%;">
+<div class="column" style="text-align:left;width:55%;">
 
 Official implementation with default parameters
 

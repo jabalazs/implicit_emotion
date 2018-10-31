@@ -71,19 +71,19 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 <div style="flex:5;">
 <p><img data-src="../images/preprocessing_substitutions.png" class="plain" style="width:100.0%;height:100.0%" /></p>
 </div>
-<div style="flex:5;font-size:70%">
+<div style="flex:5;font-size:65%">
 <ul>
 <li class="fragment">We wanted to have a single format for special tokens</li>
 <li class="fragment">The replacements were chosen arbitrarily</li>
 <li class="fragment">Shorter replacements did not impact performance significantly</li>
 <li class="fragment">Completely removing <code>[#TRIGGERWORD#]</code> had a negative <span class="math inline">\(0.66\%\)</span> impact in our best model.</li>
+<li class="fragment">We tokenized the data using an emoji-aware modification of the <code>twokenize.py</code> script.</li>
 </ul>
 </div>
 </div>
 <aside class="notes">
 <ul>
 <li>This was made mostly for sanity</li>
-<li>The replacements were chosen arbitrarily</li>
 <li>One reviewer asked what happened with shorter replacements; we found out that results did not change significantly</li>
 </ul>
 </aside>
@@ -126,7 +126,7 @@ Jorge A. Balazs, Edison Marrese-Taylor, Yutaka Matsuo
 </tr>
 <tr class="odd">
 <td><strong>Learning Rate</strong></td>
-<td>Slanted triangular schedule <br> (<span class="math inline">\(cut\_frac=0.1,\)</span> <span class="math inline">\(ratio=32,\)</span><br><span class="math inline">\(\eta_{max}=10^{-3},\,T=23,970\)</span>)</td>
+<td>Slanted triangular schedule (<span class="math inline">\(cut\_frac=0.1,\)</span> <span class="math inline">\(ratio=32,\eta_{max}=10^{-3},\,T=23,970\)</span>)<br><span class="citation" data-cites="howard2018universal">(Howard and Ruder <a href="#/ref-howard2018universal">2018</a>)</span></td>
 </tr>
 <tr class="even">
 <td><strong>Regularization</strong></td>
@@ -151,6 +151,11 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 </p>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>Stop and explain how we ensembled: Average of probabilities outputted by models initialized with different random seeds</li>
+</ul>
+</aside>
 </section>
 <section id="experiments-and-analyses" class="slide level1 center">
 <h1>Experiments and Analyses</h1>
@@ -172,6 +177,12 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>No ELMo correspond to GloVe pre-trained word-embeddings</li>
+<li>Concat Pooling -&gt; [original; maxpooled; meanpooled]</li>
+</ul>
+</aside>
 </section>
 <section id="ablation-study-1" class="slide level1">
 <h1>Ablation Study</h1>
@@ -188,9 +199,14 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 </section>
 <section id="error-analysis" class="slide level1">
 <h1>Error Analysis</h1>
-<div class="flex-container">
-<div style="flex:5;">
-<p><img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /> <img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /></p>
+<div class="flex-container" style="padding-bottom:5%;">
+<div style="flex:5;font-size:50%;">
+<figure>
+<img data-src="../images/confusion_matrix.png" title="Confusion Matrix" alt="Confusion Matrix" class="plain" style="width:70.0%;height:70.0%" /><figcaption>Confusion Matrix</figcaption>
+</figure>
+<figure>
+<img data-src="../images/classification_report.png" title="Classification Report" alt="Classification Report" class="plain" style="width:60.0%;height:60.0%" /><figcaption>Classification Report</figcaption>
+</figure>
 </div>
 <div style="flex:5;font-size:70%;text-align:left;">
 <ul>
@@ -199,6 +215,11 @@ Similar to <span class="citation" data-cites="bonab2016theoretical">Bonab and Ca
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>This confirms what Klinger et al. reported</li>
+</ul>
+</aside>
 </section>
 <section id="error-analysis-1" class="slide level1">
 <h1>Error Analysis</h1>
@@ -243,10 +264,7 @@ Tweets and hashtags (to a lesser extent), seem to be good discriminating feature
 </div>
 </div>
 <aside class="notes">
-<p>Overall effect of hashtags and emoji on classification performance.</p>
-<p>Tweets containing emoji seem to be easier for the model to classify than those without.</p>
-<p>Hashtags also have a positive effect on classification performance, however it is less significant.</p>
-<p>This implies that emoji, and hashtags in a smaller degree, provide tweets with a context richer in sentiment information, allowing the model to better guess the emotion of the <code>trigger-word</code>.</p>
+
 </aside>
 </section>
 <section id="emoji-hashtags-1" class="slide level1">
@@ -265,6 +283,12 @@ Tweets and hashtags (to a lesser extent), seem to be good discriminating feature
 </ul>
 </div>
 </div>
+<aside class="notes">
+<ul>
+<li>Alternative interpretation: <code>rage</code>, <code>mask</code> and <code>cry</code> carry stronger signal than the words in the tweet;</li>
+<li>Contrast to <code>heart</code> which is not so informative, which might mean that words in the tweet are more “lovey”</li>
+</ul>
+</aside>
 </section>
 <section id="conclusions" class="slide level1">
 <h1>Conclusions</h1>
@@ -275,7 +299,7 @@ We obtained competitive results with:
 <ul>
 <li class="fragment">simple preprocessing,</li>
 <li class="fragment">almost no external data dependencies (save for the pretrained ELMo language model),</li>
-<li class="fragment">a simple pipeline.</li>
+<li class="fragment">a simple architecture.</li>
 </ul>
 </div>
 </section>
