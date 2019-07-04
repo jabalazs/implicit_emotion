@@ -1,5 +1,7 @@
 # [Implicit Emotion Shared Task](http://implicitemotions.wassa2018.com/)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/af2b8a0923ee41cd8915b8ead3f0a7e7)](https://app.codacy.com/app/jabalazs/implicit_emotion?utm_source=github.com&utm_medium=referral&utm_content=jabalazs/implicit_emotion&utm_campaign=Badge_Grade_Dashboard)
+
 This code was developed during the WASSA 2018 Implicit Emotion Shared Task by
 the team IIIDYT. You can read our paper
 [here](https://arxiv.org/abs/1808.08672).
