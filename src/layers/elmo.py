@@ -1,5 +1,6 @@
 import sys
 
+import torch
 from .. import config
 from ..utils.torch import to_var
 
@@ -8,8 +9,9 @@ sys.path.append(config.ALLENNLP_PATH)
 from allennlp.modules.elmo import Elmo, batch_to_ids
 
 
-class ElmoWordEncodingLayer(object):
+class ElmoWordEncodingLayer(torch.nn.Module):
     def __init__(self, **kwargs):
+        super(ElmoWordEncodingLayer, self).__init__()
         kwargs.pop('use_cuda')
         kwargs.pop('char_embeddings')
         kwargs.pop('char_hidden_size')
@@ -23,7 +25,7 @@ class ElmoWordEncodingLayer(object):
         # `module`, but we didn't test this, so for now it will be hardcoded.
         self.embedding_dim = 1024
 
-    def __call__(self, *args):
+    def forward(self, *args):
         """Sents a batch of N sentences represented as list of tokens"""
 
         # -1 is the raw_sequences element passed in the encode function of the

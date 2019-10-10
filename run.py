@@ -268,7 +268,7 @@ def main():
         #                            decay_every=hp.decay_every)
 
         core_optimizer = torch.optim.Adam(
-            model.parameters(),
+            [param for param in model.parameters() if param.requires_grad],
             lr=0,
         )
 
