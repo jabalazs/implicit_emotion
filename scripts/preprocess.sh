@@ -82,11 +82,15 @@ echo "Created $CLEAN_TRAIN_DATA_PATH and $TRAIN_LABELS_PATH"
 
 echo
 
+echo "Creating Train dataset with no Triggerwords"
+cat $CLEAN_TRAIN_DATA_PATH | awk '{gsub("__TRIGGERWORD__", "", $0); print $0}' > $CLEAN_TRAIN_NO_TRIGGERWORD_DATA_PATH
+echo
+
 echo "Creating Train dataset with no emoji"
 cat $CLEAN_TRAIN_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH
 echo "Created $CLEAN_TRAIN_NO_EMOJIS_DATA_PATH"
 
-echo
+echo "################################"
 
 ################################################################################
 #                                     DEV                                      #
@@ -112,11 +116,15 @@ echo "Created $CLEAN_DEV_DATA_PATH and $DEV_LABELS_PATH"
 
 echo
 
+echo "Creating Dev dataset with no Triggerwords"
+cat $CLEAN_DEV_DATA_PATH | awk '{gsub("__TRIGGERWORD__", "", $0); print $0}' > $CLEAN_DEV_NO_TRIGGERWORD_DATA_PATH
+echo
+
 echo "Creating Dev dataset with no emoji"
 cat $CLEAN_DEV_DATA_PATH | ./utils/remove_emojis.py > $CLEAN_DEV_NO_EMOJIS_DATA_PATH
 echo "Created $CLEAN_DEV_NO_EMOJIS_DATA_PATH"
 
-echo
+echo "################################"
 ################################################################################
 #                                     TEST                                     #
 ################################################################################
@@ -128,6 +136,11 @@ preprocess $TEST_DATA_PATH $CLEAN_TEST_DATA_PATH
 
 cat $TEST_DATA_PATH | awk '{if ( $0 ~ /#TRIGGERWORD#/ ) {print $1}}' > $TEST_LABELS_PATH
 echo "Created $CLEAN_TEST_DATA_PATH and $TEST_LABELS_PATH"
+
+echo
+
+echo "Creating Test dataset with no Triggerwords"
+cat $CLEAN_TEST_DATA_PATH | awk '{gsub("__TRIGGERWORD__", "", $0); print $0}' > $CLEAN_TEST_NO_TRIGGERWORD_DATA_PATH
 echo
 
 echo "Creating Test dataset with no emoji"
